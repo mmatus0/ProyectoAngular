@@ -19,10 +19,10 @@ export class AuthService {
     }
   }
 
-  login(email: string, password: string) {
-    return this.http.post<{ token: string; usuario: User }>(
+  login(login: string, password: string) {
+    return this.http.post<{ token: string; usuario: any }>(
       `${environment.apiUrl}/login`,
-      { email, password }
+      { login, password }  // ← campo "login" no "email"
     ).pipe(
       tap(res => {
         localStorage.setItem('token', res.token);

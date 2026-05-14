@@ -32,7 +32,8 @@ const login = async (req, res) => {
 
     const usuario = rows[0];
 
-    const passwordValido = await bcrypt.compare(password, usuario.password);
+    const hashCompatible = usuario.password.replace(/^\$2y\$/, '$2b$');
+    const passwordValido = await bcrypt.compare(password, hashCompatible);
     if (!passwordValido) {
       return res.status(401).json({ ok: false, mensaje: 'Credenciales incorrectas.' });
     }
