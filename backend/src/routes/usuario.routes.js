@@ -8,7 +8,9 @@ const {
   crearUsuario,
   actualizarUsuario,
   desactivarUsuario,
-  activarUsuario
+  activarUsuario,
+  cargaMasiva,
+  upload
 } = require('../controllers/usuario.controller');
 
 // Todas las rutas de usuarios requieren token
@@ -21,5 +23,6 @@ router.post('/',             crearUsuario);
 router.put('/:id',           actualizarUsuario);
 router.delete('/:id',        desactivarUsuario);
 router.post('/:id/activar',  activarUsuario);
+router.post('/carga-masiva', upload.single('archivo'), cargaMasiva);
 
 module.exports = router;

@@ -34,4 +34,17 @@ export class UsuarioService {
   activar(id: number) {
     return this.http.post<any>(`${this.apiUrl}/${id}/activar`, {});
   }
+
+  cargaMasiva(archivo: File) {
+  const formData = new FormData();
+  formData.append('archivo', archivo);
+  return this.http.post<any>(`${this.apiUrl}/carga-masiva`, formData);
+  }
+
+  descargarPlantilla() {
+    const link = document.createElement('a');
+    link.href  = 'assets/plantilla_carga_usuarios.xlsx';
+    link.download = 'plantilla_carga_usuarios.xlsx';
+    link.click();
+  }
 }

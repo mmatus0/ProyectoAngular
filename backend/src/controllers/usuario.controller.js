@@ -241,6 +241,82 @@ const activarUsuario = async (req, res) => {
   }
 };
 
+const multer = require('multer');
+const XLSX   = require('xlsx');
+const upload = multer({ storage: multer.memoryStorage() });
+
+const cargaMasiva = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ ok: false, mensaje: 'No se recibió archivo.' });
+  }
+
+  try {
+    const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+    const sheet    = workbook.Sheets[workbook.SheetNames[0]];
+    const rows     = XLSX.utils.sheet_to_json(sheet);
+
+    const [roles]   = await db.query('SELECT id, rolusuario FROM rol_usuario');
+    const [empresas]= await db.query('SELECT id, empresa FROM empresa');
+
+    const rolesMap   = Object.fromEntries(roles.map(r => [r.rolusuario.toLowerCase(), r.id]));
+    const empresasMap= Object.fromEntries(empresas.map(e => [e.empresa.toLowerCase(), e.id]));
+
+    let creados = 0, actualizados = 0, errores = [];
+
+    for (const row of rows) {
+      const nombre   = row.nombre?.toString().trim();
+      const usuario  = row.usuario?.toString().trim();
+      const email    = row.email?.toString().trim().toLowerCase();
+      const password = row.password?.toString().trim();
+
+      if (!nombre || !usuario || !email) {
+        errores.push(`Fila omitida: nombre/usuario/email vacío`);
+        continue;
+      }
+
+      const rol_id = row.rolusuario_id
+        ?? rolesMap[row.rolusuario?.toString().toLowerCase().trim()]
+        ?? 3;
+
+      const emp_id = row.empresa_id
+        ?? empresasMap[row.empresa?.toString().toLowerCase().trim()]
+        ?? 1;
+
+      const [existe] = await db.query(
+        'SELECT id FROM user WHERE email = ? OR usuario = ?', [email, usuario]
+      );
+
+      if (existe.length > 0) {
+        await db.query(
+          `UPDATE user SET nombre=?, rolusuario_id=?, empresa_id=? WHERE id=?`,
+          [nombre, rol_id, emp_id, existe[0].id]
+        );
+        actualizados++;
+      } else {
+        const hash = password
+          ? await require('bcryptjs').hash(password, 10)
+          : await require('bcryptjs').hash('password123', 10);
+
+        const [result] = await db.query(
+          `INSERT INTO user (nombre, usuario, email, password, rolusuario_id, empresa_id, estado_id, acreditado, eval_asignadas, disc_asignados, ruta_avatar)
+           VALUES (?, ?, ?, ?, ?, ?, 1, 0, 0, 0, 'images/users/default_avatar.png')`,
+          [nombre, usuario, email, hash, rol_id, emp_id]
+        );
+        await db.query(
+          'INSERT INTO persona (usuario_id, empresa_id, estado_id) VALUES (?, ?, 1)',
+          [result.insertId, emp_id]
+        );
+        creados++;
+      }
+    }
+
+    return res.json({ ok: true, creados, actualizados, errores });
+  } catch (err) {
+    console.error('Error cargaMasiva:', err);
+    return res.status(500).json({ ok: false, mensaje: 'Error procesando el archivo.' });
+  }
+};
+
 module.exports = {
   getUsuarios,
   getFormData,
@@ -248,5 +324,7 @@ module.exports = {
   crearUsuario,
   actualizarUsuario,
   desactivarUsuario,
-  activarUsuario
+  activarUsuario, 
+  cargaMasiva,
+  upload
 };

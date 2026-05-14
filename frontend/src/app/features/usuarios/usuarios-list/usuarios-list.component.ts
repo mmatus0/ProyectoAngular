@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { UsuarioService } from '../../../core/services/usuario.service';
 import { FiltroPipe } from '../../../shared/pipes/filtro.pipe';
 import { UsuarioModalComponent } from '../usuario-modal/usuario-modal.component';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-usuarios-list',
@@ -142,5 +143,62 @@ export class UsuariosListComponent implements OnInit {
   getRolNombre(rolId: number): string {
     const map: Record<number, string> = { 1: 'Admin', 2: 'Coach', 3: 'Cliente' };
     return map[rolId] ?? 'N/A';
+  }
+
+  // Signals nuevos
+modalCarga = signal(false);
+archivoCarga: File | null = null;
+loadingCarga = signal(false);
+resultadoCarga = signal<any>(null);
+
+abrirModalCarga() {
+  this.modalCarga.set(true);
+  this.resultadoCarga.set(null);
+}
+
+onArchivoSeleccionado(event: Event) {
+  const input = event.target as HTMLInputElement;
+  if (input.files?.length) {
+    this.archivoCarga = input.files[0];
+  }
+}
+
+subirCarga() {
+  if (!this.archivoCarga) return;
+  this.loadingCarga.set(true);
+  this.usuarioService.cargaMasiva(this.archivoCarga).subscribe({
+    next: (res) => {
+      this.loadingCarga.set(false);
+      this.resultadoCarga.set(res);
+      this.cargarUsuarios();
+    },
+    error: () => {
+      this.loadingCarga.set(false);
+      this.mostrarToast('danger', 'Error al procesar el archivo.');
+    }
+  });
+}
+
+descargarPlantilla() {
+  this.usuarioService.descargarPlantilla();
+}
+
+  exportarExcel() {
+    const data = this.usuarios().map(u => ({
+      Nombre:    u.nombre,
+      Usuario:   u.usuario,
+      Email:     u.email,
+      Rol:       u.rol,
+      Institución: u.empresa,
+      Estado:    u.estado,
+      'Plan Contratado': u.membresia,
+      Tests:     u.eval_asignadas,
+      DISC:      u.disc_asignados,
+    }));
+  
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Usuarios');
+    XLSX.writeFile(wb, `usuarios_${this.tabActiva() === 1 ? 'activos' : 'inactivos'}.xlsx`);
   }
 }
