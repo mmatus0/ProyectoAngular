@@ -1,0 +1,17 @@
+# Dependencies
+/node_modules
+
+# Build output
+/dist
+
+# Angular cache
+/.angular
+
+# Environment (no subir claves reales)
+src/environments/environment.production.ts
+
+# OS / Editor
+.DS_Store
+.vscode/
+*.suo
+*.user
