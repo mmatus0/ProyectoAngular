@@ -12,4 +12,20 @@ import { AuthService } from '../../../core/services/auth.service';
 export class SidebarComponent {
   authService = inject(AuthService);
   user = this.authService.currentUser;
+
+  esAdmin(): boolean {
+    return this.user()?.rol_id === 1;
+  }
+
+  esCoach(): boolean {
+    return this.user()?.rol_id === 2;
+  }
+
+  esCliente(): boolean {
+    return this.user()?.rol_id === 3;
+  }
+
+  esAdminOCoach(): boolean {
+    return this.esAdmin() || this.esCoach();
+  }
 }
