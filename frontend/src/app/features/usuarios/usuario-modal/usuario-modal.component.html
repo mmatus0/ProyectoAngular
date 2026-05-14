@@ -1,6 +1,312 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h4>Modal Usuario</h4>
-</div>
-<div class="card">
-  <div class="card-body text-muted">Módulo en construcción...</div>
+<div class="card shadow-lg border-0" style="width: 860px; max-width: 100%;">
+
+  <!-- Header -->
+  <div class="card-header bg-transparent border-bottom py-3 d-flex align-items-center">
+    <div class="me-3 d-flex align-items-center justify-content-center rounded-2 bg-primary bg-opacity-10"
+         style="width:40px; height:40px; flex-shrink:0;">
+      <i class="bi bi-person-plus text-primary fs-5"></i>
+    </div>
+    <div class="flex-grow-1">
+      <h5 class="card-title mb-0 fw-bold">
+        {{ esEditar ? 'Editar Usuario: ' + usuario?.usuario : 'Crear Nuevo Usuario' }}
+      </h5>
+      <p class="text-muted mb-0 small">Complete la información para
+        {{ esEditar ? 'actualizar' : 'registrar' }} el usuario.</p>
+    </div>
+    <button class="btn btn-light btn-sm" (click)="cancelado.emit()">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+
+  <div class="card-body p-4">
+
+    @if (error()) {
+      <div class="alert alert-danger py-2 small">{{ error() }}</div>
+    }
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs nav-bordered mb-4">
+      <li class="nav-item">
+        <button class="nav-link" [class.active]="tabActiva() === 'generales'"
+                (click)="cambiarTab('generales')" type="button">
+          <i class="bi bi-gear me-1"></i> Datos Generales
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" [class.active]="tabActiva() === 'personales'"
+                (click)="cambiarTab('personales')" type="button">
+          <i class="bi bi-person-lines-fill me-1"></i> Datos Personales
+        </button>
+      </li>
+      @if (esEditar) {
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="tabActiva() === 'membresia'"
+                  (click)="cambiarTab('membresia')" type="button">
+            <i class="bi bi-credit-card me-1"></i> Membresía
+          </button>
+        </li>
+      }
+    </ul>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+      <!-- ══ TAB GENERALES ══ -->
+      @if (tabActiva() === 'generales') {
+        <div>
+          <h6 class="text-uppercase bg-light p-2 mb-3 small fw-bold">
+            <i class="bi bi-info-circle me-1"></i> Datos de Acceso
+          </h6>
+          <div class="row">
+            <div class="col-12 mb-3">
+              <label class="form-label fw-bold">Nombre Completo</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" class="form-control" formControlName="nombre"
+                       placeholder="Ej: Juan Pérez">
+              </div>
+              @if (form.get('nombre')?.invalid && form.get('nombre')?.touched) {
+                <small class="text-danger">El nombre es requerido</small>
+              }
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">Usuario (Login)</label>
+              <input type="text" class="form-control" formControlName="usuario"
+                     placeholder="jperez123">
+              @if (form.get('usuario')?.invalid && form.get('usuario')?.touched) {
+                <small class="text-danger">El usuario es requerido</small>
+              }
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">Correo Electrónico</label>
+              <input type="email" class="form-control" formControlName="email"
+                     placeholder="juan@ejemplo.com">
+              @if (form.get('email')?.invalid && form.get('email')?.touched) {
+                <small class="text-danger">Ingresa un email válido</small>
+              }
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">
+                {{ esEditar ? 'Nueva Contraseña' : 'Contraseña' }}
+              </label>
+              <div class="input-group">
+                <input [type]="mostrarPassword() ? 'text' : 'password'"
+                       class="form-control" formControlName="password"
+                       [placeholder]="esEditar ? 'Dejar en blanco para no cambiar' : 'Mínimo 8 caracteres'">
+                <button class="btn btn-outline-secondary" type="button"
+                        (click)="togglePassword()">
+                  <i class="bi" [class.bi-eye]="!mostrarPassword()"
+                     [class.bi-eye-slash]="mostrarPassword()"></i>
+                </button>
+              </div>
+              @if (form.get('password')?.invalid && form.get('password')?.touched) {
+                <small class="text-danger">Mínimo 8 caracteres</small>
+              }
+            </div>
+          </div>
+
+          <h6 class="text-uppercase bg-light p-2 mb-3 mt-2 small fw-bold">
+            <i class="bi bi-sliders me-1"></i> Configuración de Cuenta
+          </h6>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">Rol en el Sistema</label>
+              <select class="form-select" formControlName="rolusuario_id">
+                <option value="" disabled>Seleccione un rol...</option>
+                @for (rol of roles; track rol.id) {
+                  <option [value]="rol.id">{{ rol.rolusuario }}</option>
+                }
+              </select>
+              @if (form.get('rolusuario_id')?.invalid && form.get('rolusuario_id')?.touched) {
+                <small class="text-danger">El rol es requerido</small>
+              }
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">Empresa Asignada</label>
+              <select class="form-select" formControlName="empresa_id">
+                <option value="" disabled>Seleccione empresa...</option>
+                @for (emp of empresas; track emp.id) {
+                  <option [value]="emp.id">{{ emp.empresa }}</option>
+                }
+              </select>
+              @if (form.get('empresa_id')?.invalid && form.get('empresa_id')?.touched) {
+                <small class="text-danger">La empresa es requerida</small>
+              }
+            </div>
+
+            @if (esEditar) {
+              <div class="col-md-4 mb-3">
+                <label class="form-label fw-bold">Estado</label>
+                <select class="form-select" formControlName="estado_id">
+                  <option [value]="1">Activo</option>
+                  <option [value]="2">Inactivo</option>
+                </select>
+              </div>
+            }
+
+            <div class="col-md-4 mb-3">
+              <label class="form-label small fw-bold text-muted text-uppercase">Tests Asignados</label>
+              <input type="number" class="form-control form-control-sm text-center"
+                     formControlName="eval_asignadas">
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label class="form-label small fw-bold text-muted text-uppercase">DISC Asignados</label>
+              <input type="number" class="form-control form-control-sm text-center"
+                     formControlName="disc_asignados">
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label class="form-label small fw-bold text-muted text-uppercase">Acreditado</label>
+              <input type="number" class="form-control form-control-sm text-center"
+                     formControlName="acreditado">
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ══ TAB PERSONALES ══ -->
+      @if (tabActiva() === 'personales') {
+        <div>
+          <h6 class="text-primary border-bottom pb-1 mb-3">Información de Identidad</h6>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">RUT / ID</label>
+              <input type="text" class="form-control" formControlName="rut">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Fecha Nacimiento</label>
+              <input type="date" class="form-control" formControlName="fecha_nacimiento">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Teléfono</label>
+              <input type="text" class="form-control" formControlName="telefono">
+            </div>
+          </div>
+
+          <h6 class="text-primary border-bottom pb-1 mb-3 mt-2">Ubicación</h6>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">País</label>
+              <input type="text" class="form-control" formControlName="pais">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Ciudad</label>
+              <input type="text" class="form-control" formControlName="ciudad">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Dirección</label>
+              <input type="text" class="form-control" formControlName="direccion">
+            </div>
+          </div>
+
+          <h6 class="text-primary border-bottom pb-1 mb-3 mt-2">Trayectoria Laboral</h6>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Tiempo en Compañía (meses)</label>
+              <input type="number" class="form-control" formControlName="tiempo_compania">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Tiempo en Cargo (meses)</label>
+              <input type="number" class="form-control" formControlName="tiempo_cargo">
+            </div>
+          </div>
+
+          <h6 class="text-primary border-bottom pb-1 mb-3 mt-2">Redes Sociales</h6>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">LinkedIn (URL)</label>
+              <input type="url" class="form-control" formControlName="linkedin">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Instagram</label>
+              <input type="text" class="form-control" formControlName="instagram">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">X (Twitter)</label>
+              <input type="text" class="form-control" formControlName="x_twitter">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Facebook</label>
+              <input type="text" class="form-control" formControlName="facebook">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Página Web</label>
+              <input type="url" class="form-control" formControlName="pagina_web">
+            </div>
+          </div>
+
+          <h6 class="text-primary border-bottom pb-1 mb-3 mt-2">Observaciones</h6>
+          <div class="row">
+            <div class="col-12 mb-3">
+              <textarea class="form-control" rows="3" formControlName="observacion"
+                        placeholder="Observaciones..."></textarea>
+            </div>
+            <div class="col-12 mb-3">
+              <label class="form-label">Información Adicional</label>
+              <textarea class="form-control" rows="3" formControlName="otra_informacion"
+                        placeholder="Otra información relevante..."></textarea>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ══ TAB MEMBRESÍA ══ -->
+      @if (tabActiva() === 'membresia') {
+        <div>
+          <h6 class="text-primary border-bottom pb-1 mb-3">Detalles de Membresía</h6>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label fw-bold">Plan</label>
+              <select class="form-select" formControlName="membresia_id">
+                <option value="">-- Sin plan --</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Fecha de Contratación</label>
+              <input type="date" class="form-control" formControlName="fecha">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Día de Pago</label>
+              <input type="number" class="form-control" formControlName="dia_pago_mes">
+            </div>
+          </div>
+
+          <h6 class="text-primary border-bottom pb-1 mb-3 mt-2">Evaluaciones Contratadas</h6>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Tests Contratados</label>
+              <input type="number" class="form-control" formControlName="test_contratados">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">DISC Contratados</label>
+              <input type="number" class="form-control" formControlName="disc_contratados">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Herramientas Contratadas</label>
+              <input type="number" class="form-control" formControlName="herr_contratadas">
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Footer -->
+      <div class="border-top pt-3 mt-3 d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-light px-4" (click)="cancelado.emit()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary px-5" [disabled]="loading()">
+          @if (loading()) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+          }
+          <i class="bi bi-save me-1"></i>
+          {{ esEditar ? 'Guardar Cambios' : 'Crear Usuario' }}
+        </button>
+      </div>
+
+    </form>
+  </div>
 </div>

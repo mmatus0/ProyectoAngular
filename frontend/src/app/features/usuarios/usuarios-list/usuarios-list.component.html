@@ -1,6 +1,244 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h4>Gestión de Usuarios</h4>
+<!-- Toast -->
+@if (toast()) {
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+    <div class="toast show align-items-center text-white border-0"
+         [class]="'bg-' + toast()!.tipo">
+      <div class="d-flex">
+        <div class="toast-body fw-semibold">{{ toast()!.mensaje }}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                (click)="toast.set(null)"></button>
+      </div>
+    </div>
+  </div>
+}
+
+<div class="container-fluid">
+
+  <!-- Header -->
+  <div class="mb-4">
+    <h4 class="mb-0">Administración</h4>
+    <p class="text-muted mb-0 small">Gestión de acceso y perfiles de la plataforma</p>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-transparent py-3">
+      <h5 class="mb-0 fw-bold text-primary">
+        <i class="bi bi-people me-2"></i>Listado de Usuarios
+      </h5>
+    </div>
+
+    <div class="card-body">
+
+      <!-- Tabs -->
+      <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="tabActiva() === 1" (click)="cambiarTab(1)">
+            <i class="bi bi-person-check me-1"></i> Activos
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="tabActiva() === 2" (click)="cambiarTab(2)">
+            <i class="bi bi-person-x me-1"></i> Inactivos / Nulos
+          </button>
+        </li>
+      </ul>
+
+      <!-- Título tab -->
+      @if (tabActiva() === 1) {
+        <h5 class="text-primary mb-3">
+          <i class="bi bi-people me-1"></i> Usuarios Activos
+        </h5>
+      } @else {
+        <h5 class="text-danger mb-3">
+          <i class="bi bi-person-x me-1"></i> Usuarios Inactivos
+        </h5>
+      }
+
+      <!-- Barra de acciones -->
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          style="max-width: 260px;"
+          placeholder="Buscar..."
+          [value]="busqueda()"
+          (input)="setBusqueda($any($event.target).value)"
+        />
+
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-primary btn-sm rounded-pill px-3" (click)="abrirModalCrear()">
+            <i class="bi bi-plus-circle me-1"></i> Nuevo Usuario
+          </button>
+          <button class="btn btn-warning btn-sm rounded-pill px-3" disabled>
+            <i class="bi bi-upload me-1"></i> Carga Masiva
+          </button>
+          <button class="btn btn-success btn-sm rounded-pill px-3" disabled>
+            <i class="bi bi-file-earmark-excel me-1"></i> Exportar Excel
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabla -->
+      @if (loading()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Rol</th>
+                <th>Nombre</th>
+                <th>Usuario</th>
+                <th>Email</th>
+                <th>Institución</th>
+                <th>Plan Contratado</th>
+                <th>Estado Plan</th>
+                <th class="text-center">Tests</th>
+                <th class="text-center">DISC</th>
+                <th class="text-center">Herramientas</th>
+                <th>Estado Cliente</th>
+                <th class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (u of usuarios() | filtro: busqueda() : ['nombre','usuario','email','empresa']; track u.id) {
+                <tr>
+                  <td>
+                    <span class="badge bg-{{ getRolBadge(u.rolusuario_id) }}-subtle text-{{ getRolBadge(u.rolusuario_id) }}">
+                      {{ getRolNombre(u.rolusuario_id) }}
+                    </span>
+                  </td>
+                  <td class="fw-medium">{{ u.nombre }}</td>
+                  <td>{{ u.usuario }}</td>
+                  <td>{{ u.email }}</td>
+                  <td>{{ u.empresa }}</td>
+                  <td>{{ u.membresia }}</td>
+                  <td>
+                    <span class="badge"
+                      [class.bg-success-subtle]="u.estado_membresia === 'Activo'"
+                      [class.text-success]="u.estado_membresia === 'Activo'"
+                      [class.bg-danger-subtle]="u.estado_membresia !== 'Activo'"
+                      [class.text-danger]="u.estado_membresia !== 'Activo'">
+                      {{ u.estado_membresia ?? 'Sin estado' }}
+                    </span>
+                  </td>
+                  <td class="text-center">{{ u.eval_asignadas }}</td>
+                  <td class="text-center">{{ u.disc_asignados }}</td>
+                  <td class="text-center">{{ u.herramientas_asignadas ?? 0 }}</td>
+                  <td>
+                    <span class="badge"
+                      [class.bg-success-subtle]="u.estado === 'Activo'"
+                      [class.text-success]="u.estado === 'Activo'"
+                      [class.bg-danger-subtle]="u.estado !== 'Activo'"
+                      [class.text-danger]="u.estado !== 'Activo'">
+                      {{ u.estado }}
+                    </span>
+                  </td>
+                  <td class="text-end">
+                    <div class="d-flex gap-1 justify-content-end">
+                      <button class="btn btn-sm btn-outline-warning" title="Editar"
+                              (click)="abrirModalEditar(u)">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      @if (tabActiva() === 1) {
+                        <button class="btn btn-sm btn-outline-danger" title="Desactivar"
+                                (click)="abrirModalEliminar(u)">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      } @else {
+                        <button class="btn btn-sm btn-outline-success" title="Activar"
+                                (click)="abrirModalActivar(u)">
+                          <i class="bi bi-check-circle"></i>
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="13" class="text-center text-muted py-4">
+                    No se encontraron usuarios.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+    </div>
+  </div>
 </div>
-<div class="card">
-  <div class="card-body text-muted">Módulo en construcción...</div>
-</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- MODAL CREAR                           -->
+<!-- ══════════════════════════════════════ -->
+@if (modalCrear()) {
+  <div class="modal-backdrop-custom" (click)="cerrarModales()"></div>
+  <div class="modal-custom">
+    <app-usuario-modal
+      [roles]="roles()"
+      [empresas]="empresas()"
+      (guardado)="onUsuarioCreado()"
+      (cancelado)="cerrarModales()"
+    ></app-usuario-modal>
+  </div>
+}
+
+<!-- ══════════════════════════════════════ -->
+<!-- MODAL EDITAR                          -->
+<!-- ══════════════════════════════════════ -->
+@if (modalEditar() && usuarioSeleccionado()) {
+  <div class="modal-backdrop-custom" (click)="cerrarModales()"></div>
+  <div class="modal-custom">
+    <app-usuario-modal
+      [usuario]="usuarioSeleccionado()"
+      [roles]="roles()"
+      [empresas]="empresas()"
+      (guardado)="onUsuarioEditado()"
+      (cancelado)="cerrarModales()"
+    ></app-usuario-modal>
+  </div>
+}
+
+<!-- ══════════════════════════════════════ -->
+<!-- MODAL ELIMINAR                        -->
+<!-- ══════════════════════════════════════ -->
+@if (modalEliminar() && usuarioSeleccionado()) {
+  <div class="modal-backdrop-custom"></div>
+  <div class="modal-confirm">
+    <div class="text-center p-4">
+      <i class="bi bi-trash text-danger" style="font-size: 3rem;"></i>
+      <h5 class="mt-3 fw-bold">¿Estás seguro?</h5>
+      <p class="text-muted">Estás a punto de desactivar a:<br>
+        <strong class="text-danger">{{ usuarioSeleccionado().nombre }}</strong>
+      </p>
+      <div class="d-flex justify-content-center gap-2 mt-3">
+        <button class="btn btn-light px-4" (click)="cerrarModales()">Cancelar</button>
+        <button class="btn btn-danger px-4" (click)="confirmarEliminar()">Sí, desactivar</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══════════════════════════════════════ -->
+<!-- MODAL ACTIVAR                         -->
+<!-- ══════════════════════════════════════ -->
+@if (modalActivar() && usuarioSeleccionado()) {
+  <div class="modal-backdrop-custom"></div>
+  <div class="modal-confirm">
+    <div class="text-center p-4">
+      <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+      <h5 class="mt-3 fw-bold">¿Deseas activar este usuario?</h5>
+      <p class="text-muted">Estás a punto de reactivar el acceso para:<br>
+        <strong class="text-success">{{ usuarioSeleccionado().nombre }}</strong>
+      </p>
+      <div class="d-flex justify-content-center gap-2 mt-3">
+        <button class="btn btn-light px-4" (click)="cerrarModales()">Cancelar</button>
+        <button class="btn btn-success px-4" (click)="confirmarActivar()">Sí, activar</button>
+      </div>
+    </div>
+  </div>
+}
