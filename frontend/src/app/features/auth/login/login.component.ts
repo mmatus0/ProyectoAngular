@@ -11,19 +11,20 @@ import { AuthService } from '../../../core/services/auth.service';
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
-  private fb = inject(FormBuilder);
+  private fb          = inject(FormBuilder);
   private authService = inject(AuthService);
-  private router = inject(Router);
+  private router      = inject(Router);
 
-  error = signal<string | null>(null);
-  loading = signal(false);
+  error        = signal<string | null>(null);
+  loading      = signal(false);
+  showPassword = false;
 
   form = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required]
+    email:    ['', [Validators.required, Validators.email]],
+    password: ['',  Validators.required]
   });
 
-  onSubmit() {
+  onSubmit(): void {
     if (this.form.invalid) return;
 
     this.loading.set(true);
@@ -31,8 +32,9 @@ export class LoginComponent {
 
     const { email, password } = this.form.value;
 
+    // AuthService.login() espera (login, password) — se pasa el email como "login"
     this.authService.login(email!, password!).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next:  () => this.router.navigate(['/dashboard']),
       error: () => {
         this.error.set('Credenciales incorrectas. Intenta nuevamente.');
         this.loading.set(false);
