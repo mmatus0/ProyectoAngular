@@ -16,8 +16,8 @@
 
   <!-- Header -->
   <div class="mb-4">
-    <h4 class="mb-0">AdministraciÃ³n</h4>
-    <p class="text-muted mb-0 small">GestiÃ³n de acceso y perfiles de la plataforma</p>
+    <h4 class="mb-0">Administración</h4>
+    <p class="text-muted mb-0 small">Gestión de acceso y perfiles de la plataforma</p>
   </div>
 
   <div class="card shadow-sm">
@@ -92,7 +92,7 @@
                 <th>Nombre</th>
                 <th>Usuario</th>
                 <th>Email</th>
-                <th>InstituciÃ³n</th>
+                <th>Institución</th>
                 <th>Plan Contratado</th>
                 <th>Estado Plan</th>
                 <th class="text-center">Tests</th>
@@ -172,9 +172,7 @@
   </div>
 </div>
 
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
-<!-- MODAL CREAR                           -->
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+
 <div class="modal fade" [class.show]="modalCrear()" [style.display]="modalCrear() ? 'block' : 'none'">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
@@ -189,9 +187,7 @@
 </div>
 <div class="modal-backdrop fade" [class.show]="modalCrear()" [style.display]="modalCrear() ? 'block' : 'none'" (click)="cerrarModales()"></div>
 
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
-<!-- MODAL EDITAR                          -->
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+
 <div class="modal fade" [class.show]="modalEditar() && !!usuarioSeleccionado()" [style.display]="modalEditar() && usuarioSeleccionado() ? 'block' : 'none'">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
@@ -207,16 +203,14 @@
 </div>
 <div class="modal-backdrop fade" [class.show]="modalEditar() && !!usuarioSeleccionado()" [style.display]="modalEditar() && usuarioSeleccionado() ? 'block' : 'none'" (click)="cerrarModales()"></div>
 
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
-<!-- MODAL ELIMINAR                        -->
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+
 <div class="modal fade" [class.show]="modalEliminar() && !!usuarioSeleccionado()" [style.display]="modalEliminar() && usuarioSeleccionado() ? 'block' : 'none'">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="text-center p-4">
         <i class="bi bi-trash text-danger" style="font-size: 3rem;"></i>
-        <h5 class="mt-3 fw-bold">Â¿EstÃ¡s seguro?</h5>
-        <p class="text-muted">EstÃ¡s a punto de desactivar a:<br>
+        <h5 class="mt-3 fw-bold">¿Estás seguro?</h5>
+        <p class="text-muted">Estás a punto de desactivar a:<br>
           <strong class="text-danger">{{ usuarioSeleccionado()?.nombre }}</strong>
         </p>
         <div class="d-flex justify-content-center gap-2 mt-3">
@@ -229,9 +223,7 @@
 </div>
 <div class="modal-backdrop fade" [class.show]="modalEliminar() && !!usuarioSeleccionado()" [style.display]="modalEliminar() && usuarioSeleccionado() ? 'block' : 'none'" (click)="cerrarModales()"></div>
 
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
-<!-- MODAL CARGA MASIVA                    -->
-<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+
 <div class="modal fade" [class.show]="modalCarga()" [style.display]="modalCarga() ? 'block' : 'none'">
   <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
     <div class="modal-content">
@@ -272,7 +264,7 @@
             @if (loadingCarga()) {
               <span class="spinner-border spinner-border-sm me-2"></span>
             }
-            Iniciar ImportaciÃ³n
+            Iniciar Importación
           </button>
         </div>
       </div>
