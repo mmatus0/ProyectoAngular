@@ -63,7 +63,12 @@ export const routes: Routes = [
         path: 'faq',
         loadComponent: () =>
           import('./features/faq/faq.component').then(m => m.FaqComponent)
-      }
+      },
+      {
+        path: 'instituciones',
+        loadComponent: () =>
+          import('./features/instituciones/instituciones.component').then(m => m.InstitucionesComponent)
+      },
     ]
   },
   { path: '**', redirectTo: 'login' }

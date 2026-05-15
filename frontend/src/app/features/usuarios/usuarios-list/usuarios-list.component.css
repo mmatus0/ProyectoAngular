@@ -1,30 +1,12 @@
-.modal-backdrop-custom {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 1040;
-}
-
-.modal-custom {
-  position: fixed;
-  inset: 0;
-  z-index: 1050;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
+﻿.modal {
   overflow-y: auto;
-  padding: 2rem 1rem;
 }
 
-.modal-confirm {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1050;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-  width: 100%;
-  max-width: 420px;
+.modal-dialog {
+  max-height: calc(100vh - 3.5rem);
+}
+
+.modal-content {
+  max-height: calc(100vh - 3.5rem);
+  overflow-y: auto;
 }

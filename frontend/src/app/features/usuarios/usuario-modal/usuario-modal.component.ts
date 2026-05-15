@@ -1,4 +1,4 @@
-import { Component, inject, signal, Input, Output, EventEmitter, OnInit } from '@angular/core';
+﻿import { Component, inject, signal, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UsuarioService } from '../../../core/services/usuario.service';
 
@@ -8,7 +8,7 @@ import { UsuarioService } from '../../../core/services/usuario.service';
   imports: [ReactiveFormsModule],
   templateUrl: './usuario-modal.component.html'
 })
-export class UsuarioModalComponent implements OnInit {
+export class UsuarioModalComponent implements OnInit, OnChanges {
   @Input() usuario: any = null;
   @Input() roles: any[]    = [];
   @Input() empresas: any[] = [];
@@ -26,7 +26,6 @@ export class UsuarioModalComponent implements OnInit {
   esEditar = false;
 
   form = this.fb.group({
-    // Generales
     nombre:        ['', Validators.required],
     usuario:       ['', Validators.required],
     email:         ['', [Validators.required, Validators.email]],
@@ -37,7 +36,6 @@ export class UsuarioModalComponent implements OnInit {
     eval_asignadas:[0],
     disc_asignados:[0],
     acreditado:    [0],
-    // Personales
     rut:               [''],
     telefono:          [''],
     fecha_nacimiento:  [''],
@@ -53,7 +51,6 @@ export class UsuarioModalComponent implements OnInit {
     pagina_web:        [''],
     observacion:       [''],
     otra_informacion:  [''],
-    // Membresía
     membresia_id:      [''],
     fecha:             [''],
     dia_pago_mes:      [null],
@@ -63,11 +60,26 @@ export class UsuarioModalComponent implements OnInit {
   });
 
   ngOnInit() {
+    this.inicializarForm();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['usuario']) {
+      this.inicializarForm();
+    }
+  }
+
+  inicializarForm() {
+    this.form.reset();
+    this.tabActiva.set('generales');
+    this.error.set(null);
+
     if (this.usuario) {
       this.esEditar = true;
       this.form.patchValue(this.usuario);
       this.form.get('password')?.clearValidators();
     } else {
+      this.esEditar = false;
       this.form.get('password')?.setValidators([Validators.required, Validators.minLength(8)]);
     }
     this.form.get('password')?.updateValueAndValidity();
