@@ -1,0 +1,79 @@
+/* ═══════════════════════════════════════════════════
+   EvalCoach — Dashboard cards
+   Paleta extraída del login: teal · slate · violet · sky
+   ═══════════════════════════════════════════════════ */
+
+.dash-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  padding: 1.5rem 1.4rem 1.3rem;
+  color: #fff;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.13);
+  transition: transform 0.18s, box-shadow 0.18s;
+  cursor: default;
+}
+
+.dash-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+
+/* Círculo decorativo de fondo */
+.dash-card::after {
+  content: '';
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  bottom: -36px;
+  right: -28px;
+  pointer-events: none;
+}
+
+/* ── Variantes de color (tomadas del degradado del login) ── */
+
+/* Verde-teal  ← #43c6ac */
+.dash-card--teal {
+  background: linear-gradient(135deg, #2fb89a 0%, #43c6ac 60%, #5dd4bc 100%);
+}
+
+/* Violeta/malva ← #c5b8e8 */
+.dash-card--violet {
+  background: linear-gradient(135deg, #9b8fd4 0%, #b3a8e0 60%, #c5b8e8 100%);
+}
+
+/* Azul-grisáceo ← #7b9ea8 */
+.dash-card--blue {
+  background: linear-gradient(135deg, #5a8291 0%, #7b9ea8 60%, #92b4be 100%);
+}
+
+/* Azul-cielo ← #b8d4e8 */
+.dash-card--sky {
+  background: linear-gradient(135deg, #7ab0d0 0%, #9ec6de 60%, #b8d4e8 100%);
+}
+
+/* ── Contenido ── */
+.dash-card__icon {
+  font-size: 1.7rem;
+  margin-bottom: 0.7rem;
+  opacity: 0.88;
+}
+
+.dash-card__title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin: 0 0 0.5rem;
+  opacity: 0.9;
+}
+
+.dash-card__value {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
