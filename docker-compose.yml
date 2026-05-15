@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: evalcoach_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: coachingnew
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/coachingnew.sql:/docker-entrypoint-initdb.d/coachingnew.sql
+
+  backend:
+    build: ./backend
+    container_name: evalcoach_backend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysql
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  frontend:
+    build: ./frontend
+    container_name: evalcoach_frontend
+    restart: always
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  mysql_data:
