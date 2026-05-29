@@ -180,7 +180,10 @@ subirCarga() {
 }
 
 descargarPlantilla() {
-  this.usuarioService.descargarPlantilla();
+  const link      = document.createElement('a');
+  link.href       = 'assets/plantilla_carga_usuarios.xlsx';
+  link.download   = 'plantilla_carga_usuarios.xlsx';
+  link.click();
 }
 
   exportarExcel() {

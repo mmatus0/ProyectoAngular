@@ -6,9 +6,9 @@ import { AuthService } from '../../core/services/auth.service';
   standalone: true,
   imports: [],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']  
+  styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent {
   authService = inject(AuthService);
-  user = this.authService.currentUser;
+  user = this.authService.usuario;
 }

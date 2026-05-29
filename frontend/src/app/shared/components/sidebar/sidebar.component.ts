@@ -10,8 +10,9 @@ import { AuthService } from '../../../core/services/auth.service';
   styleUrl: './sidebar.component.css'
 })
 export class SidebarComponent {
+
   authService = inject(AuthService);
-  user = this.authService.currentUser;
+  user = this.authService.usuario;
 
   esAdmin(): boolean {
     return this.user()?.rol_id === 1;

@@ -10,7 +10,7 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class TopbarComponent {
   authService = inject(AuthService);
-  user = this.authService.currentUser;
+  user = this.authService.usuario;
 
   logout() {
     this.authService.logout();
