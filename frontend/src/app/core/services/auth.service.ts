@@ -1,46 +1,51 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { tap } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
-import { User } from '../models/user.model';
+import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private http = inject(HttpClient);
+
+  public isAuthenticated = signal<boolean>(false);
+  public usuario = signal<any>(null);
+
+  private http   = inject(HttpClient);
   private router = inject(Router);
 
-  currentUser = signal<User | null>(null);
+  private urlLogin = 'http://localhost:3000/api/login';
 
   constructor() {
-    const stored = localStorage.getItem('user');
-    if (stored) {
-      this.currentUser.set(JSON.parse(stored));
+    // Verificar si el token existe al iniciar el servicio
+    this.isAuthenticated.set(!!localStorage.getItem('token'));
+
+    const storedUser = localStorage.getItem('usuario');
+    if (storedUser) {
+      this.usuario.set(JSON.parse(storedUser));
     }
   }
 
   login(login: string, password: string) {
-    return this.http.post<{ token: string; usuario: any }>(
-      `${environment.apiUrl}/login`,
-      { login, password }  // ← campo "login" no "email"
-    ).pipe(
-      tap(res => {
-        localStorage.setItem('token', res.token);
-        localStorage.setItem('user', JSON.stringify(res.usuario));
-        this.currentUser.set(res.usuario);
+    const userLogin = { login, password };
+    return this.http.post(this.urlLogin, userLogin).pipe(
+      map((resp: any) => {
+        localStorage.setItem('token', resp.token);
+        localStorage.setItem('usuario', JSON.stringify(resp.usuario));
+        this.isAuthenticated.set(true);
+        this.usuario.set(resp.usuario);
+        this.router.navigate(['/dashboard']);
       })
     );
   }
 
-  logout() {
+  logout(): void {
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    this.currentUser.set(null);
+    localStorage.removeItem('usuario');
+    this.isAuthenticated.set(false);
+    this.usuario.set(null);
     this.router.navigate(['/login']);
   }
-
-  isLoggedIn(): boolean {
-    return !!localStorage.getItem('token');
+  
+  getToken(): string | null {
+    return localStorage.getItem('token');
   }
 }
-
