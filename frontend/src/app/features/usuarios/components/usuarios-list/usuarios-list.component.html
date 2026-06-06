@@ -43,7 +43,6 @@
         </li>
       </ul>
 
-      <!-- TÃ­tulo tab -->
       @if (tabActiva() === 1) {
         <h5 class="text-primary mb-3">
           <i class="bi bi-people me-1"></i> Usuarios Activos
@@ -54,7 +53,6 @@
         </h5>
       }
 
-      <!-- Barra de acciones -->
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <input
           type="text"
@@ -78,7 +76,6 @@
         </div>
       </div>
 
-      <!-- Tabla -->
       @if (loading()) {
         <div class="text-center py-5">
           <div class="spinner-border text-primary"></div>
@@ -103,7 +100,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (u of usuarios() | filtro: busqueda() : ['nombre','usuario','email','empresa']; track u.id) {
+              @for (u of usuariosFiltrados(); track u.id) {
                 <tr>
                   <td>
                     <span class="badge bg-{{ getRolBadge(u.rolusuario_id) }}-subtle text-{{ getRolBadge(u.rolusuario_id) }}">

@@ -1,9 +1,9 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { UsuarioService } from '../../../../core/services/usuario.service';
 import { FiltroPipe } from '../../../../shared/pipes/filtro.pipe';
 import { UsuarioModalComponent } from '../usuario-modal/usuario-modal.component';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import * as XLSX from 'xlsx';
 
 @Component({
@@ -20,6 +20,12 @@ export class UsuariosListComponent implements OnInit {
   loading         = signal(false);
   tabActiva       = signal<1 | 2>(1);
   busqueda        = signal('');
+  usuariosFiltrados = computed(() =>
+  this.usuarios().filter(u =>
+    u.nombre?.toLowerCase().includes(this.busqueda().toLowerCase()) ||
+    u.usuario?.toLowerCase().includes(this.busqueda().toLowerCase()) ||
+    u.email?.toLowerCase().includes(this.busqueda().toLowerCase())
+  ));
   modalCrear      = signal(false);
   modalEditar     = signal(false);
   modalEliminar   = signal(false);
