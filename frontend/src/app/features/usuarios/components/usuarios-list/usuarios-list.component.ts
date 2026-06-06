@@ -151,7 +151,6 @@ export class UsuariosListComponent implements OnInit {
     return map[rolId] ?? 'N/A';
   }
 
-  // Signals nuevos
 modalCarga = signal(false);
 archivoCarga: File | null = null;
 loadingCarga = signal(false);
@@ -187,7 +186,7 @@ subirCarga() {
 
 descargarPlantilla() {
   const link      = document.createElement('a');
-  link.href       = 'assets/plantilla_carga_usuarios.xlsx';
+  link.href       = 'plantilla_carga_usuarios.xlsx';
   link.download   = 'plantilla_carga_usuarios.xlsx';
   link.click();
 }
