@@ -1,8 +1,8 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { UsuarioService } from '../../../core/services/usuario.service';
-import { FiltroPipe } from '../../../shared/pipes/filtro.pipe';
+import { UsuarioService } from '../../../../core/services/usuario.service';
+import { FiltroPipe } from '../../../../shared/pipes/filtro.pipe';
 import { UsuarioModalComponent } from '../usuario-modal/usuario-modal.component';
 import * as XLSX from 'xlsx';
 

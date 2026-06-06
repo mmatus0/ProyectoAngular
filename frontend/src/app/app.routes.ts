@@ -1,18 +1,18 @@
 import { Routes } from '@angular/router';
 
-import { LoginComponent } from './features/auth/login/login.component';
+import { LoginComponent } from './features/auth/login/components/login.component';
 import { MainLayoutComponent } from './layout/main-layout.component';
-import { DashboardComponent } from './features/dashboard/dashboard.component';
-import { UsuariosListComponent } from './features/usuarios/usuarios-list/usuarios-list.component';
-import { EvaluacionesListComponent } from './features/evaluaciones/evaluaciones-list/evaluaciones-list.component';
-import { MisEvaluacionesComponent } from './features/mis-evaluaciones/mis-evaluaciones.component';
-import { DiscListComponent } from './features/disc/disc-list/disc-list.component';
-import { SesionesListComponent } from './features/sesiones/sesiones-list/sesiones-list.component';
-import { HerramientasListComponent } from './features/herramientas/herramientas-list/herramientas-list.component';
-import { BibliotecaComponent } from './features/biblioteca/biblioteca.component';
-import { PerfilComponent } from './features/perfil/perfil.component';
-import { FaqComponent } from './features/faq/faq.component';
-import { InstitucionesComponent } from './features/instituciones/instituciones.component';
+import { DashboardComponent } from './features/dashboard/components/dashboard/dashboard.component';
+import { UsuariosListComponent } from './features/usuarios/components/usuarios-list/usuarios-list.component';
+import { EvaluacionesListComponent } from './features/evaluaciones/components/evaluaciones-list/evaluaciones-list.component';
+import { MisEvaluacionesComponent } from './features/mis-evaluaciones/components/mis-evaluaciones/mis-evaluaciones.component';
+import { DiscListComponent } from './features/disc/components/disc-list/disc-list.component';
+import { SesionesListComponent } from './features/sesiones/components/sesiones-list/sesiones-list.component';
+import { HerramientasListComponent } from './features/herramientas/components/herramientas-list/herramientas-list.component';
+import { BibliotecaComponent } from './features/biblioteca/components/biblioteca/biblioteca.component';
+import { PerfilComponent } from './features/perfil/components/perfil/perfil.component';
+import { FaqComponent } from './features/faq/components/faq/faq.component';
+import { InstitucionesComponent } from './features/instituciones/components/instituciones/instituciones.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
