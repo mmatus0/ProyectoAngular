@@ -378,6 +378,131 @@ app.get('/api/faq', verificarToken, (req, res) => {
     });
 });
 
+// ── GET /api/perfil ───────────────────────────────────────────────────────────
+app.get('/api/perfil', verificarToken, (req, res) => {
+    const sql = `SELECT u.id, u.nombre, u.usuario, u.email, u.ruta_avatar,
+                        u.rolusuario_id, u.empresa_id,
+                        r.rolusuario, e.empresa,
+                        p.rut, p.telefono, p.fecha_nacimiento, p.pais, p.ciudad,
+                        p.direccion, p.tiempo_compania, p.tiempo_cargo,
+                        p.linkedin, p.instagram, p.x_twitter, p.facebook,
+                        p.pagina_web, p.observacion
+                 FROM user u
+                 LEFT JOIN rol_usuario r ON r.id = u.rolusuario_id
+                 LEFT JOIN empresa e     ON e.id = u.empresa_id
+                 LEFT JOIN persona p     ON p.usuario_id = u.id
+                 WHERE u.id = ?`;
+
+    conn.query(sql, [req.usuario.id], (err, results) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        if (results.length === 0) return res.status(404).json({ ok: false, mensaje: 'Perfil no encontrado.' });
+        res.json({ ok: true, data: results[0] });
+    });
+});
+
+// ── PUT /api/perfil ───────────────────────────────────────────────────────────
+app.put('/api/perfil', verificarToken, (req, res) => {
+    const id = req.usuario.id;
+    const { telefono, fecha_nacimiento, pais, ciudad, direccion,
+            tiempo_compania, tiempo_cargo, linkedin, instagram,
+            x_twitter, facebook, pagina_web, observacion } = req.body;
+
+    const sql = `UPDATE persona SET
+                    telefono=?, fecha_nacimiento=?, pais=?, ciudad=?,
+                    direccion=?, tiempo_compania=?, tiempo_cargo=?,
+                    linkedin=?, instagram=?, x_twitter=?, facebook=?,
+                    pagina_web=?, observacion=?
+                 WHERE usuario_id=?`;
+
+    const params = [ telefono, fecha_nacimiento, pais, ciudad, direccion,
+                     tiempo_compania, tiempo_cargo, linkedin, instagram,
+                     x_twitter, facebook, pagina_web, observacion, id ];
+
+    conn.query(sql, params, (err) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, mensaje: 'Perfil actualizado correctamente.' });
+    });
+});
+
+// ── GET /api/sesiones ─────────────────────────────────────────────────────────
+app.get('/api/sesiones', verificarToken, (req, res) => {
+    const estado = req.query.estado || 1;
+    const sql = `SELECT s.id, s.nombre_sesion, s.fecha_sesion, s.lugar,
+                        s.duracion, s.segundos, s.estado_id,
+                        e.nombre as estado,
+                        u.nombre as cliente
+                 FROM sesion s
+                 LEFT JOIN estado e  ON e.id = s.estado_id
+                 LEFT JOIN user u    ON u.id = s.usuario_id
+                 WHERE s.estado_id = ?
+                 ORDER BY s.fecha_sesion DESC`;
+
+    conn.query(sql, [estado], (err, results) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, data: results });
+    });
+});
+
+// ── GET /api/sesiones/form-data ───────────────────────────────────────────────
+app.get('/api/sesiones/form-data', verificarToken, (req, res) => {
+    conn.query('SELECT id, nombre FROM user WHERE estado_id = 1 ORDER BY nombre', (err, usuarios) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, usuarios });
+    });
+});
+
+// ── POST /api/sesiones ────────────────────────────────────────────────────────
+app.post('/api/sesiones', verificarToken, (req, res) => {
+    const { nombre_sesion, fecha_sesion, lugar, usuario_id } = req.body;
+    if (!nombre_sesion || !usuario_id) {
+        return res.status(400).json({ ok: false, mensaje: 'Nombre y cliente son requeridos.' });
+    }
+    const sql = `INSERT INTO sesion (nombre_sesion, fecha_sesion, lugar, usuario_id, estado_id, duracion, segundos)
+                 VALUES (?, ?, ?, ?, 1, 0, 0)`;
+    conn.query(sql, [nombre_sesion, fecha_sesion, lugar, usuario_id], (err, result) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.status(201).json({ ok: true, mensaje: 'Sesión creada correctamente.', id: result.insertId });
+    });
+});
+
+// ── PUT /api/sesiones/:id ─────────────────────────────────────────────────────
+app.put('/api/sesiones/:id', verificarToken, (req, res) => {
+    const { id } = req.params;
+    const { nombre_sesion, fecha_sesion, lugar, usuario_id } = req.body;
+    const sql = `UPDATE sesion SET nombre_sesion=?, fecha_sesion=?, lugar=?, usuario_id=? WHERE id=?`;
+    conn.query(sql, [nombre_sesion, fecha_sesion, lugar, usuario_id, id], (err) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, mensaje: 'Sesión actualizada correctamente.' });
+    });
+});
+
+// ── DELETE /api/sesiones/:id ──────────────────────────────────────────────────
+app.delete('/api/sesiones/:id', verificarToken, (req, res) => {
+    const { id } = req.params;
+    conn.query('UPDATE sesion SET estado_id = 2 WHERE id = ?', [id], (err) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, mensaje: 'Sesión desactivada correctamente.' });
+    });
+});
+
+// ── POST /api/sesiones/:id/activar ────────────────────────────────────────────
+app.post('/api/sesiones/:id/activar', verificarToken, (req, res) => {
+    const { id } = req.params;
+    conn.query('UPDATE sesion SET estado_id = 1 WHERE id = ?', [id], (err) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, mensaje: 'Sesión activada correctamente.' });
+    });
+});
+
+// ── POST /api/sesiones/:id/finalizar ─────────────────────────────────────────
+app.post('/api/sesiones/:id/finalizar', verificarToken, (req, res) => {
+    const { id } = req.params;
+    conn.query('UPDATE sesion SET estado_id = 4 WHERE id = ?', [id], (err) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, mensaje: 'Sesión finalizada correctamente.' });
+    });
+});
+
 // ── 404 ───────────────────────────────────────────────────────────────────────
 app.use((req, res) => {
     res.status(404).json({ ok: false, mensaje: 'Ruta no encontrada.' });

@@ -1,6 +1,269 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h4>Mi Perfil</h4>
-</div>
-<div class="card">
-  <div class="card-body text-muted">Módulo en construcción...</div>
+<!-- Toast -->
+@if (toast()) {
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+    <div class="toast show align-items-center text-white border-0"
+         [class]="'bg-' + toast()!.tipo">
+      <div class="d-flex">
+        <div class="toast-body fw-semibold">{{ toast()!.mensaje }}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                (click)="toast.set(null)"></button>
+      </div>
+    </div>
+  </div>
+}
+
+<div class="container-fluid">
+
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+    </div>
+  } @else if (perfil()) {
+
+    <!-- Header de perfil -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-body py-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold"
+               style="width: 56px; height: 56px; font-size: 1.4rem; flex-shrink: 0;">
+            {{ perfil().nombre?.charAt(0).toUpperCase() }}
+          </div>
+          <div>
+            <h4 class="mb-0 fw-bold">{{ perfil().nombre }}</h4>
+            <p class="text-muted mb-0 small">
+              @{{ perfil().usuario }} &nbsp;·&nbsp; {{ perfil().email }}
+            </p>
+            <span class="badge bg-primary-subtle text-primary mt-1">{{ perfil().rolusuario }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- Columna izquierda: datos de cuenta -->
+      <div class="col-xl-4 col-lg-5">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+
+            <h6 class="text-uppercase fw-bold text-muted border-bottom pb-2 mb-3 small">
+              Datos de Cuenta
+            </h6>
+            <div class="mb-3">
+              <label class="small fw-semibold text-muted d-block">Nombre Completo</label>
+              <p class="mb-0 fw-medium">{{ perfil().nombre }}</p>
+            </div>
+            <div class="mb-3">
+              <label class="small fw-semibold text-muted d-block">Usuario</label>
+              <p class="mb-0">@{{ perfil().usuario }}</p>
+            </div>
+            <div class="mb-3">
+              <label class="small fw-semibold text-muted d-block">Email</label>
+              <p class="mb-0">{{ perfil().email }}</p>
+            </div>
+            <div class="mb-3">
+              <label class="small fw-semibold text-muted d-block">Empresa</label>
+              <p class="mb-0">{{ perfil().empresa || 'No asignada' }}</p>
+            </div>
+
+            <h6 class="text-uppercase fw-bold text-muted border-bottom pb-2 mb-3 mt-4 small">
+              Presencia Digital
+            </h6>
+            @if (perfil().linkedin) {
+              <p class="mb-2 small">
+                <i class="bi bi-linkedin text-primary me-2"></i>{{ perfil().linkedin }}
+              </p>
+            }
+            @if (perfil().instagram) {
+              <p class="mb-2 small">
+                <i class="bi bi-instagram text-danger me-2"></i>{{ perfil().instagram }}
+              </p>
+            }
+            @if (perfil().x_twitter) {
+              <p class="mb-2 small">
+                <i class="bi bi-twitter-x me-2"></i>{{ perfil().x_twitter }}
+              </p>
+            }
+            @if (perfil().facebook) {
+              <p class="mb-2 small">
+                <i class="bi bi-facebook text-primary me-2"></i>{{ perfil().facebook }}
+              </p>
+            }
+            @if (perfil().pagina_web) {
+              <p class="mb-2 small">
+                <i class="bi bi-globe text-success me-2"></i>
+                <a [href]="perfil().pagina_web" target="_blank">{{ perfil().pagina_web }}</a>
+              </p>
+            }
+            @if (!perfil().linkedin && !perfil().instagram && !perfil().x_twitter && !perfil().facebook && !perfil().pagina_web) {
+              <p class="text-muted small">Sin redes sociales registradas.</p>
+            }
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna derecha: formulario / vista -->
+      <div class="col-xl-8 col-lg-7">
+        <div class="card shadow-sm">
+          <div class="card-body">
+
+            @if (!modoEdicion()) {
+
+              <!-- MODO VISTA -->
+              <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                <h6 class="text-uppercase fw-bold text-muted small mb-0">Información Personal</h6>
+                <button class="btn btn-outline-primary btn-sm px-3" (click)="activarEdicion()">
+                  <i class="bi bi-pencil me-1"></i> Editar Perfil
+                </button>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="small fw-semibold text-muted d-block">RUT</label>
+                  <p class="mb-0">{{ perfil().rut || 'No registrado' }}</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="small fw-semibold text-muted d-block">Fecha de Nacimiento</label>
+                  <p class="mb-0">{{ perfil().fecha_nacimiento || 'No registrada' }}</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="small fw-semibold text-muted d-block">Teléfono</label>
+                  <p class="mb-0">{{ perfil().telefono || 'No registrado' }}</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="small fw-semibold text-muted d-block">Ubicación</label>
+                  <p class="mb-0">{{ perfil().ciudad || '' }}{{ perfil().ciudad && perfil().pais ? ', ' : '' }}{{ perfil().pais || 'No registrada' }}</p>
+                </div>
+              </div>
+
+              <h6 class="text-uppercase fw-bold text-muted border-bottom pb-2 mb-3 mt-3 small">
+                Datos Corporativos
+              </h6>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="small fw-semibold text-muted d-block">Tiempo en la Compañía</label>
+                  <p class="mb-0">{{ perfil().tiempo_compania ? perfil().tiempo_compania + ' años' : 'N/A' }}</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="small fw-semibold text-muted d-block">Tiempo en el Cargo</label>
+                  <p class="mb-0">{{ perfil().tiempo_cargo ? perfil().tiempo_cargo + ' años' : 'N/A' }}</p>
+                </div>
+              </div>
+
+              <h6 class="text-uppercase fw-bold text-muted border-bottom pb-2 mb-3 mt-3 small">
+                Información Adicional
+              </h6>
+              <p class="text-muted small">{{ perfil().observacion || 'Sin observaciones.' }}</p>
+
+            } @else {
+
+              <!-- MODO EDICIÓN -->
+              <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                <h6 class="text-uppercase fw-bold text-muted small mb-0">Editar Perfil</h6>
+              </div>
+
+              <form [formGroup]="form">
+
+                <h6 class="small fw-bold text-muted text-uppercase mb-2">Información Personal</h6>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label small fw-semibold">Teléfono</label>
+                    <input type="text" class="form-control form-control-sm" formControlName="telefono">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label small fw-semibold">Fecha de Nacimiento</label>
+                    <input type="date" class="form-control form-control-sm" formControlName="fecha_nacimiento">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label small fw-semibold">País</label>
+                    <input type="text" class="form-control form-control-sm" formControlName="pais">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label small fw-semibold">Ciudad</label>
+                    <input type="text" class="form-control form-control-sm" formControlName="ciudad">
+                  </div>
+                  <div class="col-12 mb-3">
+                    <label class="form-label small fw-semibold">Dirección</label>
+                    <input type="text" class="form-control form-control-sm" formControlName="direccion">
+                  </div>
+                </div>
+
+                <h6 class="small fw-bold text-muted text-uppercase mb-2 mt-2">Datos Corporativos</h6>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label small fw-semibold">Tiempo en la Compañía (años)</label>
+                    <input type="number" class="form-control form-control-sm" formControlName="tiempo_compania">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label small fw-semibold">Tiempo en el Cargo (años)</label>
+                    <input type="number" class="form-control form-control-sm" formControlName="tiempo_cargo">
+                  </div>
+                </div>
+
+                <h6 class="small fw-bold text-muted text-uppercase mb-2 mt-2">Presencia Digital</h6>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label small fw-semibold">
+                      <i class="bi bi-linkedin text-primary me-1"></i>LinkedIn
+                    </label>
+                    <input type="text" class="form-control form-control-sm" formControlName="linkedin">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label small fw-semibold">
+                      <i class="bi bi-instagram text-danger me-1"></i>Instagram
+                    </label>
+                    <input type="text" class="form-control form-control-sm" formControlName="instagram">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label small fw-semibold">
+                      <i class="bi bi-twitter-x me-1"></i>X / Twitter
+                    </label>
+                    <input type="text" class="form-control form-control-sm" formControlName="x_twitter">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label small fw-semibold">
+                      <i class="bi bi-facebook text-primary me-1"></i>Facebook
+                    </label>
+                    <input type="text" class="form-control form-control-sm" formControlName="facebook">
+                  </div>
+                  <div class="col-12 mb-3">
+                    <label class="form-label small fw-semibold">
+                      <i class="bi bi-globe text-success me-1"></i>Página Web
+                    </label>
+                    <input type="text" class="form-control form-control-sm" formControlName="pagina_web">
+                  </div>
+                </div>
+
+                <h6 class="small fw-bold text-muted text-uppercase mb-2 mt-2">Información Adicional</h6>
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Observación / Sobre mí</label>
+                  <textarea class="form-control form-control-sm" rows="3" formControlName="observacion"></textarea>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                  <button type="button" class="btn btn-light px-4" (click)="cancelarEdicion()">
+                    Cancelar
+                  </button>
+                  <button type="button" class="btn btn-primary px-4"
+                          [disabled]="guardando()"
+                          (click)="guardar()">
+                    @if (guardando()) {
+                      <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    Guardar Cambios
+                  </button>
+                </div>
+
+              </form>
+
+            }
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  }
+
 </div>

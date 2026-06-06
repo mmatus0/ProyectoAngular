@@ -1,35 +1,42 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Sesion } from '../models/sesion.model';
 
 @Injectable({ providedIn: 'root' })
 export class SesionService {
 
-  private http   = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/api/sesiones';
+  private http = inject(HttpClient);
+  private url  = 'http://localhost:3000/api/sesiones';
 
-  private getAuthHeaders(): HttpHeaders {
+  private headers() {
     const token = localStorage.getItem('token');
-    return new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
   }
 
-  getAll() {
-    return this.http.get<Sesion[]>(this.apiUrl, { headers: this.getAuthHeaders() });
+  getSesiones(estado: number) {
+    return this.http.get<any>(`${this.url}?estado=${estado}`, this.headers());
   }
 
-  getById(id: number) {
-    return this.http.get<Sesion>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
+  getFormData() {
+    return this.http.get<any>(`${this.url}/form-data`, this.headers());
   }
 
-  create(data: Partial<Sesion>) {
-    return this.http.post<Sesion>(this.apiUrl, data, { headers: this.getAuthHeaders() });
+  crear(data: any) {
+    return this.http.post<any>(this.url, data, this.headers());
   }
 
-  update(id: number, data: Partial<Sesion>) {
-    return this.http.put<Sesion>(`${this.apiUrl}/${id}`, data, { headers: this.getAuthHeaders() });
+  actualizar(id: number, data: any) {
+    return this.http.put<any>(`${this.url}/${id}`, data, this.headers());
   }
 
-  delete(id: number) {
-    return this.http.delete(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
+  desactivar(id: number) {
+    return this.http.delete<any>(`${this.url}/${id}`, this.headers());
+  }
+
+  activar(id: number) {
+    return this.http.post<any>(`${this.url}/${id}/activar`, {}, this.headers());
+  }
+
+  finalizar(id: number) {
+    return this.http.post<any>(`${this.url}/${id}/finalizar`, {}, this.headers());
   }
 }

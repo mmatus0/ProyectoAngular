@@ -1,6 +1,322 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h4>Gestión de Sesiones</h4>
+<!-- Toast -->
+@if (toast()) {
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+    <div class="toast show align-items-center text-white border-0"
+         [class]="'bg-' + toast()!.tipo">
+      <div class="d-flex">
+        <div class="toast-body fw-semibold">{{ toast()!.mensaje }}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                (click)="toast.set(null)"></button>
+      </div>
+    </div>
+  </div>
+}
+
+<div class="container-fluid">
+
+  <div class="mb-4">
+    <h4 class="mb-0">Administración</h4>
+    <p class="text-muted mb-0 small">Gestión de Sesiones de Coaching</p>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-transparent py-3">
+      <h5 class="mb-0 fw-bold text-primary">
+        <i class="bi bi-camera-video me-2"></i>Listado de Sesiones
+      </h5>
+    </div>
+
+    <div class="card-body">
+
+      <!-- Tabs -->
+      <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="tabActiva() === 1" (click)="cambiarTab(1)">
+            <i class="bi bi-play-circle me-1"></i> Activas
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="tabActiva() === 4" (click)="cambiarTab(4)">
+            <i class="bi bi-check-all me-1"></i> Finalizadas
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="tabActiva() === 2" (click)="cambiarTab(2)">
+            <i class="bi bi-stop-circle me-1"></i> Inactivas
+          </button>
+        </li>
+      </ul>
+
+      <!-- Título tab activa -->
+      @if (tabActiva() === 1) {
+        <h5 class="text-primary mb-3">
+          <i class="bi bi-play-circle me-1"></i> Sesiones Activas
+        </h5>
+      } @else if (tabActiva() === 4) {
+        <h5 class="text-success mb-3">
+          <i class="bi bi-check-all me-1"></i> Sesiones Finalizadas
+        </h5>
+      } @else {
+        <h5 class="text-danger mb-3">
+          <i class="bi bi-stop-circle me-1"></i> Sesiones Inactivas
+        </h5>
+      }
+
+      <!-- Buscador y botón nuevo -->
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          style="max-width: 260px;"
+          placeholder="Buscar..."
+          [value]="busqueda()"
+          (input)="setBusqueda($any($event.target).value)"
+        />
+        @if (tabActiva() === 1) {
+          <button class="btn btn-primary btn-sm rounded-pill px-3" (click)="abrirModalCrear()">
+            <i class="bi bi-plus-circle me-1"></i> Nueva Sesión
+          </button>
+        }
+      </div>
+
+      @if (loading()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Cliente</th>
+                <th>Nombre Sesión</th>
+                <th>Fecha</th>
+                <th class="text-center">Duración</th>
+                <th>Lugar</th>
+                <th class="text-center">Estado</th>
+                <th class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (s of sesionesFiltradas(); track s.id) {
+                <tr>
+                  <td class="fw-medium">{{ s.cliente }}</td>
+                  <td>{{ s.nombre_sesion }}</td>
+                  <td>{{ s.fecha_sesion || '—' }}</td>
+                  <td class="text-center">{{ formatDuracion(s.duracion, s.segundos) }}</td>
+                  <td>{{ s.lugar || '—' }}</td>
+                  <td class="text-center">
+                    @if (s.estado_id === 1) {
+                      <span class="badge bg-primary-subtle text-primary">
+                        <i class="bi bi-play-circle me-1"></i>Activa
+                      </span>
+                    } @else if (s.estado_id === 4) {
+                      <span class="badge bg-success-subtle text-success">
+                        <i class="bi bi-check-all me-1"></i>Finalizada
+                      </span>
+                    } @else {
+                      <span class="badge bg-danger-subtle text-danger">
+                        <i class="bi bi-stop-circle me-1"></i>Inactiva
+                      </span>
+                    }
+                  </td>
+                  <td class="text-end">
+                    <div class="d-flex gap-1 justify-content-end">
+                      @if (tabActiva() === 1) {
+                        <button class="btn btn-sm btn-outline-warning" title="Editar"
+                                (click)="abrirModalEditar(s)">
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" title="Finalizar"
+                                (click)="abrirModalFinalizar(s)">
+                          <i class="bi bi-check-all"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" title="Desactivar"
+                                (click)="abrirModalEliminar(s)">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      } @else if (tabActiva() === 2) {
+                        <button class="btn btn-sm btn-outline-success" title="Activar"
+                                (click)="abrirModalActivar(s)">
+                          <i class="bi bi-check-circle"></i>
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" class="text-center text-muted py-4">
+                    No se encontraron sesiones.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+    </div>
+  </div>
 </div>
-<div class="card">
-  <div class="card-body text-muted">Módulo en construcción...</div>
+
+<!-- MODAL CREAR -->
+<div class="modal fade" [class.show]="modalCrear()" [style.display]="modalCrear() ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-plus-circle me-2 text-primary"></i>Nueva Sesión
+        </h5>
+        <button class="btn-close" (click)="cerrarModales()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="form">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Cliente <span class="text-danger">*</span></label>
+            <select class="form-select form-select-sm" formControlName="usuario_id">
+              <option value="">Seleccione un cliente...</option>
+              @for (u of usuarios(); track u.id) {
+                <option [value]="u.id">{{ u.nombre }}</option>
+              }
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nombre de la Sesión <span class="text-danger">*</span></label>
+            <input type="text" class="form-control form-control-sm" formControlName="nombre_sesion"
+                   placeholder="Ej: Sesión inicial de coaching">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Fecha</label>
+            <input type="date" class="form-control form-control-sm" formControlName="fecha_sesion">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Lugar</label>
+            <input type="text" class="form-control form-control-sm" formControlName="lugar"
+                   placeholder="Ej: Sala de reuniones, Online...">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-light px-4" (click)="cerrarModales()">Cancelar</button>
+        <button class="btn btn-primary px-4" [disabled]="form.invalid || guardando()" (click)="guardarCrear()">
+          @if (guardando()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+          Guardar
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
+<div class="modal-backdrop fade" [class.show]="modalCrear()" [style.display]="modalCrear() ? 'block' : 'none'"
+     (click)="cerrarModales()"></div>
+
+<!-- MODAL EDITAR -->
+<div class="modal fade" [class.show]="modalEditar()" [style.display]="modalEditar() ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-pencil me-2 text-warning"></i>Editar Sesión
+        </h5>
+        <button class="btn-close" (click)="cerrarModales()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="form">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Cliente <span class="text-danger">*</span></label>
+            <select class="form-select form-select-sm" formControlName="usuario_id">
+              <option value="">Seleccione un cliente...</option>
+              @for (u of usuarios(); track u.id) {
+                <option [value]="u.id">{{ u.nombre }}</option>
+              }
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nombre de la Sesión <span class="text-danger">*</span></label>
+            <input type="text" class="form-control form-control-sm" formControlName="nombre_sesion">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Fecha</label>
+            <input type="date" class="form-control form-control-sm" formControlName="fecha_sesion">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Lugar</label>
+            <input type="text" class="form-control form-control-sm" formControlName="lugar">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-light px-4" (click)="cerrarModales()">Cancelar</button>
+        <button class="btn btn-warning px-4" [disabled]="form.invalid || guardando()" (click)="guardarEditar()">
+          @if (guardando()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+          Actualizar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="modalEditar()" [style.display]="modalEditar() ? 'block' : 'none'"
+     (click)="cerrarModales()"></div>
+
+<!-- MODAL FINALIZAR -->
+<div class="modal fade" [class.show]="modalFinalizar()" [style.display]="modalFinalizar() ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="text-center p-4">
+        <i class="bi bi-check-all text-success" style="font-size: 3rem;"></i>
+        <h5 class="mt-3 fw-bold">¿Finalizar sesión?</h5>
+        <p class="text-muted">Estás a punto de finalizar:<br>
+          <strong class="text-success">{{ sesionSeleccionada()?.nombre_sesion }}</strong>
+        </p>
+        <div class="d-flex justify-content-center gap-2 mt-3">
+          <button class="btn btn-light px-4" (click)="cerrarModales()">Cancelar</button>
+          <button class="btn btn-success px-4" (click)="confirmarFinalizar()">Sí, finalizar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="modalFinalizar()" [style.display]="modalFinalizar() ? 'block' : 'none'"
+     (click)="cerrarModales()"></div>
+
+<!-- MODAL DESACTIVAR -->
+<div class="modal fade" [class.show]="modalEliminar()" [style.display]="modalEliminar() ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="text-center p-4">
+        <i class="bi bi-trash text-danger" style="font-size: 3rem;"></i>
+        <h5 class="mt-3 fw-bold">¿Desactivar sesión?</h5>
+        <p class="text-muted">Estás a punto de desactivar:<br>
+          <strong class="text-danger">{{ sesionSeleccionada()?.nombre_sesion }}</strong>
+        </p>
+        <div class="d-flex justify-content-center gap-2 mt-3">
+          <button class="btn btn-light px-4" (click)="cerrarModales()">Cancelar</button>
+          <button class="btn btn-danger px-4" (click)="confirmarEliminar()">Sí, desactivar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="modalEliminar()" [style.display]="modalEliminar() ? 'block' : 'none'"
+     (click)="cerrarModales()"></div>
+
+<!-- MODAL ACTIVAR -->
+<div class="modal fade" [class.show]="modalActivar()" [style.display]="modalActivar() ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="text-center p-4">
+        <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+        <h5 class="mt-3 fw-bold">¿Reactivar sesión?</h5>
+        <p class="text-muted">Estás a punto de reactivar:<br>
+          <strong class="text-success">{{ sesionSeleccionada()?.nombre_sesion }}</strong>
+        </p>
+        <div class="d-flex justify-content-center gap-2 mt-3">
+          <button class="btn btn-light px-4" (click)="cerrarModales()">Cancelar</button>
+          <button class="btn btn-success px-4" (click)="confirmarActivar()">Sí, reactivar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="modalActivar()" [style.display]="modalActivar() ? 'block' : 'none'"
+     (click)="cerrarModales()"></div>
