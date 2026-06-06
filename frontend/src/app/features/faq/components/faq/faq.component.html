@@ -1,6 +1,119 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h4>Preguntas Frecuentes</h4>
-</div>
-<div class="card">
-  <div class="card-body text-muted">Módulo en construcción...</div>
+<div class="container-fluid">
+
+  <div class="mb-3">
+    <p class="text-muted small mb-0">Seleccione una categoría para ver preguntas frecuentes</p>
+  </div>
+
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+      <p class="text-muted mt-2 small">Cargando preguntas...</p>
+    </div>
+  } @else if (faqs().length === 0) {
+    <div class="alert alert-warning">
+      No se encontraron preguntas frecuentes en el sistema.
+    </div>
+  } @else {
+
+    <div class="row g-4">
+
+      <!-- Sidebar categorías -->
+      <div class="col-12 col-lg-3">
+        <div class="card shadow-sm">
+          <div class="list-group list-group-flush rounded">
+            @for (cat of categorias(); track cat) {
+              <button
+                type="button"
+                class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3 px-4"
+                [class.active]="categoriaActiva() === cat"
+                (click)="seleccionarCategoria(cat)">
+                <span class="fw-semibold small text-uppercase">{{ cat }}</span>
+                <i class="bi bi-chevron-right small"></i>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Accordion -->
+      <div class="col-12 col-lg-9">
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+
+            <div class="mb-3">
+              <h5 class="fw-bold text-uppercase mb-0">{{ categoriaActiva() }}</h5>
+              <small class="text-muted">Ayuda para {{ categoriaActiva().toLowerCase() }}</small>
+            </div>
+
+            @if (faqsFiltradas().length === 0) {
+              <div class="alert alert-info mb-0">
+                No hay preguntas registradas para esta categoría.
+              </div>
+            } @else {
+              <div class="accordion" id="faqAccordion">
+                @for (faq of faqsFiltradas(); track faq.id) {
+                  <div class="accordion-item border rounded mb-2">
+                    <h2 class="accordion-header">
+                      <button
+                        class="accordion-button"
+                        [class.collapsed]="abierto() !== faq.id"
+                        type="button"
+                        (click)="toggle(faq.id)">
+                        {{ faq.pregunta }}
+                      </button>
+                    </h2>
+                    @if (abierto() === faq.id) {
+                      <div class="accordion-collapse">
+                        <div class="accordion-body text-muted"
+                             [innerHTML]="faq.respuesta">
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sección de contacto -->
+    <div class="card shadow-sm mt-4">
+      <div class="card-body p-4">
+        <div class="mb-4">
+          <h5 class="fw-bold mb-1">¿Tiene alguna duda?</h5>
+          <p class="text-muted small mb-0">
+            Si no encuentra su respuesta, puede contactarnos mediante los canales de comunicación:
+          </p>
+        </div>
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <div class="p-4 border rounded text-center bg-light h-100">
+              <i class="bi bi-whatsapp fs-2 text-success mb-2 d-block"></i>
+              <a href="https://wa.me/56971658505" target="_blank"
+                 class="h5 mb-1 d-block text-decoration-none text-dark fw-bold">
+                +56 9 7165 8505
+              </a>
+              <p class="text-muted small mb-0">Estaremos siempre contentos de atenderlo</p>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="p-4 border rounded text-center bg-light h-100">
+              <i class="bi bi-envelope fs-2 text-success mb-2 d-block"></i>
+              <a href="mailto:contacto@icacoaching.org"
+                 class="h5 mb-1 d-block text-decoration-none text-dark fw-bold">
+                contacto@icacoaching.org
+              </a>
+              <p class="text-muted small mb-0">La mejor manera de obtener una rápida respuesta</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  }
+
 </div>

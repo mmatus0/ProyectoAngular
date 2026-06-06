@@ -365,6 +365,19 @@ app.post('/api/usuarios/carga-masiva', verificarToken, upload.single('archivo'),
     });
 });
 
+// ── GET /api/faq ──────────────────────────────────────────────────────────────
+app.get('/api/faq', verificarToken, (req, res) => {
+    const sql = `SELECT id, categoria, pregunta, respuesta, orden
+                 FROM faq
+                 WHERE estado_id = 1
+                 ORDER BY categoria, orden`;
+
+    conn.query(sql, (err, results) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, data: results });
+    });
+});
+
 // ── 404 ───────────────────────────────────────────────────────────────────────
 app.use((req, res) => {
     res.status(404).json({ ok: false, mensaje: 'Ruta no encontrada.' });
