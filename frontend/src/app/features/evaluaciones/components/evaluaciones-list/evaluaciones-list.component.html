@@ -62,7 +62,7 @@
                placeholder="Buscar..." [value]="busqueda()"
                (input)="setBusqueda($any($event.target).value)" />
         @if (tabActiva() === 1) {
-          <button class="btn btn-primary btn-sm rounded-pill px-3" (click)="abrirModalAsignar()">
+          <button class="btn btn-primary btn-sm rounded-pill px-3" (click)="irAAsignar()">
             <i class="bi bi-plus-circle me-1"></i> Asignar Test
           </button>
         }
@@ -153,66 +153,6 @@
     </div>
   </div>
 </div>
-
-<!-- MODAL ASIGNAR -->
-<div class="modal fade" [class.show]="modalAsignar()" [style.display]="modalAsignar() ? 'block' : 'none'">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title fw-bold">
-          <i class="bi bi-plus-circle me-2 text-primary"></i>Asignar Test
-        </h5>
-        <button class="btn-close" (click)="cerrarModales()"></button>
-      </div>
-      <div class="modal-body">
-        <form [formGroup]="formAsignar">
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Usuario <span class="text-danger">*</span></label>
-            <select class="form-select form-select-sm" formControlName="usuario_id">
-              <option value="">Seleccione un usuario...</option>
-              @for (u of usuarios(); track u.id) {
-                <option [value]="u.id">{{ u.nombre }}</option>
-              }
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Test <span class="text-danger">*</span></label>
-            <select class="form-select form-select-sm" formControlName="evaluacion_id">
-              <option value="">Seleccione un test...</option>
-              @for (ev of evaluaciones(); track ev.id) {
-                <option [value]="ev.id">{{ ev.nombre }}</option>
-              }
-            </select>
-          </div>
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label fw-semibold">Intentos</label>
-              <input type="number" class="form-control form-control-sm" formControlName="intentos" min="1">
-            </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label fw-semibold d-block">Ver Resultados</label>
-              <div class="form-check form-switch mt-2">
-                <input class="form-check-input" type="checkbox" formControlName="ver_resultados"
-                       [checked]="formAsignar.get('ver_resultados')?.value">
-                <label class="form-check-label small">Permitir ver resultados</label>
-              </div>
-            </div>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-light px-4" (click)="cerrarModales()">Cancelar</button>
-        <button class="btn btn-primary px-4" [disabled]="formAsignar.invalid || guardando()"
-                (click)="guardarAsignar()">
-          @if (guardando()) { <span class="spinner-border spinner-border-sm me-2"></span> }
-          Asignar
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="modal-backdrop fade" [class.show]="modalAsignar()"
-     [style.display]="modalAsignar() ? 'block' : 'none'" (click)="cerrarModales()"></div>
 
 <!-- MODAL EDITAR -->
 <div class="modal fade" [class.show]="modalEditar()" [style.display]="modalEditar() ? 'block' : 'none'">

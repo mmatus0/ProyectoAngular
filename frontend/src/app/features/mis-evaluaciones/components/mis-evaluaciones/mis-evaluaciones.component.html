@@ -69,16 +69,10 @@
                   Continuar Test <i class="bi bi-arrow-right ms-1"></i>
                 </button>
               } @else if (e.estado_id === 4) {
-                @if (e.ver_resultados) {
                   <button class="btn btn-primary btn-sm rounded-pill px-4"
                           (click)="verResultados(e.id)">
                     Ver Resultados <i class="bi bi-eye ms-1"></i>
-                  </button>
-                } @else {
-                  <span class="text-muted small">
-                    <i class="bi bi-lock me-1"></i>Resultados no disponibles
-                  </span>
-                }
+                  </button>   
               }
             </div>
 

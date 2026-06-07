@@ -30,6 +30,8 @@ export class EvaluacionResultadosComponent implements OnInit {
   // Para tests por dimensiones (IDs 3, 4, 6, 7, 9)
   esDimensiones = computed(() => [3, 4, 6, 7, 9].includes(this.data()?.evaluacion_id));
 
+  esGestionTiempo = computed(() => this.data()?.evaluacion_id === 8);
+
   private headers() {
     const token = localStorage.getItem('token');
     return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };

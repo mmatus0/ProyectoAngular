@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 15-05-2026 a las 01:36:35
+-- Tiempo de generación: 07-06-2026 a las 22:48:56
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -466,6 +466,22 @@ CREATE TABLE `detalle_respuesta` (
   `pregunta_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Volcado de datos para la tabla `detalle_respuesta`
+--
+
+INSERT INTO `detalle_respuesta` (`id`, `resultado`, `created_at`, `updated_at`, `respuesta_id`, `estado_id`, `alternativa_id`, `pregunta_id`) VALUES
+(1, NULL, NULL, NULL, 1, 1, 49, NULL),
+(2, NULL, NULL, NULL, 1, 1, 52, NULL),
+(3, NULL, NULL, NULL, 1, 1, 55, NULL),
+(4, NULL, NULL, NULL, 1, 1, 60, NULL),
+(5, NULL, NULL, NULL, 1, 1, 62, NULL),
+(6, NULL, NULL, NULL, 1, 1, 64, NULL),
+(7, NULL, NULL, NULL, 1, 1, 69, NULL),
+(8, NULL, NULL, NULL, 1, 1, 70, NULL),
+(9, NULL, NULL, NULL, 1, 1, 73, NULL),
+(10, NULL, NULL, NULL, 1, 1, 78, NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -714,6 +730,13 @@ CREATE TABLE `evaluacion_usuario` (
   `evaluacion_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Volcado de datos para la tabla `evaluacion_usuario`
+--
+
+INSERT INTO `evaluacion_usuario` (`id`, `intentos`, `ver_resultados`, `fecha`, `inicio`, `finalizacion`, `resultados`, `coach_id`, `token_usuario`, `created_at`, `updated_at`, `usuario_id`, `resultado_id`, `estado_id`, `evaluacion_id`) VALUES
+(1, 1, 1, '2026-06-07 15:31:01', '2026-06-07 15:31:48', '2026-06-07 15:31:48', NULL, NULL, NULL, NULL, NULL, 2, NULL, 4, 2);
+
 -- --------------------------------------------------------
 
 --
@@ -824,6 +847,14 @@ CREATE TABLE `herramienta_usuario` (
   `estado_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Volcado de datos para la tabla `herramienta_usuario`
+--
+
+INSERT INTO `herramienta_usuario` (`id`, `fecha`, `created_at`, `updated_at`, `usuario_id`, `herramienta_id`, `estado_id`) VALUES
+(1, '2026-06-07 02:25:11', '2026-06-07 06:25:11', '2026-06-07 06:25:11', 2, 2, 1),
+(2, '2026-06-07 02:25:11', '2026-06-07 06:25:11', '2026-06-07 06:25:11', 2, 1, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -893,6 +924,13 @@ CREATE TABLE `membresia_usuario` (
   `usuario_id` bigint(20) UNSIGNED DEFAULT NULL,
   `estado_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `membresia_usuario`
+--
+
+INSERT INTO `membresia_usuario` (`dia_pago_mes`, `fecha`, `id`, `test_contratados`, `disc_contratados`, `herr_contratadas`, `aplica_membresia`, `created_at`, `updated_at`, `membresia_id`, `usuario_id`, `estado_id`) VALUES
+(NULL, NULL, 1, NULL, NULL, NULL, NULL, '2026-06-07 06:01:06', '2026-06-07 06:01:06', NULL, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -1031,9 +1069,7 @@ CREATE TABLE `persona` (
 
 INSERT INTO `persona` (`id`, `fecha_nacimiento`, `telefono`, `direccion`, `grupo`, `tiempo_compania`, `tiempo_cargo`, `rut`, `owner`, `otra_informacion`, `pais`, `ciudad`, `linkedin`, `instagram`, `x_twitter`, `facebook`, `pagina_web`, `observacion`, `created_at`, `updated_at`, `estado_id`, `usuario_id`, `empresa_id`) VALUES
 (1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-04-06 22:47:03', '2026-04-06 22:47:03', 1, 1, 1),
-(2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 2, 1),
-(3, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 3, 1),
-(4, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 4, 1);
+(2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-06-06 23:41:52', '2026-06-06 23:41:52', 1, 2, 1);
 
 -- --------------------------------------------------------
 
@@ -1298,6 +1334,13 @@ CREATE TABLE `respuestas` (
   `evaluacion_usuario_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Volcado de datos para la tabla `respuestas`
+--
+
+INSERT INTO `respuestas` (`id`, `fecha`, `nro_intentos`, `created_at`, `updated_at`, `estado_id`, `evaluacion_usuario_id`) VALUES
+(1, '2026-06-07 15:31:48', 1, NULL, NULL, 1, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -1399,6 +1442,13 @@ CREATE TABLE `sesion` (
   `estado_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Volcado de datos para la tabla `sesion`
+--
+
+INSERT INTO `sesion` (`id`, `nombre_sesion`, `fecha`, `lugar`, `segundos`, `fecha_sesion`, `cronometrado`, `duracion`, `fecha_hora_proxima_sesion`, `ultima_interaccion`, `created_at`, `updated_at`, `usuario_id`, `estado_id`) VALUES
+(1, 'djd', NULL, 'djnd', 0, '2026-06-07', 0, 0, NULL, '2026-06-07 02:02:32', '2026-06-07 06:02:32', '2026-06-07 06:02:32', 2, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -1496,10 +1546,8 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`id`, `nombre`, `usuario`, `email`, `password`, `status`, `disc_asignados`, `acreditado`, `eval_asignadas`, `avatar_nombre_archivo`, `avatar_es_fisico`, `ruta_avatar`, `remember_token`, `created_at`, `updated_at`, `rolusuario_id`, `estado_id`, `empresa_id`) VALUES
-(1, 'Gonzalo Matus', 'mmatus0', 'matusgonzalo1544@gmail.com', '$2y$12$aV.Duo6epIbvAL/VgB2Mj.GIJVS5lqPFUg.SKCmU.WRZ14MHY8OAO', 1, 0, 0, 0, 'default_avatar.png', '1', 'images/users/default_avatar.png', NULL, '2026-04-06 22:47:03', '2026-04-06 22:47:03', 3, 1, 1),
-(2, 'Administrador', 'admin', 'admin@evalcoach.cl', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL, 0, 0, 0, NULL, NULL, 'images/users/default_avatar.png', NULL, NULL, NULL, 1, 1, 1),
-(3, 'Constanza Venegas', 'cony21', 'cony@gmail.com', '$2a$10$vnbY9BWQ4J5QyWaUEjrD3OnZt.SRTHdsXf8X2Mr0VOS9DLaE9kxF2', NULL, 0, 0, 0, NULL, NULL, 'images/users/default_avatar.png', NULL, NULL, NULL, 2, 1, 1),
-(4, 'Alexander Ortega', 'alex1765', 'alexander@gmail.com', '$2a$10$AdRMkU/CvsBBGriQ4ZsYDOk.o9NOJMaCd3qAcnSe1dFFEXCqz4c5C', NULL, 0, 0, 0, NULL, NULL, 'images/users/default_avatar.png', NULL, NULL, NULL, 3, 1, 1);
+(1, 'Gonzalo Matus', 'mmatus0', 'matusgonzalo1544@gmail.com', '$2y$12$MW.OVVYX4mPYFF2jYw8UbeMKE9Ifs5S8HA5bR30EBqY80hjvtrzJ2', 1, 0, 0, 0, 'default_avatar.png', '1', 'images/users/default_avatar.png', 'J7UvIkaq46UUu532yz2VERMsteqnkEsFgOEIinjzeIGy2mfpPQD3p4Xi6RNS', '2026-04-06 22:47:03', '2026-06-07 06:01:06', 1, 1, 1),
+(2, 'Constanza Venegas', 'conyvenegas', 'gmatusz85@gmail.com', '$2y$12$uN8j1pFdPhCmvX2zTpBYM.rc3wc1qf0qQmW0wCvqtlnmVhC7OW16C', 1, 0, 0, 0, 'default_avatar.png', '1', 'images/users/default_avatar.png', '6OrN520h8ME9AoURUPs7CWjdUxjY6SpRV1NQi5soZft37YGMIXNAiuupUrFZ', '2026-06-06 23:41:52', '2026-06-06 23:41:52', 3, 1, 1);
 
 --
 -- Índices para tablas volcadas
@@ -1850,7 +1898,7 @@ ALTER TABLE `categorias`
 -- AUTO_INCREMENT de la tabla `detalle_respuesta`
 --
 ALTER TABLE `detalle_respuesta`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `dimension`
@@ -1904,7 +1952,7 @@ ALTER TABLE `evaluacion`
 -- AUTO_INCREMENT de la tabla `evaluacion_usuario`
 --
 ALTER TABLE `evaluacion_usuario`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `faq`
@@ -1928,7 +1976,7 @@ ALTER TABLE `herramienta_entidad`
 -- AUTO_INCREMENT de la tabla `herramienta_usuario`
 --
 ALTER TABLE `herramienta_usuario`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `log_acceso`
@@ -1946,7 +1994,7 @@ ALTER TABLE `membresia`
 -- AUTO_INCREMENT de la tabla `membresia_usuario`
 --
 ALTER TABLE `membresia_usuario`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `migrations`
@@ -1970,7 +2018,7 @@ ALTER TABLE `permiso_usuario`
 -- AUTO_INCREMENT de la tabla `persona`
 --
 ALTER TABLE `persona`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `preguntas`
@@ -1982,7 +2030,7 @@ ALTER TABLE `preguntas`
 -- AUTO_INCREMENT de la tabla `respuestas`
 --
 ALTER TABLE `respuestas`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `resultados`
@@ -2006,7 +2054,7 @@ ALTER TABLE `secciones`
 -- AUTO_INCREMENT de la tabla `sesion`
 --
 ALTER TABLE `sesion`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `tipo_contenido`
@@ -2030,7 +2078,7 @@ ALTER TABLE `tmp_usuarios`
 -- AUTO_INCREMENT de la tabla `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Restricciones para tablas volcadas

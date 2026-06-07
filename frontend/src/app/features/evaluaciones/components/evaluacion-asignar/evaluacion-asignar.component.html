@@ -1,0 +1,190 @@
+<!-- Toast -->
+@if (toast()) {
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+    <div class="toast show align-items-center text-white border-0"
+         [class]="'bg-' + toast()!.tipo">
+      <div class="d-flex">
+        <div class="toast-body fw-semibold">{{ toast()!.mensaje }}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                (click)="toast.set(null)"></button>
+      </div>
+    </div>
+  </div>
+}
+
+<div class="container-fluid">
+  <div class="row justify-content-center mt-2">
+    <div class="col-xl-12">
+
+      <div class="card shadow-sm border-0">
+
+        <!-- Header -->
+        <div class="card-header bg-transparent border-bottom py-3 d-flex align-items-center gap-3">
+          <div class="bg-primary-subtle text-primary rounded d-flex align-items-center justify-content-center"
+               style="width:42px; height:42px;">
+            <i class="bi bi-clipboard-check fs-5"></i>
+          </div>
+          <div>
+            <h5 class="card-title mb-0 fw-bold">Asignación de Tests</h5>
+            <p class="text-muted mb-0 small">
+              Seleccione un cliente y asigne los tests pasándolos a la columna derecha.
+            </p>
+          </div>
+        </div>
+
+        <div class="card-body p-4">
+
+          <!-- Paso 1: Seleccionar cliente -->
+          <h6 class="text-uppercase bg-light p-2 mb-3 small fw-bold">
+            <i class="bi bi-person-search me-1"></i> 1. Seleccione el Cliente
+          </h6>
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <select class="form-select" (change)="onUsuarioChange($event)">
+                <option value="">-- Elija un usuario de la lista --</option>
+                @for (u of usuarios(); track u.id) {
+                  <option [value]="u.id">{{ u.nombre }} ({{ u.email }})</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <!-- Paso 2: Gestionar tests -->
+          <h6 class="text-uppercase bg-light p-2 mb-3 small fw-bold">
+            <i class="bi bi-clipboard-check me-1"></i> 2. Gestionar Tests
+          </h6>
+
+          @if (loadingUsuario()) {
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary"></div>
+              <p class="text-muted mt-2 small">Cargando tests...</p>
+            </div>
+          }
+
+          @if (mostrarListas()) {
+            <div class="row mb-4 align-items-stretch">
+
+              <!-- Disponibles -->
+              <div class="col">
+                <div class="card border h-100 mb-0">
+                  <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 text-muted small fw-bold">
+                      <i class="bi bi-list-ul me-1"></i> Disponibles
+                    </h6>
+                    <button type="button" class="btn btn-sm btn-outline-primary"
+                            (click)="asignarTodas()">
+                      <i class="bi bi-check-all me-1"></i> Asignar Todas
+                    </button>
+                  </div>
+                  <div class="card-body p-2" style="height: 350px; overflow-y: auto; background: #f8f9fa;">
+                    @if (disponibles().length === 0) {
+                      <div class="text-center text-muted mt-5">
+                        <i class="bi bi-clipboard" style="font-size: 3rem; opacity: .4;"></i>
+                        <p class="mt-2 small">Todos los tests están asignados.</p>
+                      </div>
+                    } @else {
+                      <ul class="list-group list-group-flush">
+                        @for (e of disponibles(); track e.id) {
+                          <li class="list-group-item d-flex justify-content-between align-items-center
+                                     shadow-sm mb-1 rounded border-0">
+                            <div class="d-flex align-items-center gap-2">
+                              <img src="https://placehold.co/52x52?text=T"
+                                   width="52" height="52"
+                                   class="rounded border"
+                                   style="object-fit: cover;">
+                              <span class="fw-medium text-dark small">{{ e.nombre }}</span>
+                            </div>
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-success"
+                                    title="Asignar"
+                                    (click)="asignar(e)">
+                              <i class="bi bi-arrow-right-circle"></i>
+                            </button>
+                          </li>
+                        }
+                      </ul>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ícono intercambio -->
+              <div class="col-md-1 d-flex justify-content-center align-items-center">
+                <i class="bi bi-arrow-left-right text-muted" style="font-size: 2.5rem; opacity: .3;"></i>
+              </div>
+
+              <!-- Asignadas -->
+              <div class="col">
+                <div class="card border border-primary h-100 mb-0">
+                  <div class="card-header bg-primary py-2 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 text-white small fw-bold">
+                      <i class="bi bi-check-all me-1"></i> Tests del Cliente
+                    </h6>
+                    <button type="button" class="btn btn-sm btn-light"
+                            (click)="desasignarTodas()">
+                      <i class="bi bi-x-square me-1"></i> Desasignar Todas
+                    </button>
+                  </div>
+                  <div class="card-body p-2" style="height: 350px; overflow-y: auto; background: #f0f8ff;">
+                    @if (asignadas().length === 0) {
+                      <div class="text-center text-muted mt-5">
+                        <i class="bi bi-clipboard-x" style="font-size: 3rem; opacity: .4;"></i>
+                        <p class="mt-2 small">Aún no hay tests asignados.</p>
+                      </div>
+                    } @else {
+                      <ul class="list-group list-group-flush">
+                        @for (e of asignadas(); track e.id) {
+                          <li class="list-group-item d-flex justify-content-between align-items-center
+                                     shadow-sm mb-1 rounded border-0">
+                            <div class="d-flex align-items-center gap-2">
+                              <img src="https://placehold.co/52x52?text=T"
+                                   width="52" height="52"
+                                   class="rounded border"
+                                   style="object-fit: cover;">
+                              <span class="fw-medium text-dark small">{{ e.nombre }}</span>
+                            </div>
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger"
+                                    title="Quitar"
+                                    (click)="desasignar(e)">
+                              <i class="bi bi-x-circle"></i>
+                            </button>
+                          </li>
+                        }
+                      </ul>
+                    }
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          }
+
+          @if (!mostrarListas() && !loadingUsuario()) {
+            <div class="text-center text-muted py-5">
+              <i class="bi bi-person-search" style="font-size: 3rem; opacity: .4;"></i>
+              <p class="mt-2">Seleccione un cliente para cargar los tests disponibles.</p>
+            </div>
+          }
+
+          <!-- Botones -->
+          <div class="border-top mt-4 pt-4 d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-light px-4" (click)="volver()">
+              Cancelar
+            </button>
+            <button type="button"
+                    class="btn btn-primary px-5"
+                    [disabled]="!usuarioSeleccionado() || guardando()"
+                    (click)="guardar()">
+              @if (guardando()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+              }
+              <i class="bi bi-floppy me-1"></i> Guardar Asignaciones
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

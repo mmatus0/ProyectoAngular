@@ -892,7 +892,7 @@ app.post('/api/evaluaciones/asignar', verificarToken, (req, res) => {
     }
 
     conn.query(
-        'SELECT id FROM evaluacion_usuario WHERE usuario_id = ? AND evaluacion_id = ?',
+        'SELECT evaluacion_id FROM evaluacion_usuario WHERE usuario_id = ? AND estado_id IN (1, 3, 4)',
         [usuario_id, evaluacion_id],
         (err, existe) => {
             if (err) return res.status(500).json({ ok: false, mensaje: err.message });
@@ -994,7 +994,7 @@ app.get('/api/mis-evaluaciones/:id/test', verificarToken, (req, res) => {
                 if (err3) return res.status(500).json({ ok: false, mensaje: err3.message });
 
                 // Obtener respuestas guardadas
-                const sqlResp = `SELECT dr.alternativa_id, r.id as respuesta_id
+                const sqlResp = `SELECT dr.alternativa_id, dr.pregunta_id
                                  FROM respuestas r
                                  INNER JOIN detalle_respuesta dr ON dr.respuesta_id = r.id AND dr.estado_id = 1
                                  WHERE r.evaluacion_usuario_id = ? AND r.estado_id = 1`;
@@ -1004,8 +1004,11 @@ app.get('/api/mis-evaluaciones/:id/test', verificarToken, (req, res) => {
 
                     const respuestasMap = {};
                     respuestas.forEach((r) => {
-                        respuestasMap[r.respuesta_id] = r.alternativa_id;
+                        respuestasMap[r.pregunta_id] = r.alternativa_id;
                     });
+
+                    console.log('Respuestas cargadas:', JSON.stringify(respuestasMap));
+                    console.log('Preguntas IDs:', preguntas.map(p => p.id));
 
                     res.json({ ok: true, evaluacion: ev, preguntas, alternativas, respuestas: respuestasMap });
                 });
@@ -1018,80 +1021,8 @@ app.get('/api/mis-evaluaciones/:id/test', verificarToken, (req, res) => {
 app.post('/api/mis-evaluaciones/:id/guardar', verificarToken, (req, res) => {
     const { id } = req.params;
     const { respuestas, finalizar } = req.body;
-
-    // Actualizar estado a En Proceso (3) o Finalizado (4)
-    const nuevoEstado = finalizar ? 4 : 3;
-    const fechaFin = finalizar ? new Date() : null;
-
-    const sqlUpdate = finalizar
-        ? 'UPDATE evaluacion_usuario SET estado_id=?, inicio=COALESCE(inicio, NOW()), finalizacion=? WHERE id=? AND usuario_id=?'
-        : 'UPDATE evaluacion_usuario SET estado_id=?, inicio=COALESCE(inicio, NOW()) WHERE id=? AND usuario_id=?';
-
-    const paramsUpdate = finalizar
-        ? [nuevoEstado, fechaFin, id, req.usuario.id]
-        : [nuevoEstado, id, req.usuario.id];
-
-    conn.query(sqlUpdate, paramsUpdate, (err) => {
-        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
-
-        if (!respuestas || Object.keys(respuestas).length === 0) {
-            return res.json({ ok: true, mensaje: 'Avance guardado.' });
-        }
-
-        // Eliminar respuestas anteriores y guardar nuevas
-        conn.query(
-            `DELETE dr FROM detalle_respuesta dr
-             INNER JOIN respuestas r ON r.id = dr.respuesta_id
-             WHERE r.evaluacion_usuario_id = ?`,
-            [id],
-            (err2) => {
-                if (err2) return res.status(500).json({ ok: false, mensaje: err2.message });
-
-                conn.query(
-                    'DELETE FROM respuestas WHERE evaluacion_usuario_id = ?',
-                    [id],
-                    (err3) => {
-                        if (err3) return res.status(500).json({ ok: false, mensaje: err3.message });
-
-                        // Insertar nueva respuesta
-                        conn.query(
-                            'INSERT INTO respuestas (evaluacion_usuario_id, estado_id, fecha, nro_intentos) VALUES (?, 1, NOW(), 1)',
-                            [id],
-                            (err4, result) => {
-                                if (err4) return res.status(500).json({ ok: false, mensaje: err4.message });
-
-                                const respuestaId = result.insertId;
-                                const entries = Object.entries(respuestas);
-
-                                if (entries.length === 0) return res.json({ ok: true });
-
-                                const detalles = entries.map(([, altId]) => [respuestaId, altId, 1]);
-
-                                conn.query(
-                                    'INSERT INTO detalle_respuesta (respuesta_id, alternativa_id, estado_id) VALUES ?',
-                                    [detalles],
-                                    (err5) => {
-                                        if (err5) return res.status(500).json({ ok: false, mensaje: err5.message });
-                                        res.json({ ok: true, mensaje: finalizar ? 'Evaluación finalizada.' : 'Avance guardado.' });
-                                    }
-                                );
-                            }
-                        );
-                    }
-                );
-            }
-        );
-    });
-});
-
-// ── POST /api/mis-evaluaciones/:id/guardar ────────────────────────────────────
-app.post('/api/mis-evaluaciones/:id/guardar', verificarToken, (req, res) => {
-    const { id } = req.params;
-    const { respuestas, finalizar } = req.body;
-
     const nuevoEstado = finalizar ? 4 : 3;
 
-    // Obtener evaluacion_usuario
     conn.query(
         'SELECT eu.*, e.id as eval_id FROM evaluacion_usuario eu INNER JOIN evaluacion e ON e.id = eu.evaluacion_id WHERE eu.id = ? AND eu.usuario_id = ?',
         [id, req.usuario.id],
@@ -1114,18 +1045,150 @@ app.post('/api/mis-evaluaciones/:id/guardar', verificarToken, (req, res) => {
                     return res.json({ ok: true, mensaje: finalizar ? 'Evaluación finalizada.' : 'Avance guardado.' });
                 }
 
-                // Eliminar respuestas anteriores
+                // Obtener o crear registro en respuestas (no borrar, igual que PHP)
+                conn.query(
+                    'SELECT id FROM respuestas WHERE evaluacion_usuario_id = ? LIMIT 1',
+                    [id],
+                    (err3, respRows) => {
+                        if (err3) return res.status(500).json({ ok: false, mensaje: err3.message });
+
+                        const crearOUsarRespuesta = (cb) => {
+                            if (respRows.length > 0) {
+                                cb(respRows[0].id);
+                            } else {
+                                conn.query(
+                                    'INSERT INTO respuestas (evaluacion_usuario_id, estado_id, fecha, nro_intentos) VALUES (?, 1, NOW(), 1)',
+                                    [id],
+                                    (err4, result) => {
+                                        if (err4) return res.status(500).json({ ok: false, mensaje: err4.message });
+                                        cb(result.insertId);
+                                    }
+                                );
+                            }
+                        };
+
+                        crearOUsarRespuesta((respuestaId) => {
+                            // Obtener alternativas para calcular score
+                            const altIds = Object.values(respuestas);
+                            conn.query(
+                                'SELECT id, score, cuadrante FROM alternativas WHERE id IN (?)',
+                                [altIds],
+                                (err5, altsData) => {
+                                    if (err5) return res.status(500).json({ ok: false, mensaje: err5.message });
+
+                                    // Obtener preguntas para saber si son inversas
+                                    const pregIds = Object.keys(respuestas);
+                                    conn.query(
+                                        'SELECT id, inversa FROM preguntas WHERE id IN (?)',
+                                        [pregIds],
+                                        (err6, pregsData) => {
+                                            if (err6) return res.status(500).json({ ok: false, mensaje: err6.message });
+
+                                            const entries = Object.entries(respuestas);
+                                            let procesados = 0;
+
+                                            if (entries.length === 0) {
+                                                return finalizar
+                                                    ? calcularResultados(idTest, id, respuestaId, altIds, altsData, res)
+                                                    : res.json({ ok: true, mensaje: 'Avance guardado.' });
+                                            }
+
+                                            entries.forEach(([pregId, altId]) => {
+                                                const alt = altsData.find(a => a.id == altId);
+                                                const preg = pregsData.find(p => p.id == pregId);
+                                                let score = alt ? (alt.score || 0) : 0;
+
+                                                // Ajustar score según tipo de test (igual que PHP)
+                                                if (idTest == 6) {
+                                                    score = alt ? (alt.cuadrante || 0) : 0;
+                                                } else if (idTest == 5 && preg && preg.inversa == 0) {
+                                                    score = 7 - score;
+                                                } else if (idTest == 4 && preg && preg.inversa == 0) {
+                                                    score = score == 1 ? 0 : 1;
+                                                }
+
+                                                // Upsert: actualizar si existe, insertar si no
+                                                conn.query(
+                                                    'SELECT id FROM detalle_respuesta WHERE respuesta_id = ? AND pregunta_id = ? LIMIT 1',
+                                                    [respuestaId, pregId],
+                                                    (err7, existe) => {
+                                                        if (err7) { procesados++; check(); return; }
+
+                                                        if (existe && existe.length > 0) {
+                                                            conn.query(
+                                                                'UPDATE detalle_respuesta SET alternativa_id=?, resultado=? WHERE id=?',
+                                                                [altId, score, existe[0].id],
+                                                                () => { procesados++; check(); }
+                                                            );
+                                                        } else {
+                                                            conn.query(
+                                                                'INSERT INTO detalle_respuesta (respuesta_id, alternativa_id, pregunta_id, resultado, estado_id) VALUES (?,?,?,?,1)',
+                                                                [respuestaId, altId, pregId, score],
+                                                                () => { procesados++; check(); }
+                                                            );
+                                                        }
+                                                    }
+                                                );
+                                            });
+
+                                            function check() {
+                                                if (procesados === entries.length) {
+                                                    if (!finalizar) {
+                                                        return res.json({ ok: true, mensaje: 'Avance guardado.' });
+                                                    }
+                                                    calcularResultados(idTest, id, respuestaId, altIds, altsData, res);
+                                                }
+                                            }
+                                        }
+                                    );
+                                }
+                            );
+                        });
+                    }
+                );
+            });
+        }
+    );
+});
+
+// ── POST /api/mis-evaluaciones/:id/guardar ────────────────────────────────────
+app.post('/api/mis-evaluaciones/:id/guardar', verificarToken, (req, res) => {
+    const { id } = req.params;
+    const { respuestas, finalizar } = req.body;
+    const nuevoEstado = finalizar ? 4 : 3;
+
+    conn.query(
+        'SELECT eu.*, e.id as eval_id FROM evaluacion_usuario eu INNER JOIN evaluacion e ON e.id = eu.evaluacion_id WHERE eu.id = ? AND eu.usuario_id = ?',
+        [id, req.usuario.id],
+        (err, rows) => {
+            if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+            if (rows.length === 0) return res.status(403).json({ ok: false, mensaje: 'Sin acceso.' });
+
+            const eu = rows[0];
+            const idTest = eu.eval_id;
+
+            const sqlUpd = finalizar
+                ? 'UPDATE evaluacion_usuario SET estado_id=?, inicio=COALESCE(inicio, NOW()), finalizacion=NOW() WHERE id=?'
+                : 'UPDATE evaluacion_usuario SET estado_id=?, inicio=COALESCE(inicio, NOW()) WHERE id=?';
+
+            conn.query(sqlUpd, [nuevoEstado, id], (err2) => {
+                if (err2) return res.status(500).json({ ok: false, mensaje: err2.message });
+
+                if (!respuestas || Object.keys(respuestas).length === 0) {
+                    return res.json({ ok: true, mensaje: finalizar ? 'Evaluación finalizada.' : 'Avance guardado.' });
+                }
+
                 conn.query(
                     `DELETE dr FROM detalle_respuesta dr
                      INNER JOIN respuestas r ON r.id = dr.respuesta_id
-                     WHERE r.evaluacion_usuario_id = ?`, [id],
+                     WHERE r.evaluacion_usuario_id = ?`,
+                    [id],
                     (err3) => {
                         if (err3) return res.status(500).json({ ok: false, mensaje: err3.message });
 
                         conn.query('DELETE FROM respuestas WHERE evaluacion_usuario_id = ?', [id], (err4) => {
                             if (err4) return res.status(500).json({ ok: false, mensaje: err4.message });
 
-                            // Insertar nueva respuesta
                             conn.query(
                                 'INSERT INTO respuestas (evaluacion_usuario_id, estado_id, fecha, nro_intentos) VALUES (?, 1, NOW(), 1)',
                                 [id],
@@ -1137,7 +1200,6 @@ app.post('/api/mis-evaluaciones/:id/guardar', verificarToken, (req, res) => {
 
                                     if (entries.length === 0) return res.json({ ok: true });
 
-                                    // Obtener datos de alternativas seleccionadas
                                     const altIds = entries.map(([, altId]) => altId);
 
                                     conn.query(
@@ -1146,7 +1208,6 @@ app.post('/api/mis-evaluaciones/:id/guardar', verificarToken, (req, res) => {
                                         (err6, altsData) => {
                                             if (err6) return res.status(500).json({ ok: false, mensaje: err6.message });
 
-                                            // Insertar detalles con pregunta_id y resultado (score)
                                             const detalles = entries.map(([pregId, altId]) => {
                                                 const alt = altsData.find(a => a.id == altId);
                                                 return [respuestaId, altId, pregId, alt ? alt.score : 0, 1];
@@ -1156,13 +1217,15 @@ app.post('/api/mis-evaluaciones/:id/guardar', verificarToken, (req, res) => {
                                                 'INSERT INTO detalle_respuesta (respuesta_id, alternativa_id, pregunta_id, resultado, estado_id) VALUES ?',
                                                 [detalles],
                                                 (err7) => {
-                                                    if (err7) return res.status(500).json({ ok: false, mensaje: err7.message });
+                                                    if (err7) {
+                                                        console.error('Error INSERT detalle_respuesta:', err7.message);
+                                                        return res.status(500).json({ ok: false, mensaje: err7.message });
+                                                    }
 
                                                     if (!finalizar) {
                                                         return res.json({ ok: true, mensaje: 'Avance guardado.' });
                                                     }
 
-                                                    // Calcular resultados según tipo de test
                                                     calcularResultados(idTest, id, respuestaId, altIds, altsData, res);
                                                 }
                                             );
@@ -1405,7 +1468,59 @@ app.get('/api/mis-evaluaciones/:id/resultados', verificarToken, (req, res) => {
         const eu = rows[0];
         const resultadosJson = eu.resultados ? JSON.parse(eu.resultados) : { Resultados: [] };
 
+        console.log('Resultados JSON:', JSON.stringify(resultadosJson));
         res.json({ ok: true, data: { ...eu, resultadosJson } });
+    });
+});
+
+// ── GET /api/evaluaciones/asignadas/:usuarioId ────────────────────────────────
+app.get('/api/evaluaciones/asignadas/:usuarioId', verificarToken, (req, res) => {
+    const { usuarioId } = req.params;
+    conn.query(
+        'SELECT evaluacion_id FROM evaluacion_usuario WHERE usuario_id = ? AND estado_id = 1',
+        [usuarioId],
+        (err, results) => {
+            if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+            res.json({ ok: true, data: results.map(r => r.evaluacion_id) });
+        }
+    );
+});
+
+// ── POST /api/evaluaciones/asignar-lote ───────────────────────────────────────
+app.post('/api/evaluaciones/asignar-lote', verificarToken, (req, res) => {
+    const { usuario_id, evaluaciones, intentos, ver_resultados } = req.body;
+    if (!usuario_id) return res.status(400).json({ ok: false, mensaje: 'usuario_id requerido.' });
+
+    // Desactivar asignaciones actuales
+    conn.query('UPDATE evaluacion_usuario SET estado_id = 2 WHERE usuario_id = ? AND estado_id = 1', [usuario_id], (err) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+
+        if (!evaluaciones || evaluaciones.length === 0) {
+            return res.json({ ok: true, mensaje: 'Asignaciones actualizadas.' });
+        }
+
+        let procesados = 0;
+        evaluaciones.forEach(evalId => {
+            conn.query(
+                'SELECT id FROM evaluacion_usuario WHERE usuario_id = ? AND evaluacion_id = ?',
+                [usuario_id, evalId],
+                (err2, existe) => {
+                    if (existe && existe.length > 0) {
+                        conn.query(
+                            'UPDATE evaluacion_usuario SET estado_id=1, fecha=NOW() WHERE usuario_id=? AND evaluacion_id=?',
+                            [usuario_id, evalId],
+                            () => { procesados++; if (procesados === evaluaciones.length) res.json({ ok: true, mensaje: 'Asignaciones guardadas.' }); }
+                        );
+                    } else {
+                        conn.query(
+                            'INSERT INTO evaluacion_usuario (usuario_id, evaluacion_id, intentos, ver_resultados, estado_id, fecha) VALUES (?,?,?,?,1,NOW())',
+                            [usuario_id, evalId, intentos || 1, ver_resultados || 0],
+                            () => { procesados++; if (procesados === evaluaciones.length) res.json({ ok: true, mensaje: 'Asignaciones guardadas.' }); }
+                        );
+                    }
+                }
+            );
+        });
     });
 });
 

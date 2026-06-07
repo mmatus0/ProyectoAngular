@@ -2,6 +2,7 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { EvaluacionService } from '../../../../core/services/evaluacion.service';
+import { Router } from '@angular/router';
 
 interface IEvaluacion {
   id: number;
@@ -30,6 +31,7 @@ export class EvaluacionesListComponent implements OnInit {
 
   private evaluacionService = inject(EvaluacionService);
   private fb                = inject(FormBuilder);
+  private router = inject(Router);
 
   evaluacionesActivas     = signal<IEvaluacion[]>([]);
   evaluacionesFinalizadas = signal<IEvaluacion[]>([]);
@@ -149,5 +151,9 @@ export class EvaluacionesListComponent implements OnInit {
   mostrarToast(mensaje: string, tipo: string) {
     this.toast.set({ mensaje, tipo });
     setTimeout(() => this.toast.set(null), 3500);
+  }
+
+  irAAsignar() {
+    this.router.navigate(['/evaluaciones/asignar']);
   }
 }

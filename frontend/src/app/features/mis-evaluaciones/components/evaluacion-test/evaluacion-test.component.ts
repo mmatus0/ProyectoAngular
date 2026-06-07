@@ -69,8 +69,13 @@ export class EvaluacionTestComponent implements OnInit {
     });
   }
 
-  ggetAlternativasPregunta(preguntaId: number): IAlternativa[] {
-    return this.alternativas().filter((a: any) => a.pregunta_id === preguntaId);
+  getAlternativasPregunta(preguntaId: number): IAlternativa[] {
+    const filtradas = this.alternativas().filter((a: any) => a.pregunta_id === preguntaId);
+    // Si no hay alternativas específicas por pregunta, devolver todas (alternativas globales)
+    if (filtradas.length === 0) {
+      return this.alternativas();
+    }
+    return filtradas;
   }
 
   seleccionarRespuesta(preguntaId: number, alternativaId: number) {
