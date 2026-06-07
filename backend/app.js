@@ -503,6 +503,122 @@ app.post('/api/sesiones/:id/finalizar', verificarToken, (req, res) => {
     });
 });
 
+// ── GET /api/sesiones/:id/detalle ─────────────────────────────────────────────
+app.get('/api/sesiones/:id/detalle', verificarToken, (req, res) => {
+    const { id } = req.params;
+    const sqlSesion = `SELECT s.*, u.nombre as cliente
+                       FROM sesion s
+                       LEFT JOIN user u ON u.id = s.usuario_id
+                       WHERE s.id = ?`;
+
+    conn.query(sqlSesion, [id], (err, sesiones) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        if (sesiones.length === 0) return res.status(404).json({ ok: false, mensaje: 'Sesión no encontrada.' });
+
+        const sesion = sesiones[0];
+
+        conn.query('SELECT * FROM tipo_contenido WHERE estado_id = 1 ORDER BY orden', (err2, tipos) => {
+            if (err2) return res.status(500).json({ ok: false, mensaje: err2.message });
+
+            conn.query('SELECT * FROM actividad WHERE sesion_id = ?', [id], (err3, actividades) => {
+                if (err3) return res.status(500).json({ ok: false, mensaje: err3.message });
+
+                const actividadesMap = {};
+                actividades.forEach(a => { actividadesMap[a.tipo_contenido_id] = a.actividad; });
+
+                res.json({ ok: true, sesion, tipos, actividades: actividadesMap });
+            });
+        });
+    });
+});
+
+// ── PUT /api/sesiones/:id/detalle ─────────────────────────────────────────────
+app.put('/api/sesiones/:id/detalle', verificarToken, (req, res) => {
+    const { id } = req.params;
+    const { actividades, duracion, segundos } = req.body;
+
+    const actualizarTiempo = (cb) => {
+        if (duracion !== undefined && segundos !== undefined) {
+            conn.query('UPDATE sesion SET duracion=?, segundos=? WHERE id=?',
+                [duracion, segundos, id], cb);
+        } else { cb(null); }
+    };
+
+    actualizarTiempo((err) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        if (!actividades || Object.keys(actividades).length === 0) {
+            return res.json({ ok: true, mensaje: 'Tiempo actualizado.' });
+        }
+
+        const entries = Object.entries(actividades);
+        let procesados = 0;
+
+        entries.forEach(([tipoId, texto]) => {
+            conn.query(
+                'SELECT id FROM actividad WHERE sesion_id = ? AND tipo_contenido_id = ?',
+                [id, tipoId],
+                (err2, existe) => {
+                    if (err2) { procesados++; if (procesados === entries.length) res.json({ ok: true }); return; }
+
+                    if (existe.length > 0) {
+                        conn.query('UPDATE actividad SET actividad=? WHERE sesion_id=? AND tipo_contenido_id=?',
+                            [texto, id, tipoId], () => {
+                                procesados++;
+                                if (procesados === entries.length) res.json({ ok: true, mensaje: 'Actividades guardadas.' });
+                            });
+                    } else {
+                        conn.query('INSERT INTO actividad (actividad, sesion_id, tipo_contenido_id, estado_id) VALUES (?,?,?,1)',
+                            [texto, id, tipoId], () => {
+                                procesados++;
+                                if (procesados === entries.length) res.json({ ok: true, mensaje: 'Actividades guardadas.' });
+                            });
+                    }
+                }
+            );
+        });
+    });
+});
+
+// ── PUT /api/sesiones/:id/finalizar-detalle ───────────────────────────────────
+app.put('/api/sesiones/:id/finalizar-detalle', verificarToken, (req, res) => {
+    const { id } = req.params;
+    const { actividades, duracion, segundos } = req.body;
+
+    conn.query('UPDATE sesion SET estado_id=4, duracion=?, segundos=? WHERE id=?',
+        [duracion || 0, segundos || 0, id], (err) => {
+            if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+
+            if (!actividades || Object.keys(actividades).length === 0) {
+                return res.json({ ok: true, mensaje: 'Sesión finalizada.' });
+            }
+
+            const entries = Object.entries(actividades);
+            let procesados = 0;
+
+            entries.forEach(([tipoId, texto]) => {
+                conn.query(
+                    'SELECT id FROM actividad WHERE sesion_id = ? AND tipo_contenido_id = ?',
+                    [id, tipoId],
+                    (err2, existe) => {
+                        if (existe && existe.length > 0) {
+                            conn.query('UPDATE actividad SET actividad=? WHERE sesion_id=? AND tipo_contenido_id=?',
+                                [texto, id, tipoId], () => {
+                                    procesados++;
+                                    if (procesados === entries.length) res.json({ ok: true, mensaje: 'Sesión finalizada correctamente.' });
+                                });
+                        } else {
+                            conn.query('INSERT INTO actividad (actividad, sesion_id, tipo_contenido_id, estado_id) VALUES (?,?,?,1)',
+                                [texto, id, tipoId], () => {
+                                    procesados++;
+                                    if (procesados === entries.length) res.json({ ok: true, mensaje: 'Sesión finalizada correctamente.' });
+                                });
+                        }
+                    }
+                );
+            });
+        });
+});
+
 // ── 404 ───────────────────────────────────────────────────────────────────────
 app.use((req, res) => {
     res.status(404).json({ ok: false, mensaje: 'Ruta no encontrada.' });

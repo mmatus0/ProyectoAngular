@@ -13,6 +13,7 @@ import { BibliotecaComponent } from './features/biblioteca/components/biblioteca
 import { PerfilComponent } from './features/perfil/components/perfil/perfil.component';
 import { FaqComponent } from './features/faq/components/faq/faq.component';
 import { InstitucionesComponent } from './features/instituciones/components/instituciones/instituciones.component';
+import { SesionDetalleComponent } from './features/sesiones/components/sesion-detalle/sesion-detalle.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -36,6 +37,7 @@ export const routes: Routes = [
       { path: 'perfil',       component: PerfilComponent,            canActivate: [authGuard] },
       { path: 'faq',          component: FaqComponent,               canActivate: [authGuard] },
       { path: 'instituciones',component: InstitucionesComponent,     canActivate: [authGuard] },
+      { path: 'sesiones/:id/detalle', component: SesionDetalleComponent, canActivate: [authGuard] },
     ]
   },
 

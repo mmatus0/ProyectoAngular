@@ -2,6 +2,7 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { SesionService } from '../../../../core/services/sesion.service';
+import { Router } from '@angular/router';
 
 interface ISesion {
   id: number;
@@ -26,6 +27,7 @@ export class SesionesListComponent implements OnInit {
 
   private sesionService = inject(SesionService);
   private fb            = inject(FormBuilder);
+  private router = inject(Router);
 
   sesionesActivas     = signal<ISesion[]>([]);
   sesionesFinalizadas = signal<ISesion[]>([]);
@@ -203,5 +205,9 @@ export class SesionesListComponent implements OnInit {
   mostrarToast(mensaje: string, tipo: string) {
     this.toast.set({ mensaje, tipo });
     setTimeout(() => this.toast.set(null), 3000);
+  }
+
+  verDetalle(id: number) {
+    this.router.navigate(['/sesiones', id, 'detalle']);
   }
 }

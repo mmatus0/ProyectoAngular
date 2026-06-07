@@ -123,6 +123,10 @@
                   <td class="text-end">
                     <div class="d-flex gap-1 justify-content-end">
                       @if (tabActiva() === 1) {
+                        <button class="btn btn-sm btn-outline-primary" title="Ver detalle"
+                                (click)="verDetalle(s.id)">
+                          <i class="bi bi-eye"></i>
+                        </button>
                         <button class="btn btn-sm btn-outline-warning" title="Editar"
                                 (click)="abrirModalEditar(s)">
                           <i class="bi bi-pencil"></i>
@@ -134,6 +138,11 @@
                         <button class="btn btn-sm btn-outline-danger" title="Desactivar"
                                 (click)="abrirModalEliminar(s)">
                           <i class="bi bi-trash"></i>
+                        </button>
+                      } @else if (tabActiva() === 4) {
+                        <button class="btn btn-sm btn-outline-primary" title="Ver detalle"
+                                (click)="verDetalle(s.id)">
+                          <i class="bi bi-eye"></i>
                         </button>
                       } @else if (tabActiva() === 2) {
                         <button class="btn btn-sm btn-outline-success" title="Activar"
