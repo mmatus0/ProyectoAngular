@@ -7,13 +7,16 @@ import { UsuariosListComponent } from './features/usuarios/components/usuarios-l
 import { EvaluacionesListComponent } from './features/evaluaciones/components/evaluaciones-list/evaluaciones-list.component';
 import { MisEvaluacionesComponent } from './features/mis-evaluaciones/components/mis-evaluaciones/mis-evaluaciones.component';
 import { DiscListComponent } from './features/disc/components/disc-list/disc-list.component';
-import { SesionesListComponent } from './features/sesiones/components/sesiones-list/sesiones-list.component';
-import { HerramientasListComponent } from './features/herramientas/components/herramientas-list/herramientas-list.component';
 import { BibliotecaComponent } from './features/biblioteca/components/biblioteca/biblioteca.component';
 import { PerfilComponent } from './features/perfil/components/perfil/perfil.component';
 import { FaqComponent } from './features/faq/components/faq/faq.component';
 import { InstitucionesComponent } from './features/instituciones/components/instituciones/instituciones.component';
+import { SesionesComponent } from './features/sesiones/components/sesiones/sesiones.component';
 import { SesionDetalleComponent } from './features/sesiones/components/sesion-detalle/sesion-detalle.component';
+import { SesionVistaComponent } from './features/sesiones/components/sesion-vista/sesion-vista.component';
+import { HerramientasComponent } from './features/herramientas/components/herramientas/herramientas.component';
+import { HerramientaAsignarComponent } from './features/herramientas/components/herramienta-asignar/herramienta-asignar.component';
+import { HerramientaDetalleComponent } from './features/herramientas/components/herramienta-detalle/herramienta-detalle.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -31,13 +34,18 @@ export const routes: Routes = [
       { path: 'evaluaciones', component: EvaluacionesListComponent,  canActivate: [authGuard] },
       { path: 'mis-evaluaciones', component: MisEvaluacionesComponent, canActivate: [authGuard] },
       { path: 'disc',         component: DiscListComponent,          canActivate: [authGuard] },
-      { path: 'sesiones',     component: SesionesListComponent,      canActivate: [authGuard] },
-      { path: 'herramientas', component: HerramientasListComponent,  canActivate: [authGuard] },
+      { path: 'sesiones',                component: SesionesComponent,      canActivate: [authGuard] },
+      { path: 'sesiones/:id/detalle',    component: SesionDetalleComponent, canActivate: [authGuard] },
+      { path: 'sesiones/:id/vista',      component: SesionVistaComponent,   canActivate: [authGuard] },
+      { path: 'herramientas',         component: HerramientasComponent,       canActivate: [authGuard] },
+      { path: 'herramientas/asignar', component: HerramientaAsignarComponent, canActivate: [authGuard] },
+      { path: 'herramientas/:id/detalle', component: HerramientaDetalleComponent, canActivate: [authGuard] },
       { path: 'biblioteca',   component: BibliotecaComponent,        canActivate: [authGuard] },
       { path: 'perfil',       component: PerfilComponent,            canActivate: [authGuard] },
       { path: 'faq',          component: FaqComponent,               canActivate: [authGuard] },
       { path: 'instituciones',component: InstitucionesComponent,     canActivate: [authGuard] },
       { path: 'sesiones/:id/detalle', component: SesionDetalleComponent, canActivate: [authGuard] },
+      { path: 'herramientas/asignar', component: HerramientaAsignarComponent, canActivate: [authGuard] },
     ]
   },
 

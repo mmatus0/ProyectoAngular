@@ -619,6 +619,237 @@ app.put('/api/sesiones/:id/finalizar-detalle', verificarToken, (req, res) => {
         });
 });
 
+// ── GET /api/mis-sesiones ─────────────────────────────────────────────────────
+app.get('/api/mis-sesiones', verificarToken, (req, res) => {
+    const sql = `SELECT s.id, s.nombre_sesion, s.fecha_sesion, s.lugar,
+                        s.duracion, s.segundos, s.estado_id,
+                        e.nombre as estado
+                 FROM sesion s
+                 LEFT JOIN estado e ON e.id = s.estado_id
+                 WHERE s.usuario_id = ? AND s.estado_id IN (1, 4)
+                 ORDER BY s.fecha_sesion DESC`;
+
+    conn.query(sql, [req.usuario.id], (err, results) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, data: results });
+    });
+});
+
+// ── GET /api/herramientas ─────────────────────────────────────────────────────
+app.get('/api/herramientas', verificarToken, (req, res) => {
+    const estado = req.query.estado || 1;
+    const sql = `SELECT hu.id, hu.fecha, hu.estado_id,
+                        u.id as usuario_id, u.nombre as usuario, u.email,
+                        h.id as herramienta_id, h.nombre as herramienta, h.foto,
+                        e.nombre as estado
+                 FROM herramienta_usuario hu
+                 LEFT JOIN user u         ON u.id  = hu.usuario_id
+                 LEFT JOIN herramienta h  ON h.id  = hu.herramienta_id
+                 LEFT JOIN estado e       ON e.id  = hu.estado_id
+                 WHERE hu.estado_id = ?
+                 ORDER BY hu.fecha DESC`;
+    conn.query(sql, [estado], (err, results) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, data: results });
+    });
+});
+
+// ── GET /api/herramientas/catalogo ────────────────────────────────────────────
+app.get('/api/herramientas/catalogo', verificarToken, (req, res) => {
+    conn.query('SELECT id, nombre, descripcion, foto FROM herramienta WHERE estado_id = 1 ORDER BY nombre',
+        (err, results) => {
+            if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+            res.json({ ok: true, data: results });
+        });
+});
+
+// ── GET /api/herramientas/form-data ───────────────────────────────────────────
+app.get('/api/herramientas/form-data', verificarToken, (req, res) => {
+    conn.query('SELECT id, nombre, email FROM user WHERE estado_id = 1 ORDER BY nombre', (err, usuarios) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        conn.query('SELECT id, nombre, foto FROM herramienta WHERE estado_id = 1 ORDER BY nombre', (err2, herramientas) => {
+            if (err2) return res.status(500).json({ ok: false, mensaje: err2.message });
+            res.json({ ok: true, usuarios, herramientas });
+        });
+    });
+});
+
+// ── GET /api/herramientas/asignadas/:usuarioId ────────────────────────────────
+app.get('/api/herramientas/asignadas/:usuarioId', verificarToken, (req, res) => {
+    const { usuarioId } = req.params;
+    const sql = `SELECT herramienta_id FROM herramienta_usuario
+                 WHERE usuario_id = ? AND estado_id = 1`;
+    conn.query(sql, [usuarioId], (err, results) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, data: results.map(r => r.herramienta_id) });
+    });
+});
+
+// ── POST /api/herramientas/asignar ────────────────────────────────────────────
+app.post('/api/herramientas/asignar', verificarToken, (req, res) => {
+    const { usuario_id, herramientas } = req.body;
+    if (!usuario_id) return res.status(400).json({ ok: false, mensaje: 'usuario_id es requerido.' });
+
+    // Desactivar todas las asignaciones actuales del usuario
+    conn.query('UPDATE herramienta_usuario SET estado_id = 2 WHERE usuario_id = ?', [usuario_id], (err) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+
+        if (!herramientas || herramientas.length === 0) {
+            return res.json({ ok: true, mensaje: 'Asignaciones actualizadas.' });
+        }
+
+        let procesados = 0;
+        herramientas.forEach(herrId => {
+            // Verificar si ya existe registro
+            conn.query(
+                'SELECT id FROM herramienta_usuario WHERE usuario_id = ? AND herramienta_id = ?',
+                [usuario_id, herrId],
+                (err2, existe) => {
+                    if (existe && existe.length > 0) {
+                        conn.query('UPDATE herramienta_usuario SET estado_id = 1, fecha = NOW() WHERE usuario_id = ? AND herramienta_id = ?',
+                            [usuario_id, herrId], () => {
+                                procesados++;
+                                if (procesados === herramientas.length)
+                                    res.json({ ok: true, mensaje: 'Asignaciones guardadas correctamente.' });
+                            });
+                    } else {
+                        conn.query('INSERT INTO herramienta_usuario (usuario_id, herramienta_id, estado_id, fecha) VALUES (?,?,1,NOW())',
+                            [usuario_id, herrId], () => {
+                                procesados++;
+                                if (procesados === herramientas.length)
+                                    res.json({ ok: true, mensaje: 'Asignaciones guardadas correctamente.' });
+                            });
+                    }
+                }
+            );
+        });
+    });
+});
+
+// ── DELETE /api/herramientas/:id ──────────────────────────────────────────────
+app.delete('/api/herramientas/:id', verificarToken, (req, res) => {
+    const { id } = req.params;
+    conn.query('UPDATE herramienta_usuario SET estado_id = 2 WHERE id = ?', [id], (err) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, mensaje: 'Asignación desactivada correctamente.' });
+    });
+});
+
+// ── POST /api/herramientas/:id/activar ────────────────────────────────────────
+app.post('/api/herramientas/:id/activar', verificarToken, (req, res) => {
+    const { id } = req.params;
+    conn.query('UPDATE herramienta_usuario SET estado_id = 1 WHERE id = ?', [id], (err) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, mensaje: 'Asignación activada correctamente.' });
+    });
+});
+
+// ── GET /api/mis-herramientas ─────────────────────────────────────────────────
+app.get('/api/mis-herramientas', verificarToken, (req, res) => {
+    const sql = `SELECT hu.id, hu.fecha,
+                        h.id as herramienta_id, h.nombre as herramienta,
+                        h.descripcion, h.foto
+                 FROM herramienta_usuario hu
+                 LEFT JOIN herramienta h ON h.id = hu.herramienta_id
+                 WHERE hu.usuario_id = ? AND hu.estado_id = 1
+                 ORDER BY h.nombre`;
+
+    conn.query(sql, [req.usuario.id], (err, results) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, data: results });
+    });
+});
+
+// ── GET /api/mis-herramientas/:id/cuadrantes ──────────────────────────────────
+app.get('/api/mis-herramientas/:id/cuadrantes', verificarToken, (req, res) => {
+    const { id } = req.params; // id = herramienta_usuario_id
+
+    // Verificar que la asignación pertenece al usuario
+    conn.query(
+        'SELECT hu.id, h.nombre, h.descripcion FROM herramienta_usuario hu LEFT JOIN herramienta h ON h.id = hu.herramienta_id WHERE hu.id = ? AND hu.usuario_id = ?',
+        [id, req.usuario.id],
+        (err, herr) => {
+            if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+            if (herr.length === 0) return res.status(403).json({ ok: false, mensaje: 'Sin acceso.' });
+
+            // Obtener entidades (cuadrantes) de la herramienta
+            const sqlEntidades = `SELECT e.id, e.entidad, e.tipo_entidad, e.sub_entidad, e.codigo_metodo
+                                  FROM herramienta_entidad he
+                                  LEFT JOIN entidad e ON e.id = he.entidad_id
+                                  WHERE he.herramienta_id = (
+                                      SELECT herramienta_id FROM herramienta_usuario WHERE id = ?
+                                  ) AND he.estado_id = 1
+                                  ORDER BY e.id`;
+
+            conn.query(sqlEntidades, [id], (err2, entidades) => {
+                if (err2) return res.status(500).json({ ok: false, mensaje: err2.message });
+
+                // Obtener atributos guardados
+                conn.query(
+                    'SELECT * FROM atributo WHERE herramienta_usuario_id = ? AND estado_id = 1 ORDER BY fecha ASC',
+                    [id],
+                    (err3, atributos) => {
+                        if (err3) return res.status(500).json({ ok: false, mensaje: err3.message });
+
+                        // Agrupar atributos por entidad_id
+                        const atributosMap = {};
+                        atributos.forEach(a => {
+                            if (!atributosMap[a.entidad_id]) atributosMap[a.entidad_id] = [];
+                            atributosMap[a.entidad_id].push(a);
+                        });
+
+                        res.json({
+                            ok: true,
+                            herramienta: herr[0],
+                            entidades,
+                            atributos: atributosMap
+                        });
+                    }
+                );
+            });
+        }
+    );
+});
+
+// ── POST /api/mis-herramientas/:id/atributo ───────────────────────────────────
+app.post('/api/mis-herramientas/:id/atributo', verificarToken, (req, res) => {
+    const { id } = req.params;
+    const { entidad_id, atributo } = req.body;
+
+    if (!atributo || !entidad_id) {
+        return res.status(400).json({ ok: false, mensaje: 'Datos incompletos.' });
+    }
+
+    const sql = `INSERT INTO atributo (atributo, herramienta_usuario_id, entidad_id, estado_id, fecha)
+                 VALUES (?, ?, ?, 1, NOW())`;
+
+    conn.query(sql, [atributo, id, entidad_id], (err, result) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, id: result.insertId, atributo, entidad_id });
+    });
+});
+
+// ── PUT /api/mis-herramientas/atributo/:atributoId ────────────────────────────
+app.put('/api/mis-herramientas/atributo/:atributoId', verificarToken, (req, res) => {
+    const { atributoId } = req.params;
+    const { atributo } = req.body;
+
+    conn.query('UPDATE atributo SET atributo = ? WHERE id = ?', [atributo, atributoId], (err) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, mensaje: 'Atributo actualizado.' });
+    });
+});
+
+// ── DELETE /api/mis-herramientas/atributo/:atributoId ─────────────────────────
+app.delete('/api/mis-herramientas/atributo/:atributoId', verificarToken, (req, res) => {
+    const { atributoId } = req.params;
+
+    conn.query('UPDATE atributo SET estado_id = 2 WHERE id = ?', [atributoId], (err) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, mensaje: 'Atributo eliminado.' });
+    });
+});
+
 // ── 404 ───────────────────────────────────────────────────────────────────────
 app.use((req, res) => {
     res.status(404).json({ ok: false, mensaje: 'Ruta no encontrada.' });

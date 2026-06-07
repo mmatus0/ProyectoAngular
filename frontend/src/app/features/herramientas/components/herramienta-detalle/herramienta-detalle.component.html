@@ -1,0 +1,144 @@
+<!-- Toast -->
+@if (toast()) {
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+    <div class="toast show align-items-center text-white border-0"
+         [class]="'bg-' + toast()!.tipo">
+      <div class="d-flex">
+        <div class="toast-body fw-semibold">{{ toast()!.mensaje }}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                (click)="toast.set(null)"></button>
+      </div>
+    </div>
+  </div>
+}
+
+<div class="container-fluid">
+
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+    </div>
+  } @else if (herramienta()) {
+
+    <!-- Header -->
+    <div class="row mb-3">
+      <div class="col-12 d-flex justify-content-between align-items-center">
+        <h4 class="fw-bold mb-0">
+          <i class="bi bi-tools text-primary me-2"></i>{{ herramienta().nombre }}
+        </h4>
+        <button class="btn btn-light btn-sm" (click)="volver()">
+          <i class="bi bi-arrow-left me-1"></i> Volver
+        </button>
+      </div>
+    </div>
+
+    <!-- Cuadrantes -->
+    <div class="row">
+      @for (entidad of entidades(); track entidad.id) {
+        <div class="col-md-6 mb-4">
+          <div class="card h-100 shadow-sm border-0 border-top border-3"
+               [class]="'border-' + colorPorTipo(entidad.tipo_entidad)">
+
+            <!-- Header cuadrante -->
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-start">
+              <div>
+                <h5 class="mb-0 fw-bold" [class]="'text-' + colorPorTipo(entidad.tipo_entidad)">
+                  {{ entidad.entidad }}
+                </h5>
+                <small class="text-muted d-block">{{ entidad.sub_entidad }}</small>
+              </div>
+              <span class="badge rounded-pill ms-2"
+                    [class]="'bg-' + colorPorTipo(entidad.tipo_entidad) + '-subtle text-' + colorPorTipo(entidad.tipo_entidad)">
+                {{ entidad.tipo_entidad }}
+              </span>
+            </div>
+
+            <!-- Lista atributos -->
+            <div class="card-body p-0">
+              <ul class="list-group list-group-flush"
+                  style="min-height: 200px; max-height: 240px; overflow-y: auto;">
+
+                @for (attr of getAtributos(entidad.id); track attr.id) {
+                  <li class="list-group-item px-3 py-2">
+
+                    @if (!attr.editando) {
+                      <!-- Vista normal -->
+                      <div class="d-flex justify-content-between align-items-start gap-2">
+                        <span class="small flex-grow-1">{{ attr.atributo }}</span>
+                        <div class="d-flex gap-1 flex-shrink-0">
+                          <button class="btn btn-xs btn-outline-secondary"
+                                  style="padding: 1px 6px; font-size: 11px;"
+                                  title="Editar"
+                                  (click)="iniciarEdicion(entidad.id, attr)">
+                            <i class="bi bi-pencil"></i>
+                          </button>
+                          <button class="btn btn-xs btn-outline-danger"
+                                  style="padding: 1px 6px; font-size: 11px;"
+                                  title="Eliminar"
+                                  (click)="eliminarAtributo(entidad.id, attr.id)">
+                            <i class="bi bi-x-lg"></i>
+                          </button>
+                        </div>
+                      </div>
+                    } @else {
+                      <!-- Modo edición -->
+                      <div class="p-1">
+                        <textarea
+                          class="form-control form-control-sm mb-2"
+                          rows="2"
+                          [value]="attr.textoEdicion || ''"
+                          (input)="setTextoEdicion(entidad.id, attr.id, $any($event.target).value)">
+                        </textarea>
+                        <div class="text-end d-flex gap-1 justify-content-end">
+                          <button class="btn btn-sm btn-light"
+                                  (click)="cancelarEdicion(entidad.id, attr.id)">
+                            Cancelar
+                          </button>
+                          <button class="btn btn-sm"
+                                  [class]="'btn-' + colorPorTipo(entidad.tipo_entidad)"
+                                  (click)="guardarEdicion(entidad.id, attr)">
+                            Guardar
+                          </button>
+                        </div>
+                      </div>
+                    }
+
+                  </li>
+                } @empty {
+                  <li class="list-group-item text-center text-muted py-4 small">
+                    <i class="bi bi-inbox me-1"></i> Sin elementos aún.
+                  </li>
+                }
+
+              </ul>
+            </div>
+
+            <!-- Input agregar -->
+            <div class="card-footer bg-transparent p-2">
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control form-control-sm"
+                  [class]="'border-' + colorPorTipo(entidad.tipo_entidad)"
+                  [placeholder]="'Añadir a ' + entidad.entidad + '...'"
+                  [value]="getInput(entidad.id)"
+                  (input)="setInput(entidad.id, $any($event.target).value)"
+                  (keyup.enter)="agregarAtributo(entidad.id)"
+                />
+                <button
+                  class="btn btn-sm"
+                  [class]="'btn-' + colorPorTipo(entidad.tipo_entidad)"
+                  (click)="agregarAtributo(entidad.id)">
+                  <i class="bi bi-send"></i>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      }
+    </div>
+
+  }
+
+</div>

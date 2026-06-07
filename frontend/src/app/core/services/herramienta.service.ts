@@ -1,35 +1,38 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Herramienta } from '../models/herramienta.model';
 
 @Injectable({ providedIn: 'root' })
 export class HerramientaService {
 
-  private http   = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/api/herramientas';
+  private http = inject(HttpClient);
+  private url  = 'http://localhost:3000/api/herramientas';
 
-  private getAuthHeaders(): HttpHeaders {
+  private headers() {
     const token = localStorage.getItem('token');
-    return new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
   }
 
-  getAll() {
-    return this.http.get<Herramienta[]>(this.apiUrl, { headers: this.getAuthHeaders() });
+  getAsignaciones(estado: number) {
+    return this.http.get<any>(`${this.url}?estado=${estado}`, this.headers());
   }
 
-  getById(id: number) {
-    return this.http.get<Herramienta>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
+  getFormData() {
+    return this.http.get<any>(`${this.url}/form-data`, this.headers());
   }
 
-  create(data: Partial<Herramienta>) {
-    return this.http.post<Herramienta>(this.apiUrl, data, { headers: this.getAuthHeaders() });
+  getAsignadasPorUsuario(usuarioId: number) {
+    return this.http.get<any>(`${this.url}/asignadas/${usuarioId}`, this.headers());
   }
 
-  update(id: number, data: Partial<Herramienta>) {
-    return this.http.put<Herramienta>(`${this.apiUrl}/${id}`, data, { headers: this.getAuthHeaders() });
+  asignar(data: { usuario_id: number; herramientas: number[] }) {
+    return this.http.post<any>(`${this.url}/asignar`, data, this.headers());
   }
 
-  delete(id: number) {
-    return this.http.delete(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
+  desactivar(id: number) {
+    return this.http.delete<any>(`${this.url}/${id}`, this.headers());
+  }
+
+  activar(id: number) {
+    return this.http.post<any>(`${this.url}/${id}/activar`, {}, this.headers());
   }
 }

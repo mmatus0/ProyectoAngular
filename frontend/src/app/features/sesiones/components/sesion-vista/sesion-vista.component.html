@@ -1,0 +1,97 @@
+<div class="container-fluid">
+
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+    </div>
+  } @else if (sesion()) {
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+          <div>
+            <h4 class="mb-1">
+              Sesión: <span class="text-primary fw-bold">{{ sesion().nombre_sesion }}</span>
+            </h4>
+            <p class="text-muted mb-0 small">
+              <i class="bi bi-calendar me-1"></i>{{ sesion().fecha_sesion || 'Sin fecha' }}
+              &nbsp;·&nbsp;
+              <i class="bi bi-geo-alt me-1"></i>{{ sesion().lugar || 'Sin lugar' }}
+              &nbsp;·&nbsp;
+              <i class="bi bi-stopwatch me-1"></i>{{ formatTiempo(sesion().duracion, sesion().segundos) }}
+            </p>
+          </div>
+          <button type="button" class="btn btn-light btn-sm" (click)="volver()">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+          </button>
+        </div>
+
+        <!-- Badge estado -->
+        <div class="mb-4">
+          @if (sesion().estado_id === 1) {
+            <span class="badge bg-primary-subtle text-primary">
+              <i class="bi bi-play-circle me-1"></i>Activa
+            </span>
+          } @else if (sesion().estado_id === 4) {
+            <span class="badge bg-success-subtle text-success">
+              <i class="bi bi-check-all me-1"></i>Finalizada
+            </span>
+          }
+        </div>
+
+        <hr class="my-3">
+
+        <!-- Catastro solo lectura -->
+        @if (tipos().length > 0) {
+          <h5 class="mb-3">Catastro de la sesión</h5>
+
+          <div class="row g-3">
+
+            <!-- Sidebar tipos -->
+            <div class="col-lg-3">
+              <div class="list-group">
+                @for (tipo of tipos(); track tipo.id) {
+                  <button
+                    type="button"
+                    class="list-group-item list-group-item-action"
+                    [class.active]="tabActiva() === tipo.id"
+                    (click)="setTab(tipo.id)">
+                    {{ formatLabel(tipo.tipo_contenido) }}
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- Contenido solo lectura -->
+            <div class="col-lg-9">
+              <div class="border rounded p-4 bg-light" style="min-height: 200px;">
+                @for (tipo of tipos(); track tipo.id) {
+                  @if (tabActiva() === tipo.id) {
+                    <div>
+                      <h6 class="fw-bold text-primary mb-3">
+                        {{ formatLabel(tipo.tipo_contenido) }}
+                      </h6>
+                      <p class="text-muted mb-0" style="white-space: pre-wrap;">
+                        {{ getActividad(tipo.id) }}
+                      </p>
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+
+          </div>
+        } @else {
+          <div class="alert alert-info">
+            No hay información de catastro registrada para esta sesión.
+          </div>
+        }
+
+      </div>
+    </div>
+
+  }
+
+</div>

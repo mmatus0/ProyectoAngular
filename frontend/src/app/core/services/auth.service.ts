@@ -48,4 +48,22 @@ export class AuthService {
   getToken(): string | null {
     return localStorage.getItem('token');
   }
+
+  getRol(): string {
+  const usuario = this.usuario();
+  return usuario?.rol?.toLowerCase() || '';
+}
+
+esAdmin(): boolean {
+  const rol = this.getRol();
+  return rol === 'administrador' || rol === 'admin';
+}
+
+esCoach(): boolean {
+  return this.getRol() === 'coach';
+}
+
+esCliente(): boolean {
+  return this.getRol() === 'cliente';
+}
 }

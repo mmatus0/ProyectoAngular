@@ -1,0 +1,70 @@
+<div class="container-fluid">
+
+  <div class="mb-4">
+    <h4 class="fw-bold mb-0">
+      <i class="bi bi-calendar-clock text-primary me-2"></i>Mis Sesiones
+    </h4>
+    <p class="text-muted small mb-0">
+      Aquí encontrarás tus próximas sesiones asignadas.
+    </p>
+  </div>
+
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+    </div>
+  } @else if (sesiones().length === 0) {
+    <div class="text-center mt-5">
+      <i class="bi bi-calendar-x text-muted" style="font-size: 5rem; opacity: 0.4;"></i>
+      <h4 class="text-muted fw-normal mt-3">No tienes sesiones activas.</h4>
+      <p class="text-muted small">Cuando te asignen una sesión, aparecerá aquí.</p>
+    </div>
+  } @else {
+    <div class="row">
+      @for (s of sesiones(); track s.id) {
+        <div class="col-md-6 col-xl-4 mb-4">
+          <div class="card h-100 shadow-sm border-0 d-flex flex-column">
+            <div class="card-body">
+
+              <div class="d-flex align-items-center mb-3">
+                <div class="bg-primary text-white rounded d-flex align-items-center justify-content-center flex-shrink-0"
+                     style="width: 60px; height: 60px;">
+                  <i class="bi bi-calendar" style="font-size: 1.5rem;"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h5 class="mt-0 mb-1 fw-bold text-dark">{{ s.nombre_sesion }}</h5>
+                  @if (s.estado_id === 1) {
+                    <span class="badge bg-success-subtle text-success">
+                      <i class="bi bi-clock me-1"></i>Activa
+                    </span>
+                  } @else {
+                    <span class="badge bg-primary-subtle text-primary">
+                      <i class="bi bi-check-all me-1"></i>Finalizada
+                    </span>
+                  }
+                </div>
+              </div>
+
+              <p class="text-muted mb-1 small">
+                <strong>Fecha:</strong>
+                {{ s.fecha_sesion || 'No definida' }}
+              </p>
+              <p class="text-muted mb-0 small">
+                <strong>Lugar:</strong>
+                {{ s.lugar || 'No definido' }}
+              </p>
+
+            </div>
+            <div class="card-footer bg-transparent border-top mt-auto p-3 text-end">
+              <button class="btn btn-primary btn-sm rounded-pill px-4"
+                      (click)="verSesion(s.id)">
+                Ver sesión <i class="bi bi-arrow-right ms-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>
