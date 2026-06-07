@@ -1,6 +1,91 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h4>Mis Evaluaciones</h4>
-</div>
-<div class="card">
-  <div class="card-body text-muted">Módulo en construcción...</div>
+<div class="container-fluid">
+
+  <div class="mb-4">
+    <h4 class="fw-bold mb-0">
+      <i class="bi bi-clipboard-text text-primary me-2"></i>Mis Tests
+    </h4>
+    <p class="text-muted small mb-0">
+      Aquí encontrarás los tests y evaluaciones que te han sido asignados.
+    </p>
+  </div>
+
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+    </div>
+  } @else if (evaluaciones().length === 0) {
+    <div class="text-center mt-5">
+      <i class="bi bi-clipboard-check text-muted" style="font-size: 5rem; opacity: 0.4;"></i>
+      <h4 class="text-muted fw-normal mt-3">No tienes tests pendientes.</h4>
+      <p class="text-muted small">Cuando tu coach te asigne un nuevo test, aparecerá aquí.</p>
+    </div>
+  } @else {
+    <div class="row">
+      @for (e of evaluaciones(); track e.id) {
+        <div class="col-md-6 col-xl-4 mb-4">
+          <div class="card h-100 shadow-sm border-0 d-flex flex-column">
+            <div class="card-body">
+
+              <div class="d-flex align-items-center mb-3">
+                <div class="flex-shrink-0">
+                  <img src="https://placehold.co/60x60?text=T"
+                       alt="Test"
+                       class="rounded border bg-light"
+                       width="60" height="60"
+                       style="object-fit: contain; padding: 5px;">
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h5 class="mt-0 mb-1 fw-bold text-dark">{{ e.nombre }}</h5>
+                  <span class="badge" [class]="getBadge(e.estado_id).clase">
+                    @if (e.estado_id === 4) {
+                      <i class="bi bi-check-circle me-1"></i>
+                    } @else if (e.estado_id === 3) {
+                      <i class="bi bi-clock me-1"></i>
+                    } @else {
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                    }
+                    {{ getBadge(e.estado_id).texto }}
+                  </span>
+                </div>
+              </div>
+
+              <p class="text-muted mb-0 small" style="text-align: justify;">
+                {{ e.descripcion
+                   ? (e.descripcion.length > 150 ? e.descripcion.slice(0, 150) + '...' : e.descripcion)
+                   : 'Por favor, completa esta evaluación para continuar con tu proceso.' }}
+              </p>
+
+            </div>
+
+            <div class="card-footer bg-transparent border-top mt-auto p-3 text-end">
+              @if (e.estado_id === 1) {
+                <button class="btn btn-success btn-sm rounded-pill px-4"
+                        (click)="comenzarTest(e.id)">
+                  Comenzar Test <i class="bi bi-arrow-right ms-1"></i>
+                </button>
+              } @else if (e.estado_id === 3) {
+                <button class="btn btn-primary btn-sm rounded-pill px-4"
+                        (click)="comenzarTest(e.id)">
+                  Continuar Test <i class="bi bi-arrow-right ms-1"></i>
+                </button>
+              } @else if (e.estado_id === 4) {
+                @if (e.ver_resultados) {
+                  <button class="btn btn-primary btn-sm rounded-pill px-4"
+                          (click)="verResultados(e.id)">
+                    Ver Resultados <i class="bi bi-eye ms-1"></i>
+                  </button>
+                } @else {
+                  <span class="text-muted small">
+                    <i class="bi bi-lock me-1"></i>Resultados no disponibles
+                  </span>
+                }
+              }
+            </div>
+
+          </div>
+        </div>
+      }
+    </div>
+  }
+
 </div>

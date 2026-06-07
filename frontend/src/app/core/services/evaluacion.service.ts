@@ -1,35 +1,42 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Evaluacion } from '../models/evaluacion.model';
 
 @Injectable({ providedIn: 'root' })
 export class EvaluacionService {
 
-  private http   = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/api/evaluaciones';
+  private http = inject(HttpClient);
+  private url  = 'http://localhost:3000/api/evaluaciones';
 
-  private getAuthHeaders(): HttpHeaders {
+  private headers() {
     const token = localStorage.getItem('token');
-    return new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
   }
 
-  getAll() {
-    return this.http.get<Evaluacion[]>(this.apiUrl, { headers: this.getAuthHeaders() });
+  getEvaluaciones(estado: number) {
+    return this.http.get<any>(`${this.url}?estado=${estado}`, this.headers());
   }
 
-  getById(id: number) {
-    return this.http.get<Evaluacion>(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
+  getFormData() {
+    return this.http.get<any>(`${this.url}/form-data`, this.headers());
   }
 
-  create(data: Partial<Evaluacion>) {
-    return this.http.post<Evaluacion>(this.apiUrl, data, { headers: this.getAuthHeaders() });
+  asignar(data: any) {
+    return this.http.post<any>(`${this.url}/asignar`, data, this.headers());
   }
 
-  update(id: number, data: Partial<Evaluacion>) {
-    return this.http.put<Evaluacion>(`${this.apiUrl}/${id}`, data, { headers: this.getAuthHeaders() });
+  actualizar(id: number, data: any) {
+    return this.http.put<any>(`${this.url}/${id}`, data, this.headers());
   }
 
-  delete(id: number) {
-    return this.http.delete(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
+  desactivar(id: number) {
+    return this.http.delete<any>(`${this.url}/${id}`, this.headers());
+  }
+
+  activar(id: number) {
+    return this.http.post<any>(`${this.url}/${id}/activar`, {}, this.headers());
+  }
+
+  getMisEvaluaciones() {
+    return this.http.get<any>('http://localhost:3000/api/mis-evaluaciones', this.headers());
   }
 }

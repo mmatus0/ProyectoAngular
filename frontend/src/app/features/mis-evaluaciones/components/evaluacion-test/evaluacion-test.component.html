@@ -1,0 +1,157 @@
+<!-- Toast -->
+@if (toast()) {
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+    <div class="toast show align-items-center text-white border-0"
+         [class]="'bg-' + toast()!.tipo">
+      <div class="d-flex">
+        <div class="toast-body fw-semibold">{{ toast()!.mensaje }}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                (click)="toast.set(null)"></button>
+      </div>
+    </div>
+  </div>
+}
+
+<div class="container-fluid">
+
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+    </div>
+  } @else if (evaluacion()) {
+
+    <!-- Header -->
+    <div class="row mb-3">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+          <div>
+            <h4 class="fw-bold mb-1">
+              <i class="bi bi-clipboard-edit text-primary me-2"></i>{{ evaluacion().nombre }}
+            </h4>
+            <p class="text-muted small mb-0">{{ evaluacion().descripcion }}</p>
+          </div>
+          <button class="btn btn-light btn-sm" (click)="volver()">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barra de progreso -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-body py-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="small fw-semibold text-muted">Progreso del test</span>
+          <span class="small fw-bold text-primary">
+            {{ respondidas() }} / {{ totalPreguntas() }} respondidas
+          </span>
+        </div>
+        <div class="progress" style="height: 8px;">
+          <div class="progress-bar bg-primary"
+               [style.width.%]="progreso()"
+               role="progressbar">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preguntas -->
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+
+        @for (pregunta of preguntas(); track pregunta.id; let i = $index) {
+          <div class="mb-4 p-3 border rounded"
+               [class.bg-light]="!estaRespondida(pregunta.id)"
+               [class.bg-success-subtle]="estaRespondida(pregunta.id)">
+
+            <h5 class="fw-bold mb-3">
+              {{ i + 1 }}. {{ pregunta.enunciado || 'Seleccione la alternativa que mejor lo represente:' }}
+            </h5>
+
+            <div class="ps-2">
+              @for (alt of ggetAlternativasPregunta(pregunta.id); track alt.id) {
+                <div class="form-check mb-2">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    [name]="'pregunta_' + pregunta.id"
+                    [id]="'preg_' + pregunta.id + '_alt_' + alt.id"
+                    [value]="alt.id"
+                    [checked]="getRespuesta(pregunta.id) === alt.id"
+                    (change)="seleccionarRespuesta(pregunta.id, alt.id)">
+                  <label class="form-check-label"
+                         [for]="'preg_' + pregunta.id + '_alt_' + alt.id">
+                    @if (alt.letra) {
+                      <strong class="me-1">{{ alt.letra }}.</strong>
+                    }
+                    {{ alt.alternativa }}
+                  </label>
+                </div>
+              }
+            </div>
+
+          </div>
+        }
+
+        <!-- Botones -->
+        <div class="text-end mt-4 d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-outline-primary px-4 rounded-pill"
+                  [disabled]="guardando()"
+                  (click)="guardarAvance()">
+            @if (guardando()) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            }
+            <i class="bi bi-floppy me-1"></i> Guardar Avance
+          </button>
+          <button type="button" class="btn btn-primary px-4 rounded-pill"
+                  [disabled]="guardando()"
+                  (click)="abrirModalFinalizar()">
+            <i class="bi bi-check me-1"></i> Finalizar Evaluación
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  }
+
+</div>
+
+<!-- MODAL FINALIZAR -->
+<div class="modal fade" [class.show]="modalFinalizar()"
+     [style.display]="modalFinalizar() ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Confirmar Finalización</h5>
+        <button class="btn-close" (click)="cerrarModalFinalizar()"></button>
+      </div>
+      <div class="modal-body text-muted">
+        ¿Está seguro de que desea finalizar esta evaluación? Una vez finalizada,
+        no podrá seguir editándola.
+        @if (respondidas() < totalPreguntas()) {
+          <div class="alert alert-warning mt-3 mb-0 small">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            Aún tienes <strong>{{ totalPreguntas() - respondidas() }}</strong>
+            pregunta(s) sin responder.
+          </div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" (click)="cerrarModalFinalizar()">
+          Cancelar
+        </button>
+        <button class="btn btn-primary" [disabled]="guardando()"
+                (click)="confirmarFinalizar()">
+          @if (guardando()) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+          }
+          Sí, Finalizar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="modalFinalizar()"
+     [style.display]="modalFinalizar() ? 'block' : 'none'"
+     (click)="cerrarModalFinalizar()"></div>

@@ -1,6 +1,307 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h4>Gestión de Evaluaciones</h4>
+<!-- Toast -->
+@if (toast()) {
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+    <div class="toast show align-items-center text-white border-0"
+         [class]="'bg-' + toast()!.tipo">
+      <div class="d-flex">
+        <div class="toast-body fw-semibold">{{ toast()!.mensaje }}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                (click)="toast.set(null)"></button>
+      </div>
+    </div>
+  </div>
+}
+
+<div class="container-fluid">
+
+  <div class="mb-4">
+    <h4 class="mb-0">Panel de Asignación de Tests</h4>
+    <p class="text-muted mb-0 small">Gestión de tests, intentos y seguimiento por usuario.</p>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-transparent py-3">
+      <h5 class="mb-0 fw-bold text-primary">
+        <i class="bi bi-clipboard-check me-2"></i>Listado de Tests
+      </h5>
+    </div>
+
+    <div class="card-body">
+
+      <!-- Tabs -->
+      <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="tabActiva() === 1" (click)="cambiarTab(1)">
+            <i class="bi bi-play-circle me-1"></i> Activos
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="tabActiva() === 4" (click)="cambiarTab(4)">
+            <i class="bi bi-check-all me-1"></i> Finalizados
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="tabActiva() === 2" (click)="cambiarTab(2)">
+            <i class="bi bi-stop-circle me-1"></i> Inactivos
+          </button>
+        </li>
+      </ul>
+
+      <!-- Título tab -->
+      @if (tabActiva() === 1) {
+        <h5 class="text-primary mb-3"><i class="bi bi-play-circle me-1"></i> Tests Activos</h5>
+      } @else if (tabActiva() === 4) {
+        <h5 class="text-success mb-3"><i class="bi bi-check-all me-1"></i> Tests Finalizados</h5>
+      } @else {
+        <h5 class="text-danger mb-3"><i class="bi bi-stop-circle me-1"></i> Tests Inactivos</h5>
+      }
+
+      <!-- Buscador + botón -->
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <input type="text" class="form-control form-control-sm" style="max-width: 260px;"
+               placeholder="Buscar..." [value]="busqueda()"
+               (input)="setBusqueda($any($event.target).value)" />
+        @if (tabActiva() === 1) {
+          <button class="btn btn-primary btn-sm rounded-pill px-3" (click)="abrirModalAsignar()">
+            <i class="bi bi-plus-circle me-1"></i> Asignar Test
+          </button>
+        }
+      </div>
+
+      @if (loading()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Usuario</th>
+                <th>Test</th>
+                <th class="text-center">Intentos</th>
+                <th class="text-center">Ver Res.</th>
+                <th>Asignado</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th class="text-center">Estado</th>
+                <th class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of evaluacionesFiltradas(); track e.id) {
+                <tr>
+                  <td>
+                    <div class="fw-medium">{{ e.usuario }}</div>
+                    <div class="text-muted small">{{ e.email }}</div>
+                  </td>
+                  <td>{{ e.evaluacion }}</td>
+                  <td class="text-center">{{ e.intentos }}</td>
+                  <td class="text-center">
+                    @if (e.ver_resultados) {
+                      <i class="bi bi-check-circle text-success"></i>
+                    } @else {
+                      <i class="bi bi-x-circle text-danger"></i>
+                    }
+                  </td>
+                  <td class="small">{{ e.fecha ? e.fecha.toString().slice(0,10) : '—' }}</td>
+                  <td class="small">{{ e.inicio ? e.inicio.toString().slice(0,10) : '—' }}</td>
+                  <td class="small">{{ e.finalizacion ? e.finalizacion.toString().slice(0,10) : '—' }}</td>
+                  <td class="text-center">
+                    @if (e.estado_id === 1) {
+                      <span class="badge bg-primary-subtle text-primary">Activo</span>
+                    } @else if (e.estado_id === 4) {
+                      <span class="badge bg-success-subtle text-success">Finalizado</span>
+                    } @else if (e.estado_id === 3) {
+                      <span class="badge bg-warning-subtle text-warning">En Proceso</span>
+                    } @else {
+                      <span class="badge bg-danger-subtle text-danger">Inactivo</span>
+                    }
+                  </td>
+                  <td class="text-end">
+                    <div class="d-flex gap-1 justify-content-end">
+                      @if (tabActiva() === 1) {
+                        <button class="btn btn-sm btn-outline-warning" title="Editar"
+                                (click)="abrirModalEditar(e)">
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" title="Desactivar"
+                                (click)="abrirModalDesactivar(e)">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      } @else if (tabActiva() === 2) {
+                        <button class="btn btn-sm btn-outline-success" title="Activar"
+                                (click)="abrirModalActivar(e)">
+                          <i class="bi bi-check-circle"></i>
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="9" class="text-center text-muted py-4">
+                    No se encontraron evaluaciones.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+    </div>
+  </div>
 </div>
-<div class="card">
-  <div class="card-body text-muted">Módulo en construcción...</div>
+
+<!-- MODAL ASIGNAR -->
+<div class="modal fade" [class.show]="modalAsignar()" [style.display]="modalAsignar() ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-plus-circle me-2 text-primary"></i>Asignar Test
+        </h5>
+        <button class="btn-close" (click)="cerrarModales()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="formAsignar">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Usuario <span class="text-danger">*</span></label>
+            <select class="form-select form-select-sm" formControlName="usuario_id">
+              <option value="">Seleccione un usuario...</option>
+              @for (u of usuarios(); track u.id) {
+                <option [value]="u.id">{{ u.nombre }}</option>
+              }
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Test <span class="text-danger">*</span></label>
+            <select class="form-select form-select-sm" formControlName="evaluacion_id">
+              <option value="">Seleccione un test...</option>
+              @for (ev of evaluaciones(); track ev.id) {
+                <option [value]="ev.id">{{ ev.nombre }}</option>
+              }
+            </select>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">Intentos</label>
+              <input type="number" class="form-control form-control-sm" formControlName="intentos" min="1">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold d-block">Ver Resultados</label>
+              <div class="form-check form-switch mt-2">
+                <input class="form-check-input" type="checkbox" formControlName="ver_resultados"
+                       [checked]="formAsignar.get('ver_resultados')?.value">
+                <label class="form-check-label small">Permitir ver resultados</label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-light px-4" (click)="cerrarModales()">Cancelar</button>
+        <button class="btn btn-primary px-4" [disabled]="formAsignar.invalid || guardando()"
+                (click)="guardarAsignar()">
+          @if (guardando()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+          Asignar
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
+<div class="modal-backdrop fade" [class.show]="modalAsignar()"
+     [style.display]="modalAsignar() ? 'block' : 'none'" (click)="cerrarModales()"></div>
+
+<!-- MODAL EDITAR -->
+<div class="modal fade" [class.show]="modalEditar()" [style.display]="modalEditar() ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-pencil me-2 text-warning"></i>Editar Asignación
+        </h5>
+        <button class="btn-close" (click)="cerrarModales()"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted small mb-3">
+          Editando: <strong>{{ seleccionada()?.evaluacion }}</strong>
+          para <strong>{{ seleccionada()?.usuario }}</strong>
+        </p>
+        <form [formGroup]="formEditar">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">Intentos</label>
+              <input type="number" class="form-control form-control-sm" formControlName="intentos" min="1">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold d-block">Ver Resultados</label>
+              <div class="form-check form-switch mt-2">
+                <input class="form-check-input" type="checkbox" formControlName="ver_resultados"
+                       [checked]="formEditar.get('ver_resultados')?.value">
+                <label class="form-check-label small">Permitir ver resultados</label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-light px-4" (click)="cerrarModales()">Cancelar</button>
+        <button class="btn btn-warning px-4" [disabled]="formEditar.invalid || guardando()"
+                (click)="guardarEditar()">
+          @if (guardando()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+          Actualizar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="modalEditar()"
+     [style.display]="modalEditar() ? 'block' : 'none'" (click)="cerrarModales()"></div>
+
+<!-- MODAL DESACTIVAR -->
+<div class="modal fade" [class.show]="modalDesactivar()"
+     [style.display]="modalDesactivar() ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="text-center p-4">
+        <i class="bi bi-trash text-danger" style="font-size: 3rem;"></i>
+        <h5 class="mt-3 fw-bold">¿Desactivar evaluación?</h5>
+        <p class="text-muted">
+          Se desactivará <strong class="text-danger">{{ seleccionada()?.evaluacion }}</strong>
+          para <strong>{{ seleccionada()?.usuario }}</strong>.
+        </p>
+        <div class="d-flex justify-content-center gap-2 mt-3">
+          <button class="btn btn-light px-4" (click)="cerrarModales()">Cancelar</button>
+          <button class="btn btn-danger px-4" (click)="confirmarDesactivar()">Sí, desactivar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="modalDesactivar()"
+     [style.display]="modalDesactivar() ? 'block' : 'none'" (click)="cerrarModales()"></div>
+
+<!-- MODAL ACTIVAR -->
+<div class="modal fade" [class.show]="modalActivar()"
+     [style.display]="modalActivar() ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="text-center p-4">
+        <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+        <h5 class="mt-3 fw-bold">¿Activar evaluación?</h5>
+        <p class="text-muted">
+          Se reactivará <strong class="text-success">{{ seleccionada()?.evaluacion }}</strong>
+          para <strong>{{ seleccionada()?.usuario }}</strong>.
+        </p>
+        <div class="d-flex justify-content-center gap-2 mt-3">
+          <button class="btn btn-light px-4" (click)="cerrarModales()">Cancelar</button>
+          <button class="btn btn-success px-4" (click)="confirmarActivar()">Sí, activar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="modalActivar()"
+     [style.display]="modalActivar() ? 'block' : 'none'" (click)="cerrarModales()"></div>

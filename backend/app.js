@@ -850,6 +850,240 @@ app.delete('/api/mis-herramientas/atributo/:atributoId', verificarToken, (req, r
     });
 });
 
+// ── GET /api/evaluaciones ─────────────────────────────────────────────────────
+app.get('/api/evaluaciones', verificarToken, (req, res) => {
+    const estado = req.query.estado || 1;
+    const sql = `SELECT eu.id, eu.intentos, eu.ver_resultados,
+                        eu.fecha, eu.inicio, eu.finalizacion, eu.estado_id,
+                        u.id as usuario_id, u.nombre as usuario, u.email,
+                        e.id as evaluacion_id, e.nombre as evaluacion, e.foto,
+                        es.nombre as estado
+                 FROM evaluacion_usuario eu
+                 INNER JOIN user u        ON u.id  = eu.usuario_id
+                 INNER JOIN evaluacion e  ON e.id  = eu.evaluacion_id AND e.estado_id = 1
+                 LEFT  JOIN estado es     ON es.id = eu.estado_id
+                 WHERE eu.estado_id = ?
+                   AND eu.usuario_id IS NOT NULL
+                   AND eu.evaluacion_id IS NOT NULL
+                 ORDER BY u.nombre, e.nombre`;
+
+    conn.query(sql, [estado], (err, results) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, data: results });
+    });
+});
+
+// ── GET /api/evaluaciones/form-data ───────────────────────────────────────────
+app.get('/api/evaluaciones/form-data', verificarToken, (req, res) => {
+    conn.query('SELECT id, nombre FROM user WHERE estado_id = 1 ORDER BY nombre', (err, usuarios) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        conn.query('SELECT id, nombre FROM evaluacion WHERE estado_id = 1 ORDER BY nombre', (err2, evaluaciones) => {
+            if (err2) return res.status(500).json({ ok: false, mensaje: err2.message });
+            res.json({ ok: true, usuarios, evaluaciones });
+        });
+    });
+});
+
+// ── POST /api/evaluaciones/asignar ────────────────────────────────────────────
+app.post('/api/evaluaciones/asignar', verificarToken, (req, res) => {
+    const { usuario_id, evaluacion_id, intentos, ver_resultados } = req.body;
+    if (!usuario_id || !evaluacion_id) {
+        return res.status(400).json({ ok: false, mensaje: 'usuario_id y evaluacion_id son requeridos.' });
+    }
+
+    conn.query(
+        'SELECT id FROM evaluacion_usuario WHERE usuario_id = ? AND evaluacion_id = ?',
+        [usuario_id, evaluacion_id],
+        (err, existe) => {
+            if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+            if (existe.length > 0) {
+                return res.status(400).json({ ok: false, mensaje: 'Esta evaluación ya está asignada a este usuario.' });
+            }
+
+            const sql = `INSERT INTO evaluacion_usuario
+                         (usuario_id, evaluacion_id, intentos, ver_resultados, estado_id, fecha)
+                         VALUES (?, ?, ?, ?, 1, NOW())`;
+            conn.query(sql, [usuario_id, evaluacion_id, intentos || 1, ver_resultados || 0], (err2, result) => {
+                if (err2) return res.status(500).json({ ok: false, mensaje: err2.message });
+                res.status(201).json({ ok: true, mensaje: 'Evaluación asignada correctamente.', id: result.insertId });
+            });
+        }
+    );
+});
+
+// ── PUT /api/evaluaciones/:id ─────────────────────────────────────────────────
+app.put('/api/evaluaciones/:id', verificarToken, (req, res) => {
+    const { id } = req.params;
+    const { intentos, ver_resultados } = req.body;
+    conn.query(
+        'UPDATE evaluacion_usuario SET intentos=?, ver_resultados=? WHERE id=?',
+        [intentos, ver_resultados, id],
+        (err) => {
+            if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+            res.json({ ok: true, mensaje: 'Evaluación actualizada correctamente.' });
+        }
+    );
+});
+
+// ── DELETE /api/evaluaciones/:id ──────────────────────────────────────────────
+app.delete('/api/evaluaciones/:id', verificarToken, (req, res) => {
+    const { id } = req.params;
+    conn.query('UPDATE evaluacion_usuario SET estado_id = 2 WHERE id = ?', [id], (err) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, mensaje: 'Evaluación desactivada correctamente.' });
+    });
+});
+
+// ── POST /api/evaluaciones/:id/activar ────────────────────────────────────────
+app.post('/api/evaluaciones/:id/activar', verificarToken, (req, res) => {
+    const { id } = req.params;
+    conn.query('UPDATE evaluacion_usuario SET estado_id = 1 WHERE id = ?', [id], (err) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, mensaje: 'Evaluación activada correctamente.' });
+    });
+});
+
+// ── GET /api/mis-evaluaciones ─────────────────────────────────────────────────
+app.get('/api/mis-evaluaciones', verificarToken, (req, res) => {
+    const sql = `SELECT eu.id, eu.intentos, eu.ver_resultados,
+                        eu.fecha, eu.inicio, eu.finalizacion, eu.estado_id,
+                        e.id as evaluacion_id, e.nombre, e.descripcion, e.foto,
+                        e.instrucciones
+                 FROM evaluacion_usuario eu
+                 INNER JOIN evaluacion e ON e.id = eu.evaluacion_id AND e.estado_id = 1
+                 WHERE eu.usuario_id = ? AND eu.estado_id IN (1, 3, 4)
+                 ORDER BY e.nombre`;
+
+    conn.query(sql, [req.usuario.id], (err, results) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, data: results });
+    });
+});
+
+// ── GET /api/mis-evaluaciones/:id/test ───────────────────────────────────────
+app.get('/api/mis-evaluaciones/:id/test', verificarToken, (req, res) => {
+    const { id } = req.params;
+
+    const sqlEval = `SELECT eu.id, eu.estado_id, eu.ver_resultados,
+                            e.id as evaluacion_id, e.nombre, e.descripcion,
+                            e.instrucciones, e.nro_alternativas
+                     FROM evaluacion_usuario eu
+                     INNER JOIN evaluacion e ON e.id = eu.evaluacion_id
+                     WHERE eu.id = ? AND eu.usuario_id = ?`;
+
+    conn.query(sqlEval, [id, req.usuario.id], (err, evals) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        if (evals.length === 0) return res.status(403).json({ ok: false, mensaje: 'Sin acceso.' });
+
+        const ev = evals[0];
+
+        const sqlPregs = `SELECT p.id, p.enunciado, p.numero, p.dimension_id
+                          FROM preguntas p
+                          WHERE p.evaluacion_id = ? AND p.estado_id = 1
+                          ORDER BY p.numero ASC`;
+
+        conn.query(sqlPregs, [ev.evaluacion_id], (err2, preguntas) => {
+            if (err2) return res.status(500).json({ ok: false, mensaje: err2.message });
+
+            const sqlAlts = `SELECT id, alternativa, score, letra, cuadrante, grupo, pregunta_id
+                             FROM alternativas
+                             WHERE evaluacion_id = ? AND estado_id = 1
+                             ORDER BY pregunta_id, id ASC`;
+
+            conn.query(sqlAlts, [ev.evaluacion_id], (err3, alternativas) => {
+                if (err3) return res.status(500).json({ ok: false, mensaje: err3.message });
+
+                // Obtener respuestas guardadas
+                const sqlResp = `SELECT dr.alternativa_id, r.id as respuesta_id
+                                 FROM respuestas r
+                                 INNER JOIN detalle_respuesta dr ON dr.respuesta_id = r.id AND dr.estado_id = 1
+                                 WHERE r.evaluacion_usuario_id = ? AND r.estado_id = 1`;
+
+                conn.query(sqlResp, [id], (err4, respuestas) => {
+                    if (err4) return res.status(500).json({ ok: false, mensaje: err4.message });
+
+                    const respuestasMap = {};
+                    respuestas.forEach((r) => {
+                        respuestasMap[r.respuesta_id] = r.alternativa_id;
+                    });
+
+                    res.json({ ok: true, evaluacion: ev, preguntas, alternativas, respuestas: respuestasMap });
+                });
+            });
+        });
+    });
+});
+
+// ── POST /api/mis-evaluaciones/:id/guardar ────────────────────────────────────
+app.post('/api/mis-evaluaciones/:id/guardar', verificarToken, (req, res) => {
+    const { id } = req.params;
+    const { respuestas, finalizar } = req.body;
+
+    // Actualizar estado a En Proceso (3) o Finalizado (4)
+    const nuevoEstado = finalizar ? 4 : 3;
+    const fechaFin = finalizar ? new Date() : null;
+
+    const sqlUpdate = finalizar
+        ? 'UPDATE evaluacion_usuario SET estado_id=?, inicio=COALESCE(inicio, NOW()), finalizacion=? WHERE id=? AND usuario_id=?'
+        : 'UPDATE evaluacion_usuario SET estado_id=?, inicio=COALESCE(inicio, NOW()) WHERE id=? AND usuario_id=?';
+
+    const paramsUpdate = finalizar
+        ? [nuevoEstado, fechaFin, id, req.usuario.id]
+        : [nuevoEstado, id, req.usuario.id];
+
+    conn.query(sqlUpdate, paramsUpdate, (err) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+
+        if (!respuestas || Object.keys(respuestas).length === 0) {
+            return res.json({ ok: true, mensaje: 'Avance guardado.' });
+        }
+
+        // Eliminar respuestas anteriores y guardar nuevas
+        conn.query(
+            `DELETE dr FROM detalle_respuesta dr
+             INNER JOIN respuestas r ON r.id = dr.respuesta_id
+             WHERE r.evaluacion_usuario_id = ?`,
+            [id],
+            (err2) => {
+                if (err2) return res.status(500).json({ ok: false, mensaje: err2.message });
+
+                conn.query(
+                    'DELETE FROM respuestas WHERE evaluacion_usuario_id = ?',
+                    [id],
+                    (err3) => {
+                        if (err3) return res.status(500).json({ ok: false, mensaje: err3.message });
+
+                        // Insertar nueva respuesta
+                        conn.query(
+                            'INSERT INTO respuestas (evaluacion_usuario_id, estado_id, fecha, nro_intentos) VALUES (?, 1, NOW(), 1)',
+                            [id],
+                            (err4, result) => {
+                                if (err4) return res.status(500).json({ ok: false, mensaje: err4.message });
+
+                                const respuestaId = result.insertId;
+                                const entries = Object.entries(respuestas);
+
+                                if (entries.length === 0) return res.json({ ok: true });
+
+                                const detalles = entries.map(([, altId]) => [respuestaId, altId, 1]);
+
+                                conn.query(
+                                    'INSERT INTO detalle_respuesta (respuesta_id, alternativa_id, estado_id) VALUES ?',
+                                    [detalles],
+                                    (err5) => {
+                                        if (err5) return res.status(500).json({ ok: false, mensaje: err5.message });
+                                        res.json({ ok: true, mensaje: finalizar ? 'Evaluación finalizada.' : 'Avance guardado.' });
+                                    }
+                                );
+                            }
+                        );
+                    }
+                );
+            }
+        );
+    });
+});
+
 // ── 404 ───────────────────────────────────────────────────────────────────────
 app.use((req, res) => {
     res.status(404).json({ ok: false, mensaje: 'Ruta no encontrada.' });
