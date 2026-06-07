@@ -1084,6 +1084,331 @@ app.post('/api/mis-evaluaciones/:id/guardar', verificarToken, (req, res) => {
     });
 });
 
+// ── POST /api/mis-evaluaciones/:id/guardar ────────────────────────────────────
+app.post('/api/mis-evaluaciones/:id/guardar', verificarToken, (req, res) => {
+    const { id } = req.params;
+    const { respuestas, finalizar } = req.body;
+
+    const nuevoEstado = finalizar ? 4 : 3;
+
+    // Obtener evaluacion_usuario
+    conn.query(
+        'SELECT eu.*, e.id as eval_id FROM evaluacion_usuario eu INNER JOIN evaluacion e ON e.id = eu.evaluacion_id WHERE eu.id = ? AND eu.usuario_id = ?',
+        [id, req.usuario.id],
+        (err, rows) => {
+            if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+            if (rows.length === 0) return res.status(403).json({ ok: false, mensaje: 'Sin acceso.' });
+
+            const eu = rows[0];
+            const idTest = eu.eval_id;
+
+            // Actualizar estado
+            const sqlUpd = finalizar
+                ? 'UPDATE evaluacion_usuario SET estado_id=?, inicio=COALESCE(inicio, NOW()), finalizacion=NOW() WHERE id=?'
+                : 'UPDATE evaluacion_usuario SET estado_id=?, inicio=COALESCE(inicio, NOW()) WHERE id=?';
+
+            conn.query(sqlUpd, [nuevoEstado, id], (err2) => {
+                if (err2) return res.status(500).json({ ok: false, mensaje: err2.message });
+
+                if (!respuestas || Object.keys(respuestas).length === 0) {
+                    return res.json({ ok: true, mensaje: finalizar ? 'Evaluación finalizada.' : 'Avance guardado.' });
+                }
+
+                // Eliminar respuestas anteriores
+                conn.query(
+                    `DELETE dr FROM detalle_respuesta dr
+                     INNER JOIN respuestas r ON r.id = dr.respuesta_id
+                     WHERE r.evaluacion_usuario_id = ?`, [id],
+                    (err3) => {
+                        if (err3) return res.status(500).json({ ok: false, mensaje: err3.message });
+
+                        conn.query('DELETE FROM respuestas WHERE evaluacion_usuario_id = ?', [id], (err4) => {
+                            if (err4) return res.status(500).json({ ok: false, mensaje: err4.message });
+
+                            // Insertar nueva respuesta
+                            conn.query(
+                                'INSERT INTO respuestas (evaluacion_usuario_id, estado_id, fecha, nro_intentos) VALUES (?, 1, NOW(), 1)',
+                                [id],
+                                (err5, result) => {
+                                    if (err5) return res.status(500).json({ ok: false, mensaje: err5.message });
+
+                                    const respuestaId = result.insertId;
+                                    const entries = Object.entries(respuestas);
+
+                                    if (entries.length === 0) return res.json({ ok: true });
+
+                                    // Obtener datos de alternativas seleccionadas
+                                    const altIds = entries.map(([, altId]) => altId);
+
+                                    conn.query(
+                                        'SELECT id, score, cuadrante, grupo, letra FROM alternativas WHERE id IN (?)',
+                                        [altIds],
+                                        (err6, altsData) => {
+                                            if (err6) return res.status(500).json({ ok: false, mensaje: err6.message });
+
+                                            // Insertar detalles con pregunta_id y resultado (score)
+                                            const detalles = entries.map(([pregId, altId]) => {
+                                                const alt = altsData.find(a => a.id == altId);
+                                                return [respuestaId, altId, pregId, alt ? alt.score : 0, 1];
+                                            });
+
+                                            conn.query(
+                                                'INSERT INTO detalle_respuesta (respuesta_id, alternativa_id, pregunta_id, resultado, estado_id) VALUES ?',
+                                                [detalles],
+                                                (err7) => {
+                                                    if (err7) return res.status(500).json({ ok: false, mensaje: err7.message });
+
+                                                    if (!finalizar) {
+                                                        return res.json({ ok: true, mensaje: 'Avance guardado.' });
+                                                    }
+
+                                                    // Calcular resultados según tipo de test
+                                                    calcularResultados(idTest, id, respuestaId, altIds, altsData, res);
+                                                }
+                                            );
+                                        }
+                                    );
+                                }
+                            );
+                        });
+                    }
+                );
+            });
+        }
+    );
+});
+
+function calcularResultados(idTest, euId, respuestaId, altIds, altsData, res) {
+
+    const guardarResultados = (jsonResultados) => {
+        conn.query(
+            'UPDATE evaluacion_usuario SET resultados=? WHERE id=?',
+            [JSON.stringify(jsonResultados), euId],
+            (err) => {
+                if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+                res.json({ ok: true, mensaje: 'Evaluación finalizada correctamente.' });
+            }
+        );
+    };
+
+    // IDs 2, 5: Tests globales con tabla resultados
+    if ([2, 5].includes(idTest)) {
+        const puntajeTotal = altsData.reduce((sum, a) => sum + (a.score || 0), 0);
+        const puntajeFinal = idTest === 5
+            ? Math.round(puntajeTotal / (altIds.length || 1) * 100) / 100
+            : puntajeTotal;
+
+        conn.query(
+            'SELECT * FROM resultados WHERE evaluacion_id=? AND minimo<=? AND maximo>=? LIMIT 1',
+            [idTest, puntajeFinal, puntajeFinal],
+            (err, diag) => {
+                if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+                const d = diag[0];
+                guardarResultados({ Resultados: [{ Puntaje: puntajeFinal, Resultado: d ? d.resultado : 'Sin diagnóstico', ResultadoDescripcion: d ? d.recomendaciones : '', dimension: null }] });
+            }
+        );
+
+    // ID 8: Gestión del tiempo
+    } else if (idTest === 8) {
+        const puntajeTotal = altsData.reduce((sum, a) => sum + (a.score || 0), 0);
+        const bgt = Math.round(puntajeTotal * 8.3333 * 100) / 100;
+        const mgt = Math.round((12 - puntajeTotal) * 8.3333 * 100) / 100;
+        guardarResultados({ Resultados: [
+            { Puntaje: bgt, Resultado: bgt + '%', ResultadoDescripcion: 'Buena gestión del tiempo', dimension: null },
+            { Puntaje: mgt, Resultado: mgt + '%', ResultadoDescripcion: 'Mala gestión del tiempo', dimension: null }
+        ]});
+
+    // IDs 3, 4, 9: Tests por dimensiones
+    } else if ([3, 4, 9].includes(idTest)) {
+        conn.query(
+            `SELECT p.dimension_id as dimId, SUM(dr.resultado) as sumaTotal, COUNT(dr.resultado) as conteo
+             FROM detalle_respuesta dr
+             INNER JOIN preguntas p ON p.id = dr.pregunta_id
+             WHERE dr.respuesta_id = ?
+             GROUP BY p.dimension_id`,
+            [respuestaId],
+            (err, dims) => {
+                if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+
+                const dimIds = dims.map(d => d.dimId);
+                if (dimIds.length === 0) return guardarResultados({ Resultados: [] });
+
+                conn.query('SELECT * FROM dimension WHERE id IN (?)', [dimIds], (err2, dimensiones) => {
+                    if (err2) return res.status(500).json({ ok: false, mensaje: err2.message });
+
+                    const resultadosArray = [];
+                    let pendientes = dims.length;
+
+                    dims.forEach(row => {
+                        const puntaje = idTest === 9
+                            ? Math.round(row.sumaTotal / row.conteo * 100) / 100
+                            : row.sumaTotal;
+
+                        const dimObj = dimensiones.find(d => d.id === row.dimId);
+                        const nombreDim = dimObj ? dimObj.dimension : 'Dimensión';
+                        const descDim = idTest === 3
+                            ? (dimObj ? dimObj.descripcion_larga : '')
+                            : (dimObj ? dimObj.descripcion : '');
+
+                        const qDiag = idTest === 3
+                            ? 'SELECT * FROM resultados WHERE evaluacion_id=? AND minimo<=? AND maximo>=? LIMIT 1'
+                            : 'SELECT * FROM resultados WHERE evaluacion_id=? AND dimension_id=? AND minimo<=? AND maximo>=? LIMIT 1';
+                        const paramsDiag = idTest === 3
+                            ? [idTest, puntaje, puntaje]
+                            : [idTest, row.dimId, puntaje, puntaje];
+
+                        conn.query(qDiag, paramsDiag, (err3, diag) => {
+                            const d = diag ? diag[0] : null;
+                            resultadosArray.push({
+                                Puntaje: puntaje,
+                                Resultado: d ? d.resultado : 'Sin diagnóstico',
+                                ResultadoDescripcion: d ? d.recomendaciones : '',
+                                dimension: nombreDim,
+                                dimension_descripcion: descDim
+                            });
+                            if (--pendientes === 0) guardarResultados({ Resultados: resultadosArray });
+                        });
+                    });
+                });
+            }
+        );
+
+    // ID 1: Liderazgo Situacional
+    } else if (idTest === 1) {
+        const cuadranteCounts = { 1: 0, 2: 0, 3: 0, 4: 0 };
+        let nivelM = 0;
+        altsData.forEach(a => {
+            if (a.cuadrante && cuadranteCounts[a.cuadrante] !== undefined) cuadranteCounts[a.cuadrante]++;
+            nivelM += (a.score || 0);
+        });
+        const total = altIds.length || 1;
+
+        conn.query(
+            'SELECT * FROM resultados WHERE evaluacion_id=? AND minimo<=? AND maximo>=? LIMIT 1',
+            [idTest, nivelM, nivelM],
+            (err, diag) => {
+                const d = diag ? diag[0] : null;
+                guardarResultados({ Resultados: [
+                    { dimension: 'ATBR', Puntaje: cuadranteCounts[1], Porcentaje: Math.round(cuadranteCounts[1]/total*100*100)/100, Resultado: 'E1: Dirigir', ResultadoDescripcion: 'Alto Comportamiento Directivo / Bajo Comportamiento de Apoyo' },
+                    { dimension: 'ATAR', Puntaje: cuadranteCounts[2], Porcentaje: Math.round(cuadranteCounts[2]/total*100*100)/100, Resultado: 'E2: Persuadir', ResultadoDescripcion: 'Alto Comportamiento Directivo / Alto Comportamiento de Apoyo' },
+                    { dimension: 'BTAR', Puntaje: cuadranteCounts[3], Porcentaje: Math.round(cuadranteCounts[3]/total*100*100)/100, Resultado: 'E3: Apoyar', ResultadoDescripcion: 'Alto Comportamiento de Apoyo / Bajo Comportamiento Directivo' },
+                    { dimension: 'BTBR', Puntaje: cuadranteCounts[4], Porcentaje: Math.round(cuadranteCounts[4]/total*100*100)/100, Resultado: 'E4: Delegar', ResultadoDescripcion: 'Bajo Comportamiento de Apoyo / Bajo Comportamiento Directivo' },
+                    { dimension: 'Nivel de Efectividad', Puntaje: nivelM, Porcentaje: 0, Resultado: d ? d.resultado : 'Nivel ' + nivelM, ResultadoDescripcion: d ? d.recomendaciones : '' }
+                ]});
+            }
+        );
+
+    // ID 6: Manejo de Conflictos
+    } else if (idTest === 6) {
+        const mapeoCuadrantes = { 1: 13, 2: 14, 3: 15, 4: 16, 5: 17 };
+        const cuadranteCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+        altsData.forEach(a => { if (a.cuadrante && cuadranteCounts[a.cuadrante] !== undefined) cuadranteCounts[a.cuadrante]++; });
+
+        const dimIds = Object.values(mapeoCuadrantes);
+        conn.query('SELECT * FROM dimension WHERE id IN (?)', [dimIds], (err, dims) => {
+            if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+
+            const resultadosArray = [];
+            let pendientes = Object.keys(mapeoCuadrantes).length;
+
+            Object.entries(mapeoCuadrantes).forEach(([cuadrante, dimId]) => {
+                const puntaje = cuadranteCounts[cuadrante] || 0;
+                conn.query(
+                    'SELECT * FROM resultados WHERE evaluacion_id=? AND dimension_id=? AND minimo<=? AND maximo>=? LIMIT 1',
+                    [idTest, dimId, puntaje, puntaje],
+                    (err2, diag) => {
+                        const d = diag ? diag[0] : null;
+                        const dimObj = dims.find(x => x.id == dimId);
+                        if (d) {
+                            resultadosArray.push({
+                                Puntaje: puntaje,
+                                Resultado: (dimObj ? dimObj.dimension : '') + ' ' + (d ? d.resultado : ''),
+                                ResultadoDescripcion: d ? d.recomendaciones : '',
+                                dimension: dimObj ? dimObj.dimension : '',
+                                dimension_descripcion: dimObj ? dimObj.descripcion : ''
+                            });
+                        }
+                        if (--pendientes === 0) guardarResultados({ Resultados: resultadosArray });
+                    }
+                );
+            });
+        });
+
+    // ID 7: Estilos de Aprendizaje
+    } else if (idTest === 7) {
+        conn.query(
+            `SELECT a.cuadrante, SUM(dr.resultado) as total
+             FROM detalle_respuesta dr
+             INNER JOIN alternativas a ON a.id = dr.alternativa_id
+             WHERE dr.respuesta_id = ?
+             GROUP BY a.cuadrante`,
+            [respuestaId],
+            (err, cuads) => {
+                if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+
+                const get = (c) => { const r = cuads.find(x => x.cuadrante == c); return r ? r.total : 0; };
+                const iEC = get(18), iOR = get(19), iCA = get(20), iEA = get(21);
+                const val_CA_EC = iCA - iEC;
+                const val_EA_OR = iEA - iOR;
+
+                let nombreCuadrante = '';
+                if (val_CA_EC > 0 && val_EA_OR > 0) nombreCuadrante = 'Divergente';
+                else if (val_CA_EC < 0 && val_EA_OR < 0) nombreCuadrante = 'Convergente';
+                else if (val_CA_EC > 0 && val_EA_OR < 0) nombreCuadrante = 'Acomodador';
+                else if (val_CA_EC < 0 && val_EA_OR > 0) nombreCuadrante = 'Asimilador';
+
+                const dimIds = [18, 19, 20, 21];
+                conn.query('SELECT * FROM dimension WHERE id IN (?)', [dimIds], (err2, dims) => {
+                    conn.query(
+                        'SELECT * FROM resultados WHERE evaluacion_id=? AND resultado=? LIMIT 1',
+                        [idTest, nombreCuadrante],
+                        (err3, diagCuad) => {
+                            const getDim = (id) => dims.find(d => d.id == id);
+                            const dC = diagCuad ? diagCuad[0] : null;
+                            guardarResultados({ Resultados: [
+                                { Puntaje: iEC, Resultado: getDim(18)?.dimension || '', ResultadoDescripcion: '', dimension: getDim(18)?.dimension || '', dimension_descripcion: getDim(18)?.descripcion || '' },
+                                { Puntaje: iOR, Resultado: getDim(19)?.dimension || '', ResultadoDescripcion: '', dimension: getDim(19)?.dimension || '', dimension_descripcion: getDim(19)?.descripcion || '' },
+                                { Puntaje: iCA, Resultado: getDim(20)?.dimension || '', ResultadoDescripcion: '', dimension: getDim(20)?.dimension || '', dimension_descripcion: getDim(20)?.descripcion || '' },
+                                { Puntaje: iEA, Resultado: getDim(21)?.dimension || '', ResultadoDescripcion: '', dimension: getDim(21)?.dimension || '', dimension_descripcion: getDim(21)?.descripcion || '' },
+                                { Puntaje: val_EA_OR, Resultado: val_EA_OR > 0 ? 'Reflexivo' : 'Activo', ResultadoDescripcion: 'EA-OR eje abscisas', dimension: 'EJE HORIZONTAL', dimension_descripcion: 'Tendencia Reflexiva vs Activa' },
+                                { Puntaje: val_CA_EC, Resultado: val_CA_EC > 0 ? 'Concreto' : 'Abstracto', ResultadoDescripcion: 'CA-EC eje ordenadas', dimension: 'EJE VERTICAL', dimension_descripcion: 'Tendencia Concreta vs Abstracta' },
+                                { Puntaje: 0, Resultado: 'Cuadrante ' + nombreCuadrante, ResultadoDescripcion: dC ? dC.recomendaciones : '', dimension: 'ESTILO DE APRENDIZAJE', dimension_descripcion: 'Perfil dominante según matriz de Kolb' }
+                            ]});
+                        }
+                    );
+                });
+            }
+        );
+
+    // Default: puntaje simple
+    } else {
+        const puntajeTotal = altsData.reduce((sum, a) => sum + (a.score || 0), 0);
+        guardarResultados({ Resultados: [{ Puntaje: puntajeTotal, Resultado: 'Test completado', ResultadoDescripcion: '', dimension: null }] });
+    }
+}
+
+// ── GET /api/mis-evaluaciones/:id/resultados ──────────────────────────────────
+app.get('/api/mis-evaluaciones/:id/resultados', verificarToken, (req, res) => {
+    const { id } = req.params;
+
+    const sql = `SELECT eu.id, eu.resultados, eu.finalizacion, eu.estado_id,
+                        e.id as evaluacion_id, e.nombre, e.descripcion,
+                        e.interpretacion, e.foto
+                 FROM evaluacion_usuario eu
+                 INNER JOIN evaluacion e ON e.id = eu.evaluacion_id
+                 WHERE eu.id = ? AND eu.usuario_id = ?`;
+
+    conn.query(sql, [id, req.usuario.id], (err, rows) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        if (rows.length === 0) return res.status(403).json({ ok: false, mensaje: 'Sin acceso.' });
+
+        const eu = rows[0];
+        const resultadosJson = eu.resultados ? JSON.parse(eu.resultados) : { Resultados: [] };
+
+        res.json({ ok: true, data: { ...eu, resultadosJson } });
+    });
+});
+
 // ── 404 ───────────────────────────────────────────────────────────────────────
 app.use((req, res) => {
     res.status(404).json({ ok: false, mensaje: 'Ruta no encontrada.' });

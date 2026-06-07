@@ -7,6 +7,7 @@ import { UsuariosListComponent } from './features/usuarios/components/usuarios-l
 import { EvaluacionesListComponent } from './features/evaluaciones/components/evaluaciones-list/evaluaciones-list.component';
 import { MisEvaluacionesComponent } from './features/mis-evaluaciones/components/mis-evaluaciones/mis-evaluaciones.component';
 import { EvaluacionTestComponent } from './features/mis-evaluaciones/components/evaluacion-test/evaluacion-test.component';
+import { EvaluacionResultadosComponent } from './features/mis-evaluaciones/components/evaluacion-resultados/evaluacion-resultados.component';
 import { DiscListComponent } from './features/disc/components/disc-list/disc-list.component';
 import { BibliotecaComponent } from './features/biblioteca/components/biblioteca/biblioteca.component';
 import { PerfilComponent } from './features/perfil/components/perfil/perfil.component';
@@ -35,6 +36,7 @@ export const routes: Routes = [
       { path: 'evaluaciones', component: EvaluacionesListComponent,  canActivate: [authGuard] },
       { path: 'mis-evaluaciones',                component: MisEvaluacionesComponent,  canActivate: [authGuard] },
       { path: 'mis-evaluaciones/:id/test',        component: EvaluacionTestComponent,   canActivate: [authGuard] },
+      { path: 'mis-evaluaciones/:id/resultados', component: EvaluacionResultadosComponent, canActivate: [authGuard] },
       { path: 'disc',         component: DiscListComponent,          canActivate: [authGuard] },
       { path: 'sesiones',                component: SesionesComponent,      canActivate: [authGuard] },
       { path: 'sesiones/:id/detalle',    component: SesionDetalleComponent, canActivate: [authGuard] },
