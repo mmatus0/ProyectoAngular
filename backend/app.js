@@ -643,9 +643,9 @@ app.get('/api/herramientas', verificarToken, (req, res) => {
                         h.id as herramienta_id, h.nombre as herramienta, h.foto,
                         e.nombre as estado
                  FROM herramienta_usuario hu
-                 LEFT JOIN user u         ON u.id  = hu.usuario_id
-                 LEFT JOIN herramienta h  ON h.id  = hu.herramienta_id
-                 LEFT JOIN estado e       ON e.id  = hu.estado_id
+                 INNER JOIN user u         ON u.id  = hu.usuario_id
+                 INNER JOIN herramienta h  ON h.id  = hu.herramienta_id AND h.estado_id = 1
+                 LEFT JOIN estado e        ON e.id  = hu.estado_id
                  WHERE hu.estado_id = ?
                  ORDER BY hu.fecha DESC`;
     conn.query(sql, [estado], (err, results) => {

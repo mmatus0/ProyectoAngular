@@ -30,7 +30,7 @@
               <div class="d-flex align-items-center mb-3">
                 <div class="flex-shrink-0">
                   <img
-                    [src]="h.foto || 'images/herramientas/default.png'"
+                    src="https://placehold.co/60x60?text=H"
                     alt="Herramienta"
                     class="rounded border bg-light"
                     width="60" height="60"
@@ -49,7 +49,7 @@
             <div class="card-footer bg-transparent border-top mt-auto p-3 d-flex justify-content-between align-items-center">
               <span class="text-muted small">
                 <i class="bi bi-calendar me-1"></i>
-                {{ h.fecha ? (h.fecha | date:'dd/MM/yyyy') : 'Sin fecha' }}
+                {{ h.fecha ? h.fecha.toString().slice(0, 10) : 'Sin fecha' }}
               </span>
               <button class="btn btn-primary btn-sm rounded-pill px-4"
                       (click)="irADetalle(h.id)">
