@@ -1,7 +1,6 @@
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { UsuarioService } from '../../../../core/services/usuario.service';
-import { FiltroPipe } from '../../../../shared/pipes/filtro.pipe';
 import { UsuarioModalComponent } from '../usuario-modal/usuario-modal.component';
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import * as XLSX from 'xlsx';
@@ -9,7 +8,7 @@ import * as XLSX from 'xlsx';
 @Component({
   selector: 'app-usuarios-list',
   standalone: true,
-  imports: [RouterLink, FormsModule, FiltroPipe, UsuarioModalComponent],
+  imports: [RouterLink, FormsModule, UsuarioModalComponent],
   templateUrl: './usuarios-list.component.html',
   styleUrl: './usuarios-list.component.css'
 })
