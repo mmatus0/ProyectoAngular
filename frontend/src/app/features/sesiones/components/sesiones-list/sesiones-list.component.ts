@@ -2,6 +2,7 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { SesionService } from '../../../../core/services/sesion.service';
+import { HighlightRowDirective } from '../../../../shared/directives/highlight-row.directive';
 import { Router } from '@angular/router';
 
 interface ISesion {
@@ -20,7 +21,7 @@ interface ISesion {
 @Component({
   selector: 'app-sesiones-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, HighlightRowDirective],
   templateUrl: './sesiones-list.component.html'
 })
 export class SesionesListComponent implements OnInit {

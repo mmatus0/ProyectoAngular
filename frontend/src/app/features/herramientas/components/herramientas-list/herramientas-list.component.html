@@ -88,7 +88,7 @@
             </thead>
             <tbody>
               @for (a of asignacionesFiltradas(); track a.id) {
-                <tr>
+                <tr [appHighlightRow]="'#f0f4ff'">
                   <td class="fw-medium">{{ a.usuario }}</td>
                   <td class="text-muted small">{{ a.email }}</td>
                   <td>

@@ -90,7 +90,7 @@
             </thead>
             <tbody>
               @for (e of evaluacionesFiltradas(); track e.id) {
-                <tr>
+                <tr [appHighlightRow]="'#f0f4ff'">
                   <td>
                     <div class="fw-medium">{{ e.usuario }}</div>
                     <div class="text-muted small">{{ e.email }}</div>

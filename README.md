@@ -37,7 +37,7 @@ Luego levanta el servidor:
 npm run dev
 ```
 
-> Debe aparecer: `Backend EvalCoach corriendo en http://localhost:3000`
+> Debe aparecer: `Servidor backend EvalCoach escuchando en puerto 3000 Conectado a MySQL correctamente.`
 
 ---
 

@@ -99,7 +99,7 @@
             </thead>
             <tbody>
               @for (s of sesionesFiltradas(); track s.id) {
-                <tr>
+                <tr [appHighlightRow]="'#f0f4ff'">
                   <td class="fw-medium">{{ s.cliente }}</td>
                   <td>{{ s.nombre_sesion }}</td>
                   <td>{{ s.fecha_sesion || '—' }}</td>

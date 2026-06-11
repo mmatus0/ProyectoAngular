@@ -1,6 +1,7 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { HighlightRowDirective } from '../../../../shared/directives/highlight-row.directive';
 import { HerramientaService } from '../../../../core/services/herramienta.service';
 
 interface IAsignacion {
@@ -19,7 +20,7 @@ interface IAsignacion {
 @Component({
   selector: 'app-herramientas-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, HighlightRowDirective],
   templateUrl: './herramientas-list.component.html'
 })
 export class HerramientasListComponent implements OnInit {
