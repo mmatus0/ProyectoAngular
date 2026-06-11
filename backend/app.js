@@ -1524,6 +1524,106 @@ app.post('/api/evaluaciones/asignar-lote', verificarToken, (req, res) => {
     });
 });
 
+// ── INSTITUCIONES ─────────────────────────────────────────────────────────────
+
+app.get('/api/instituciones', verificarToken, (req, res) => {
+    const estadoId = req.query.estado || 1;
+    const sql = `
+        SELECT em.id, em.empresa, em.razonsocial, em.numero_identificacion_fiscal,
+               em.direccion, em.telefonos, em.pagina_web, em.estado_id,
+               es.nombre as estado
+        FROM empresa em
+        LEFT JOIN estado es ON es.id = em.estado_id
+        WHERE em.estado_id = ?
+        ORDER BY em.id DESC`;
+    conn.query(sql, [estadoId], (err, rows) => {
+        if (err) return res.status(500).json({ ok: false });
+        res.json({ ok: true, data: rows });
+    });
+});
+
+app.post('/api/instituciones', verificarToken, (req, res) => {
+    const { empresa, razonsocial, numero_identificacion_fiscal, direccion, telefonos, pagina_web } = req.body;
+    if (!empresa) return res.status(400).json({ ok: false, mensaje: 'El nombre es obligatorio.' });
+    const sql = `INSERT INTO empresa (empresa, razonsocial, numero_identificacion_fiscal, direccion, telefonos, pagina_web, estado_id, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, 1, NOW(), NOW())`;
+    conn.query(sql, [empresa, razonsocial, numero_identificacion_fiscal, direccion, telefonos, pagina_web], (err, result) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: 'Error al crear.' });
+        res.json({ ok: true, id: result.insertId });
+    });
+});
+
+app.put('/api/instituciones/:id', verificarToken, (req, res) => {
+    const { empresa, razonsocial, numero_identificacion_fiscal, direccion, telefonos, pagina_web } = req.body;
+    if (!empresa) return res.status(400).json({ ok: false, mensaje: 'El nombre es obligatorio.' });
+    const sql = `UPDATE empresa SET empresa=?, razonsocial=?, numero_identificacion_fiscal=?, direccion=?, telefonos=?, pagina_web=?, updated_at=NOW() WHERE id=?`;
+    conn.query(sql, [empresa, razonsocial, numero_identificacion_fiscal, direccion, telefonos, pagina_web, req.params.id], (err) => {
+        if (err) return res.status(500).json({ ok: false });
+        res.json({ ok: true });
+    });
+});
+
+app.post('/api/instituciones/:id/desactivar', verificarToken, (req, res) => {
+    conn.query('UPDATE empresa SET estado_id=2, updated_at=NOW() WHERE id=?', [req.params.id], (err) => {
+        if (err) return res.status(500).json({ ok: false });
+        res.json({ ok: true });
+    });
+});
+
+app.post('/api/instituciones/:id/activar', verificarToken, (req, res) => {
+    conn.query('UPDATE empresa SET estado_id=1, updated_at=NOW() WHERE id=?', [req.params.id], (err) => {
+        if (err) return res.status(500).json({ ok: false });
+        res.json({ ok: true });
+    });
+});
+
+app.post('/api/instituciones/carga-masiva', verificarToken, upload.single('archivo'), (req, res) => {
+    if (!req.file) return res.status(400).json({ ok: false, mensaje: 'No se recibió archivo.' });
+    try {
+        const workbook = XLSX.readFile(req.file.path);
+        const sheet    = workbook.Sheets[workbook.SheetNames[0]];
+        const rows     = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+        if (rows.length === 0) return res.status(400).json({ ok: false, mensaje: 'El archivo está vacío.' });
+
+        let created = 0, updated = 0, skipped = 0;
+        let pending = rows.length;
+
+        const done = () => {
+            if (--pending === 0)
+                res.json({ ok: true, created, updated, skipped });
+        };
+
+        rows.forEach(row => {
+            const empresa = (row['empresa'] || row['Empresa'] || '').toString().trim();
+            if (!empresa) { skipped++; done(); return; }
+
+            const payload = {
+                empresa,
+                razonsocial:                  (row['razonsocial']    || row['Razón Social']       || '').toString().trim(),
+                numero_identificacion_fiscal: (row['nroidentfiscal'] || row['N° Ident. Fiscal']   || '').toString().trim(),
+                direccion:                    (row['direccion']      || row['Dirección']           || '').toString().trim(),
+                telefonos:                    (row['telefonos']      || row['Teléfonos']           || '').toString().trim(),
+                pagina_web:                   (row['paginaweb']      || row['Página Web']          || '').toString().trim(),
+            };
+
+            const sqlBuscar = 'SELECT id FROM empresa WHERE LOWER(empresa) = LOWER(?) LIMIT 1';
+            conn.query(sqlBuscar, [empresa], (err, found) => {
+                if (err) { skipped++; done(); return; }
+                if (found.length > 0) {
+                    const sqlUpd = 'UPDATE empresa SET razonsocial=?, numero_identificacion_fiscal=?, direccion=?, telefonos=?, pagina_web=?, updated_at=NOW() WHERE id=?';
+                    conn.query(sqlUpd, [payload.razonsocial, payload.numero_identificacion_fiscal, payload.direccion, payload.telefonos, payload.pagina_web, found[0].id], () => { updated++; done(); });
+                } else {
+                    const sqlIns = 'INSERT INTO empresa (empresa, razonsocial, numero_identificacion_fiscal, direccion, telefonos, pagina_web, estado_id, created_at, updated_at) VALUES (?,?,?,?,?,?,1,NOW(),NOW())';
+                    conn.query(sqlIns, [payload.empresa, payload.razonsocial, payload.numero_identificacion_fiscal, payload.direccion, payload.telefonos, payload.pagina_web], () => { created++; done(); });
+                }
+            });
+        });
+    } catch (e) {
+        res.status(500).json({ ok: false, mensaje: 'Error al procesar el archivo.' });
+    }
+});
+
 // ── 404 ───────────────────────────────────────────────────────────────────────
 app.use((req, res) => {
     res.status(404).json({ ok: false, mensaje: 'Ruta no encontrada.' });
