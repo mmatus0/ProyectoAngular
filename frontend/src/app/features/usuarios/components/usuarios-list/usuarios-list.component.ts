@@ -1,14 +1,16 @@
 import { RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { UsuarioService } from '../../../../core/services/usuario.service';
 import { UsuarioModalComponent } from '../usuario-modal/usuario-modal.component';
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { HighlightRowDirective } from '../../../../shared/directives/highlight-row.directive';
 import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-usuarios-list',
   standalone: true,
-  imports: [RouterLink, FormsModule, UsuarioModalComponent],
+  imports: [RouterLink, FormsModule, UsuarioModalComponent, CommonModule, ReactiveFormsModule, HighlightRowDirective],
   templateUrl: './usuarios-list.component.html',
   styleUrl: './usuarios-list.component.css'
 })

@@ -101,7 +101,7 @@
             </thead>
             <tbody>
               @for (u of usuariosFiltrados(); track u.id) {
-                <tr>
+                <tr [appHighlightRow]="'#f0f4ff'">
                   <td>
                     <span class="badge bg-{{ getRolBadge(u.rolusuario_id) }}-subtle text-{{ getRolBadge(u.rolusuario_id) }}">
                       {{ getRolNombre(u.rolusuario_id) }}

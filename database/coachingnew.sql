@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 07-06-2026 a las 22:48:56
+-- Tiempo de generación: 12-06-2026 a las 00:05:38
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -480,7 +480,227 @@ INSERT INTO `detalle_respuesta` (`id`, `resultado`, `created_at`, `updated_at`, 
 (7, NULL, NULL, NULL, 1, 1, 69, NULL),
 (8, NULL, NULL, NULL, 1, 1, 70, NULL),
 (9, NULL, NULL, NULL, 1, 1, 73, NULL),
-(10, NULL, NULL, NULL, 1, 1, 78, NULL);
+(10, NULL, NULL, NULL, 1, 1, 78, NULL),
+(19, NULL, NULL, NULL, 4, 1, 188, NULL),
+(20, NULL, NULL, NULL, 4, 1, 188, NULL),
+(21, NULL, NULL, NULL, 4, 1, 188, NULL),
+(22, NULL, NULL, NULL, 4, 1, 188, NULL),
+(23, NULL, NULL, NULL, 4, 1, 188, NULL),
+(24, NULL, NULL, NULL, 4, 1, 188, NULL),
+(25, NULL, NULL, NULL, 4, 1, 189, NULL),
+(26, '1', NULL, NULL, 4, 1, 188, 151),
+(27, '1', NULL, NULL, 4, 1, 188, 159),
+(28, '1', NULL, NULL, 4, 1, 188, 160),
+(30, '0', NULL, NULL, 4, 1, 189, 152),
+(31, '1', NULL, NULL, 4, 1, 188, 153),
+(32, '0', NULL, NULL, 4, 1, 189, 154),
+(33, '1', NULL, NULL, 4, 1, 188, 155),
+(34, '1', NULL, NULL, 4, 1, 188, 156),
+(35, '1', NULL, NULL, 4, 1, 188, 157),
+(36, '0', NULL, NULL, 4, 1, 189, 158),
+(37, '1', NULL, NULL, 4, 1, 188, 161),
+(38, '0', NULL, NULL, 4, 1, 189, 162),
+(40, '1', NULL, NULL, 5, 1, 190, 163),
+(41, '1', NULL, NULL, 5, 1, 190, 164),
+(42, '1', NULL, NULL, 5, 1, 190, 165),
+(43, '1', NULL, NULL, 5, 1, 190, 166),
+(44, '1', NULL, NULL, 5, 1, 190, 167),
+(45, '3', NULL, NULL, 5, 1, 192, 168),
+(46, '3', NULL, NULL, 5, 1, 192, 169),
+(47, '2', NULL, NULL, 5, 1, 191, 170),
+(48, '1', NULL, NULL, 5, 1, 190, 171),
+(49, '1', NULL, NULL, 5, 1, 190, 172),
+(50, '2', NULL, NULL, 5, 1, 191, 173),
+(51, '3', NULL, NULL, 5, 1, 192, 174),
+(52, '3', NULL, NULL, 5, 1, 192, 175),
+(53, '2', NULL, NULL, 5, 1, 191, 176),
+(54, '3', NULL, NULL, 5, 1, 192, 177),
+(55, '3', NULL, NULL, 5, 1, 192, 178),
+(56, '2', NULL, NULL, 5, 1, 191, 179),
+(57, '5', NULL, NULL, 5, 1, 194, 180),
+(58, '5', NULL, NULL, 5, 1, 194, 181),
+(59, '1', NULL, NULL, 5, 1, 190, 182),
+(60, '4', NULL, NULL, 5, 1, 193, 183),
+(61, '2', NULL, NULL, 5, 1, 191, 184),
+(62, '3', NULL, NULL, 5, 1, 192, 185),
+(63, '2', NULL, NULL, 5, 1, 191, 186),
+(64, '5', NULL, NULL, 5, 1, 194, 187),
+(65, '3', NULL, NULL, 5, 1, 192, 188),
+(66, '3', NULL, NULL, 5, 1, 192, 189),
+(67, '1', NULL, NULL, 5, 1, 190, 190),
+(68, '1', NULL, NULL, 5, 1, 190, 191),
+(69, '5', NULL, NULL, 5, 1, 194, 192),
+(70, '2', NULL, NULL, 5, 1, 191, 193),
+(71, '4', NULL, NULL, 5, 1, 193, 194),
+(72, '2', NULL, NULL, 5, 1, 191, 195),
+(73, '4', NULL, NULL, 5, 1, 193, 196),
+(74, '2', NULL, NULL, 5, 1, 191, 197),
+(75, '4', NULL, NULL, 5, 1, 193, 198),
+(76, '2', NULL, NULL, 5, 1, 191, 199),
+(77, '4', NULL, NULL, 5, 1, 193, 200),
+(78, '0', NULL, NULL, 6, 1, 139, 142),
+(79, '0', NULL, NULL, 6, 1, 146, 143),
+(80, '0', NULL, NULL, 6, 1, 148, 144),
+(81, '0', NULL, NULL, 6, 1, 152, 145),
+(82, '0', NULL, NULL, 6, 1, 156, 146),
+(83, '0', NULL, NULL, 6, 1, 160, 147),
+(84, '0', NULL, NULL, 6, 1, 164, 148),
+(85, '0', NULL, NULL, 6, 1, 169, 149),
+(86, '0', NULL, NULL, 6, 1, 172, 150),
+(87, '3', NULL, NULL, 7, 1, 177, 23),
+(88, '1', NULL, NULL, 7, 1, 175, 24),
+(89, '1', NULL, NULL, 7, 1, 175, 25),
+(90, '1', NULL, NULL, 7, 1, 175, 26),
+(91, '5', NULL, NULL, 7, 1, 179, 27),
+(92, '5', NULL, NULL, 7, 1, 179, 28),
+(93, '4', NULL, NULL, 7, 1, 178, 29),
+(94, '2', NULL, NULL, 7, 1, 176, 30),
+(95, '2', NULL, NULL, 7, 1, 176, 31),
+(96, '4', NULL, NULL, 7, 1, 178, 32),
+(97, '4', NULL, NULL, 7, 1, 178, 33),
+(98, '2', NULL, NULL, 7, 1, 176, 34),
+(99, '5', NULL, NULL, 7, 1, 179, 35),
+(100, '1', NULL, NULL, 7, 1, 175, 36),
+(101, '1', NULL, NULL, 7, 1, 175, 37),
+(102, '4', NULL, NULL, 7, 1, 178, 38),
+(103, '3', NULL, NULL, 7, 1, 177, 39),
+(104, '5', NULL, NULL, 7, 1, 179, 40),
+(105, '4', NULL, NULL, 7, 1, 178, 41),
+(106, '2', NULL, NULL, 7, 1, 176, 42),
+(107, '1', NULL, NULL, 7, 1, 175, 43),
+(108, '5', NULL, NULL, 7, 1, 179, 44),
+(109, '2', NULL, NULL, 7, 1, 176, 45),
+(110, '1', NULL, NULL, 7, 1, 175, 46),
+(111, '1', NULL, NULL, 7, 1, 175, 47),
+(112, '2', NULL, NULL, 7, 1, 176, 48),
+(113, '5', NULL, NULL, 7, 1, 179, 49),
+(114, '5', NULL, NULL, 7, 1, 179, 50),
+(115, '3', NULL, NULL, 7, 1, 177, 51),
+(116, '1', NULL, NULL, 7, 1, 175, 52),
+(117, '3', NULL, NULL, 7, 1, 177, 53),
+(118, '1', NULL, NULL, 7, 1, 175, 54),
+(120, '2', NULL, NULL, 8, 1, 1, 1),
+(121, '1', NULL, NULL, 8, 1, 7, 2),
+(122, '-2', NULL, NULL, 8, 1, 11, 3),
+(123, '1', NULL, NULL, 8, 1, 13, 4),
+(124, '-2', NULL, NULL, 8, 1, 17, 5),
+(125, '2', NULL, NULL, 8, 1, 24, 6),
+(126, '-1', NULL, NULL, 8, 1, 27, 7),
+(127, '-1', NULL, NULL, 8, 1, 30, 8),
+(128, '1', NULL, NULL, 8, 1, 34, 9),
+(129, '1', NULL, NULL, 8, 1, 37, 10),
+(130, '-2', NULL, NULL, 8, 1, 41, 11),
+(131, '1', NULL, NULL, 8, 1, 48, 12),
+(132, '4', NULL, NULL, 9, 1, 79, 104),
+(133, '2', NULL, NULL, 9, 1, 82, 105),
+(134, '1', NULL, NULL, 9, 1, 83, 106),
+(135, '3', NULL, NULL, 9, 1, 85, 107),
+(136, '4', NULL, NULL, 9, 1, 88, 108),
+(137, '4', NULL, NULL, 9, 1, 89, 109),
+(138, '4', NULL, NULL, 9, 1, 91, 110),
+(139, '1', NULL, NULL, 9, 1, 93, 111),
+(140, '1', NULL, NULL, 9, 1, 96, 120),
+(141, '3', NULL, NULL, 9, 1, 98, 121),
+(142, '2', NULL, NULL, 9, 1, 99, 122),
+(143, '4', NULL, NULL, 9, 1, 101, 123),
+(144, '3', NULL, NULL, 9, 1, 103, 124),
+(145, '1', NULL, NULL, 9, 1, 106, 125),
+(146, '5', NULL, NULL, 9, 1, 107, 126),
+(147, '5', NULL, NULL, 9, 1, 109, 127),
+(148, '4', NULL, NULL, 9, 1, 112, 128),
+(149, '3', NULL, NULL, 9, 1, 114, 129),
+(150, '4', NULL, NULL, 9, 1, 116, 130),
+(151, '2', NULL, NULL, 9, 1, 117, 131),
+(152, '5', NULL, NULL, 9, 1, 119, 132),
+(153, '1', NULL, NULL, 9, 1, 122, 133),
+(154, '4', NULL, NULL, 9, 1, 124, 134),
+(155, '5', NULL, NULL, 9, 1, 125, 135),
+(156, '5', NULL, NULL, 9, 1, 128, 136),
+(157, '3', NULL, NULL, 9, 1, 129, 137),
+(158, '4', NULL, NULL, 9, 1, 131, 138),
+(159, '2', NULL, NULL, 9, 1, 134, 139),
+(160, '4', NULL, NULL, 9, 1, 136, 140),
+(161, '5', NULL, NULL, 9, 1, 137, 141),
+(162, '2', NULL, NULL, 1, 1, 50, 13),
+(163, '3', NULL, NULL, 1, 1, 53, 14),
+(164, '1', NULL, NULL, 1, 1, 55, 15),
+(165, '3', NULL, NULL, 1, 1, 60, 16),
+(166, '1', NULL, NULL, 1, 1, 62, 17),
+(167, '3', NULL, NULL, 1, 1, 64, 18),
+(168, '3', NULL, NULL, 1, 1, 67, 19),
+(169, '1', NULL, NULL, 1, 1, 71, 20),
+(170, '3', NULL, NULL, 1, 1, 75, 21),
+(171, '2', NULL, NULL, 1, 1, 76, 22),
+(173, '0', NULL, NULL, 10, 1, 180, 55),
+(174, '1', NULL, NULL, 10, 1, 181, 56),
+(175, '0', NULL, NULL, 10, 1, 180, 57),
+(176, '0', NULL, NULL, 10, 1, 181, 58),
+(177, '0', NULL, NULL, 10, 1, 180, 59),
+(178, '1', NULL, NULL, 10, 1, 181, 60),
+(179, '0', NULL, NULL, 10, 1, 180, 61),
+(180, '1', NULL, NULL, 10, 1, 180, 62),
+(181, '1', NULL, NULL, 10, 1, 181, 63),
+(182, '0', NULL, NULL, 10, 1, 180, 64),
+(183, '1', NULL, NULL, 10, 1, 180, 65),
+(184, '1', NULL, NULL, 10, 1, 180, 66),
+(185, '1', NULL, NULL, 10, 1, 181, 67),
+(186, '1', NULL, NULL, 10, 1, 181, 68),
+(187, '0', NULL, NULL, 10, 1, 181, 69),
+(188, '0', NULL, NULL, 10, 1, 180, 70),
+(189, '0', NULL, NULL, 10, 1, 180, 71),
+(190, '1', NULL, NULL, 10, 1, 181, 72),
+(191, '0', NULL, NULL, 10, 1, 181, 73),
+(192, '0', NULL, NULL, 10, 1, 180, 74),
+(193, '5', NULL, NULL, 11, 1, 183, 75),
+(194, '2', NULL, NULL, 11, 1, 183, 76),
+(195, '1', NULL, NULL, 11, 1, 182, 77),
+(196, '2', NULL, NULL, 11, 1, 183, 78),
+(197, '4', NULL, NULL, 11, 1, 184, 79),
+(198, '4', NULL, NULL, 11, 1, 184, 80),
+(199, '1', NULL, NULL, 11, 1, 182, 81),
+(200, '4', NULL, NULL, 11, 1, 185, 82),
+(201, '6', NULL, NULL, 11, 1, 187, 83),
+(202, '1', NULL, NULL, 11, 1, 187, 84),
+(203, '4', NULL, NULL, 11, 1, 185, 85),
+(204, '5', NULL, NULL, 11, 1, 186, 86),
+(205, '4', NULL, NULL, 11, 1, 184, 87),
+(206, '4', NULL, NULL, 11, 1, 184, 88),
+(207, '5', NULL, NULL, 11, 1, 186, 89),
+(208, '5', NULL, NULL, 11, 1, 186, 90),
+(209, '5', NULL, NULL, 11, 1, 186, 91),
+(210, '4', NULL, NULL, 11, 1, 185, 92),
+(211, '6', NULL, NULL, 11, 1, 182, 93),
+(212, '3', NULL, NULL, 11, 1, 184, 94),
+(213, '2', NULL, NULL, 11, 1, 183, 95),
+(214, '2', NULL, NULL, 11, 1, 183, 96),
+(215, '2', NULL, NULL, 11, 1, 186, 97),
+(216, '3', NULL, NULL, 11, 1, 185, 98),
+(217, '6', NULL, NULL, 11, 1, 187, 99),
+(218, '5', NULL, NULL, 11, 1, 186, 100),
+(219, '5', NULL, NULL, 11, 1, 183, 101),
+(220, '4', NULL, NULL, 11, 1, 184, 102),
+(221, '2', NULL, NULL, 11, 1, 186, 103),
+(222, '0', NULL, NULL, 12, 1, 139, 142),
+(223, '0', NULL, NULL, 12, 1, 145, 143),
+(224, '0', NULL, NULL, 12, 1, 147, 144),
+(225, '0', NULL, NULL, 12, 1, 153, 145),
+(226, '0', NULL, NULL, 12, 1, 155, 146),
+(227, '0', NULL, NULL, 12, 1, 159, 147),
+(228, '0', NULL, NULL, 12, 1, 164, 148),
+(229, '0', NULL, NULL, 12, 1, 169, 149),
+(230, '0', NULL, NULL, 12, 1, 171, 150),
+(231, '0', NULL, NULL, 13, 1, 189, 151),
+(232, '0', NULL, NULL, 13, 1, 189, 152),
+(233, '0', NULL, NULL, 13, 1, 189, 153),
+(234, '1', NULL, NULL, 13, 1, 188, 154),
+(235, '0', NULL, NULL, 13, 1, 189, 155),
+(236, '1', NULL, NULL, 13, 1, 188, 156),
+(237, '0', NULL, NULL, 13, 1, 189, 157),
+(238, '1', NULL, NULL, 13, 1, 188, 158),
+(239, '1', NULL, NULL, 13, 1, 188, 159),
+(240, '1', NULL, NULL, 13, 1, 188, 160),
+(241, '0', NULL, NULL, 13, 1, 189, 161),
+(242, '1', NULL, NULL, 13, 1, 188, 162);
 
 -- --------------------------------------------------------
 
@@ -612,7 +832,8 @@ CREATE TABLE `empresa` (
 --
 
 INSERT INTO `empresa` (`id`, `empresa`, `razonsocial`, `numero_identificacion_fiscal`, `direccion`, `telefonos`, `pagina_web`, `created_at`, `updated_at`, `estado_id`) VALUES
-(1, 'Empresa Demo', 'Demo S.A.', '12345678-9', NULL, NULL, NULL, '2026-04-06 22:46:34', '2026-04-06 22:46:34', 1);
+(1, 'Empresa Demo', 'Demo S.A.', '12345678-9', NULL, NULL, NULL, '2026-04-06 22:46:34', '2026-04-06 22:46:34', 1),
+(2, 'ISIAC', 'ISIAC LTDA', '775463218', 'Constitución 879', '+56999999999', NULL, '2026-06-11 20:56:39', '2026-06-11 20:56:39', 1);
 
 -- --------------------------------------------------------
 
@@ -735,7 +956,26 @@ CREATE TABLE `evaluacion_usuario` (
 --
 
 INSERT INTO `evaluacion_usuario` (`id`, `intentos`, `ver_resultados`, `fecha`, `inicio`, `finalizacion`, `resultados`, `coach_id`, `token_usuario`, `created_at`, `updated_at`, `usuario_id`, `resultado_id`, `estado_id`, `evaluacion_id`) VALUES
-(1, 1, 1, '2026-06-07 15:31:01', '2026-06-07 15:31:48', '2026-06-07 15:31:48', NULL, NULL, NULL, NULL, NULL, 2, NULL, 4, 2);
+(1, 1, 1, '2026-06-07 18:19:36', '2026-06-07 15:31:48', '2026-06-07 18:29:26', '{\"Resultados\":[{\"Puntaje\":23,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":null}]}', NULL, NULL, NULL, NULL, 2, NULL, 4, 2),
+(2, 1, 0, '2026-06-07 17:48:09', '2026-06-07 17:50:15', '2026-06-07 18:27:52', '{\"Resultados\":[{\"Puntaje\":8.33,\"Resultado\":\"8.33%\",\"ResultadoDescripcion\":\"Buena gestión del tiempo\",\"dimension\":null},{\"Puntaje\":91.67,\"Resultado\":\"91.67%\",\"ResultadoDescripcion\":\"Mala gestión del tiempo\",\"dimension\":null}]}', NULL, NULL, NULL, NULL, 2, NULL, 4, 8),
+(3, 1, 0, '2026-06-07 18:19:36', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2, NULL, 1, 10),
+(4, 1, 0, '2026-06-07 18:19:36', '2026-06-07 18:25:12', '2026-06-07 18:26:08', '{\"Resultados\":[{\"Puntaje\":2.25,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Confianza\",\"dimension_descripcion\":\"Seguridad que tienen los miembros del equipo sobre que las intenciones de sus compañeros son buenas,\\ny sobre que no hay razón para ser ni protector ni cauteloso. Implica que los miembros de un equipo se sienten verdaderamente\\ncómodos si están expuestos unos a otros, y actúan sin preocuparse de protegerse a sí mismo por lo que dicen o lo que hacen.\\nEl resultado es que pueden centrar su energía en el trabajo\"},{\"Puntaje\":2.5,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Confrontación o Capacidad\\nde enfrentar el conflicto\",\"dimension_descripcion\":\"Implica que el equipo busca resolver problemas, aunque esto implica salir acalorados del debate,\\npero sin resentimientos o daños colaterales.\"},{\"Puntaje\":3.29,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Compromiso\",\"dimension_descripcion\":\"Los grandes equipos adoptan decisiones claras y permanentes y las concretan con la aceptación de los otros miembros\\ndel equipo, incluso quienes en un principio no estaban de acuerdo\"},{\"Puntaje\":2.71,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Rendición de Cuentas\",\"dimension_descripcion\":\"El equipo tiende a ser menos “políticamente correcto” y se atreven a entregarse feedback entre pares\"},{\"Puntaje\":2.13,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Resultados\",\"dimension_descripcion\":\"Implica que el equipo se centra en los objetivos compartidos, no solo en los objetivos de su área\"}]}', NULL, NULL, NULL, NULL, 2, NULL, 4, 9),
+(5, 1, 0, '2026-06-07 18:19:36', '2026-06-07 18:26:31', '2026-06-07 18:26:31', '{\"Resultados\":[{\"Puntaje\":0,\"Resultado\":\"Experiencia Concreta (EC)\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Experiencia Concreta (EC)\",\"dimension_descripcion\":\"Refleja una tendencia a aprender basado en la experiencia y en juicios intuitivos.\\nLos individuos con un fuerte desarrollo en EC suelen establecer buenos contactos con otros y son más bien “orientados a las personas”.\\n A menudo encuentran que la teoría no ayuda mucho y prefieren tratar cada caso como caso único.\\nAprenden más de ejemplos específicos que los enfrentan a situaciones prácticas.\\nLas personas que enfatizan EC aprenden más de sus iguales que de sus superiores y se benefician más de la retroalimentación y discusión con los otros que enfatizan EC.\"},{\"Puntaje\":0,\"Resultado\":\"Observación Reflexiva (OR)\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Observación Reflexiva (OR)\",\"dimension_descripcion\":\"Refleja una tendencia a aprender en forma imparcial y reflexiva.\\nLas personas con un desarrollo de OR aprenden basándose en juicios sobre observaciones precisas y prefieren\\n situaciones de aprendizaje tal como las clases expositivas que les permiten tomar el rol de observadores imparciales.\\nEstas personas suelen ser Introvertidas.\"},{\"Puntaje\":0,\"Resultado\":\"Conceptualización Abstracta (CA)\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Conceptualización Abstracta (CA)\",\"dimension_descripcion\":\"Refleja una tendencia al análisis y a la conceptualización y una forma de aprender basada en el pensamiento lógico y la evaluación racional.\\nLas personas con un fuerte desarrollo de CA tienden a orientarse más hacia las cosas y los símbolos que hacia otras personas.\\nAprende más en situaciones impersonales con una clara autoridad en las que enfatiza el análisis sistemático y la teoría.\\nSe frustran y obtienen poco beneficio de la experiencia poco estructurada tales como el ejercicio y la simulación.\"},{\"Puntaje\":0,\"Resultado\":\"Experimentación Activa (EA)\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Experimentación Activa (EA)\",\"dimension_descripcion\":\"Refleja una tendencia a aprender haciendo cosas y experimentando alternativas.\\nLas personas con un grado de desarrollo de EA aprenden más cuando participan en proyectos, trabajos o discusión de grupo.\\nNo se sienten atraídos por clases expositivas y situaciones de aprendizaje pasivo. Estas personas suelen ser extravertidas.\"},{\"Puntaje\":0,\"Resultado\":\"Activo\",\"ResultadoDescripcion\":\"EA-OR eje abscisas\",\"dimension\":\"EJE HORIZONTAL\",\"dimension_descripcion\":\"Tendencia Reflexiva vs Activa\"},{\"Puntaje\":0,\"Resultado\":\"Abstracto\",\"ResultadoDescripcion\":\"CA-EC eje ordenadas\",\"dimension\":\"EJE VERTICAL\",\"dimension_descripcion\":\"Tendencia Concreta vs Abstracta\"},{\"Puntaje\":0,\"Resultado\":\"Cuadrante \",\"ResultadoDescripcion\":\"\",\"dimension\":\"ESTILO DE APRENDIZAJE\",\"dimension_descripcion\":\"Perfil dominante según matriz de Kolb\"}]}', NULL, NULL, NULL, NULL, 2, NULL, 4, 7),
+(6, 1, 0, '2026-06-07 18:19:36', '2026-06-07 18:27:26', '2026-06-07 18:27:26', '{\"Resultados\":[{\"Puntaje\":27,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Formación\",\"dimension_descripcion\":\"El equipo del proyecto está inicialmente preocupado con su orientación, la cual se logra a través de evaluaciones. Esas evaluaciones sirven para identificar los límites de los comportamientos interpersonales y de la tarea. Coincidente con la prueba en el ámbito interpersonal es el establecimiento de las relaciones de dependencia con los líderes, con los otros miembros del grupo, o con los estándares preexistentes.\\nLos miembros del equipo se comportan de forma independiente. Pueden ser motivados pero generalmente están relativamente mal informados sobre los temas y los objetivos del equipo. Algunos miembros del equipo pueden exhibir muestras de incertidumbre y de ansiedad.\\nEl Líder del proyecto debe mantener al equipo junto, asegurándose de confíen el uno en el otro y en que tengan la capacidad de  desarrollar una relación de trabajo.\\nEstilo: Director o “informar”. Compartir el concepto de la “Formación, Enfrentamientos, Normalización, Desempeño\\\" con el equipo puede ser provechoso.\"},{\"Puntaje\":23,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Enfrentamientos.\",\"dimension_descripcion\":\"El equipo de proyecto gana confianza, pero hay conflictos y polarización alrededor de temas interpersonales\\nLos miembros del equipo están mostrando sus propias personalidades mientras que enfrentan ideas y perspectivas de cada uno de los otros miembros. La frustración o los desacuerdos sobre metas, expectativas, papeles y responsabilidades se expresan abiertamente.\\nEl Líder del proyecto conduce al equipo de proyecto a través de ésta fase turbulenta de transición.\\nEstilo:  Entrenador. La tolerancia de cada miembro del equipo y en sus diferentes necesidades debe ser acentuada.\"},{\"Puntaje\":22,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Normalización.\",\"dimension_descripcion\":\"La eficacia del equipo de proyecto aumenta y el equipo comienza a desarrollar una identidad.\\nLos miembros del equipo ajustan su comportamiento el uno al del otro mientras que desarrollan acuerdos de hacer el trabajo en equipo de forma más natural y fluida. Esfuerzo consciente de resolver los problemas y de lograr armonía en el grupo. Los niveles de motivación están aumentando.\\nEl Líder de proyecto permite que el equipo se haga mucho más autónomo.\\nEstilo Participativo.\"},{\"Puntaje\":17,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Desempeño.\",\"dimension_descripcion\":\"El equipo de proyecto puede ahora funcionar como una unidad. Consigue que el trabajo sea hecho de forma fluida y con eficacia, sin conflictos inadecuados o necesidad de supervisión externa.\\nLos miembros del equipo tienen una comprensión clara sobre lo qué se requiere de él a nivel de tarea. Ellos son ahora competentes, autónomos y ahora manejan el procedimiento de la toma de decisiones sin supervisión. La actitud \\\"Yo puede hacerlo” es visible. Se hacen ofertas espontáneas para ayudar a otros.\\nEl Líder del proyecto permite al equipo tomar la mayor parte de las decisiones necesarias.\\nEstilo delegativo.\"}]}', NULL, NULL, NULL, NULL, 2, NULL, 4, 3),
+(7, 1, 0, '2026-06-07 18:19:36', '2026-06-07 18:28:14', '2026-06-07 18:28:14', '{\"Resultados\":[{\"dimension\":\"ATBR\",\"Puntaje\":3,\"Porcentaje\":25,\"Resultado\":\"E1: Dirigir\",\"ResultadoDescripcion\":\"Alto Comportamiento Directivo / Bajo Comportamiento de Apoyo\"},{\"dimension\":\"ATAR\",\"Puntaje\":4,\"Porcentaje\":33.33,\"Resultado\":\"E2: Persuadir\",\"ResultadoDescripcion\":\"Alto Comportamiento Directivo / Alto Comportamiento de Apoyo\"},{\"dimension\":\"BTAR\",\"Puntaje\":4,\"Porcentaje\":33.33,\"Resultado\":\"E3: Apoyar\",\"ResultadoDescripcion\":\"Alto Comportamiento de Apoyo / Bajo Comportamiento Directivo\"},{\"dimension\":\"BTBR\",\"Puntaje\":1,\"Porcentaje\":8.33,\"Resultado\":\"E4: Delegar\",\"ResultadoDescripcion\":\"Bajo Comportamiento de Apoyo / Bajo Comportamiento Directivo\"},{\"dimension\":\"Nivel de Efectividad\",\"Puntaje\":1,\"Porcentaje\":0,\"Resultado\":\"Nivel 1\",\"ResultadoDescripcion\":\"\"}]}', NULL, NULL, NULL, NULL, 2, NULL, 4, 1),
+(8, 1, 0, '2026-06-07 18:19:36', '2026-06-07 18:29:01', '2026-06-07 18:29:01', '{\"Resultados\":[]}', NULL, NULL, NULL, NULL, 2, NULL, 4, 6),
+(9, 1, 0, '2026-06-07 18:19:36', '2026-06-07 18:30:00', '2026-06-07 18:30:00', '{\"Resultados\":[{\"Puntaje\":2,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Escuchar sin interrumpir.\",\"dimension_descripcion\":null},{\"Puntaje\":4,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Escuchar prestando 100% de atención.\",\"dimension_descripcion\":null},{\"Puntaje\":1,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Escuchar más allá de las palabras.\",\"dimension_descripcion\":null},{\"Puntaje\":2,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Escuchar incentivando al otro a profundizar.\",\"dimension_descripcion\":null}]}', NULL, NULL, NULL, NULL, 2, NULL, 4, 4),
+(10, 1, 0, '2026-06-07 18:19:36', '2026-06-07 18:31:11', '2026-06-07 18:31:11', '{\"Resultados\":[{\"Puntaje\":0.72,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":null}]}', NULL, NULL, NULL, NULL, 2, NULL, 4, 5),
+(11, 1, 0, '2026-06-11 17:06:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, NULL, 1, 9),
+(12, 1, 0, '2026-06-11 16:58:32', '2026-06-11 16:59:05', '2026-06-11 16:59:18', '{\"Resultados\":[{\"Puntaje\":0,\"Resultado\":\"Experiencia Concreta (EC)\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Experiencia Concreta (EC)\",\"dimension_descripcion\":\"Refleja una tendencia a aprender basado en la experiencia y en juicios intuitivos.\\nLos individuos con un fuerte desarrollo en EC suelen establecer buenos contactos con otros y son más bien “orientados a las personas”.\\n A menudo encuentran que la teoría no ayuda mucho y prefieren tratar cada caso como caso único.\\nAprenden más de ejemplos específicos que los enfrentan a situaciones prácticas.\\nLas personas que enfatizan EC aprenden más de sus iguales que de sus superiores y se benefician más de la retroalimentación y discusión con los otros que enfatizan EC.\"},{\"Puntaje\":0,\"Resultado\":\"Observación Reflexiva (OR)\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Observación Reflexiva (OR)\",\"dimension_descripcion\":\"Refleja una tendencia a aprender en forma imparcial y reflexiva.\\nLas personas con un desarrollo de OR aprenden basándose en juicios sobre observaciones precisas y prefieren\\n situaciones de aprendizaje tal como las clases expositivas que les permiten tomar el rol de observadores imparciales.\\nEstas personas suelen ser Introvertidas.\"},{\"Puntaje\":0,\"Resultado\":\"Conceptualización Abstracta (CA)\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Conceptualización Abstracta (CA)\",\"dimension_descripcion\":\"Refleja una tendencia al análisis y a la conceptualización y una forma de aprender basada en el pensamiento lógico y la evaluación racional.\\nLas personas con un fuerte desarrollo de CA tienden a orientarse más hacia las cosas y los símbolos que hacia otras personas.\\nAprende más en situaciones impersonales con una clara autoridad en las que enfatiza el análisis sistemático y la teoría.\\nSe frustran y obtienen poco beneficio de la experiencia poco estructurada tales como el ejercicio y la simulación.\"},{\"Puntaje\":0,\"Resultado\":\"Experimentación Activa (EA)\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Experimentación Activa (EA)\",\"dimension_descripcion\":\"Refleja una tendencia a aprender haciendo cosas y experimentando alternativas.\\nLas personas con un grado de desarrollo de EA aprenden más cuando participan en proyectos, trabajos o discusión de grupo.\\nNo se sienten atraídos por clases expositivas y situaciones de aprendizaje pasivo. Estas personas suelen ser extravertidas.\"},{\"Puntaje\":0,\"Resultado\":\"Activo\",\"ResultadoDescripcion\":\"EA-OR eje abscisas\",\"dimension\":\"EJE HORIZONTAL\",\"dimension_descripcion\":\"Tendencia Reflexiva vs Activa\"},{\"Puntaje\":0,\"Resultado\":\"Abstracto\",\"ResultadoDescripcion\":\"CA-EC eje ordenadas\",\"dimension\":\"EJE VERTICAL\",\"dimension_descripcion\":\"Tendencia Concreta vs Abstracta\"},{\"Puntaje\":0,\"Resultado\":\"Cuadrante \",\"ResultadoDescripcion\":\"\",\"dimension\":\"ESTILO DE APRENDIZAJE\",\"dimension_descripcion\":\"Perfil dominante según matriz de Kolb\"}]}', NULL, NULL, NULL, NULL, 3, NULL, 4, 7),
+(13, 1, 0, '2026-06-11 17:06:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, NULL, 1, 3),
+(14, 1, 0, '2026-06-11 16:58:32', '2026-06-11 17:00:39', '2026-06-11 17:00:39', '{\"Resultados\":[{\"Puntaje\":8.33,\"Resultado\":\"8.33%\",\"ResultadoDescripcion\":\"Buena gestión del tiempo\",\"dimension\":null},{\"Puntaje\":91.67,\"Resultado\":\"91.67%\",\"ResultadoDescripcion\":\"Mala gestión del tiempo\",\"dimension\":null}]}', NULL, NULL, NULL, NULL, 3, NULL, 4, 8),
+(15, 1, 0, '2026-06-11 17:06:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, NULL, 1, 1),
+(16, 1, 0, '2026-06-11 17:06:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, NULL, 1, 6),
+(17, 1, 0, '2026-06-11 17:06:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, NULL, 1, 2),
+(18, 1, 0, '2026-06-11 17:06:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, NULL, 1, 4),
+(19, 1, 0, '2026-06-11 17:06:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, NULL, 1, 5),
+(20, 1, 0, '2026-06-11 17:06:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, NULL, 1, 10);
 
 -- --------------------------------------------------------
 
@@ -1069,7 +1309,9 @@ CREATE TABLE `persona` (
 
 INSERT INTO `persona` (`id`, `fecha_nacimiento`, `telefono`, `direccion`, `grupo`, `tiempo_compania`, `tiempo_cargo`, `rut`, `owner`, `otra_informacion`, `pais`, `ciudad`, `linkedin`, `instagram`, `x_twitter`, `facebook`, `pagina_web`, `observacion`, `created_at`, `updated_at`, `estado_id`, `usuario_id`, `empresa_id`) VALUES
 (1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-04-06 22:47:03', '2026-04-06 22:47:03', 1, 1, 1),
-(2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-06-06 23:41:52', '2026-06-06 23:41:52', 1, 2, 1);
+(2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-06-06 23:41:52', '2026-06-06 23:41:52', 1, 2, 1),
+(3, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 3, 1),
+(4, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 4, 2);
 
 -- --------------------------------------------------------
 
@@ -1339,7 +1581,17 @@ CREATE TABLE `respuestas` (
 --
 
 INSERT INTO `respuestas` (`id`, `fecha`, `nro_intentos`, `created_at`, `updated_at`, `estado_id`, `evaluacion_usuario_id`) VALUES
-(1, '2026-06-07 15:31:48', 1, NULL, NULL, 1, 1);
+(1, '2026-06-07 15:31:48', 1, NULL, NULL, 1, 1),
+(4, '2026-06-07 17:53:12', 1, NULL, NULL, 1, 2),
+(5, '2026-06-07 18:25:12', 1, NULL, NULL, 1, 4),
+(6, '2026-06-07 18:26:31', 1, NULL, NULL, 1, 5),
+(7, '2026-06-07 18:27:26', 1, NULL, NULL, 1, 6),
+(8, '2026-06-07 18:28:14', 1, NULL, NULL, 1, 7),
+(9, '2026-06-07 18:29:01', 1, NULL, NULL, 1, 8),
+(10, '2026-06-07 18:30:00', 1, NULL, NULL, 1, 9),
+(11, '2026-06-07 18:31:11', 1, NULL, NULL, 1, 10),
+(12, '2026-06-11 16:59:05', 1, NULL, NULL, 1, 12),
+(13, '2026-06-11 17:00:39', 1, NULL, NULL, 1, 14);
 
 -- --------------------------------------------------------
 
@@ -1547,7 +1799,9 @@ CREATE TABLE `user` (
 
 INSERT INTO `user` (`id`, `nombre`, `usuario`, `email`, `password`, `status`, `disc_asignados`, `acreditado`, `eval_asignadas`, `avatar_nombre_archivo`, `avatar_es_fisico`, `ruta_avatar`, `remember_token`, `created_at`, `updated_at`, `rolusuario_id`, `estado_id`, `empresa_id`) VALUES
 (1, 'Gonzalo Matus', 'mmatus0', 'matusgonzalo1544@gmail.com', '$2y$12$MW.OVVYX4mPYFF2jYw8UbeMKE9Ifs5S8HA5bR30EBqY80hjvtrzJ2', 1, 0, 0, 0, 'default_avatar.png', '1', 'images/users/default_avatar.png', 'J7UvIkaq46UUu532yz2VERMsteqnkEsFgOEIinjzeIGy2mfpPQD3p4Xi6RNS', '2026-04-06 22:47:03', '2026-06-07 06:01:06', 1, 1, 1),
-(2, 'Constanza Venegas', 'conyvenegas', 'gmatusz85@gmail.com', '$2y$12$uN8j1pFdPhCmvX2zTpBYM.rc3wc1qf0qQmW0wCvqtlnmVhC7OW16C', 1, 0, 0, 0, 'default_avatar.png', '1', 'images/users/default_avatar.png', '6OrN520h8ME9AoURUPs7CWjdUxjY6SpRV1NQi5soZft37YGMIXNAiuupUrFZ', '2026-06-06 23:41:52', '2026-06-06 23:41:52', 3, 1, 1);
+(2, 'Constanza Venegas', 'conyvenegas', 'gmatusz85@gmail.com', '$2y$12$uN8j1pFdPhCmvX2zTpBYM.rc3wc1qf0qQmW0wCvqtlnmVhC7OW16C', 1, 0, 0, 0, 'default_avatar.png', '1', 'images/users/default_avatar.png', '6OrN520h8ME9AoURUPs7CWjdUxjY6SpRV1NQi5soZft37YGMIXNAiuupUrFZ', '2026-06-06 23:41:52', '2026-06-06 23:41:52', 3, 1, 1),
+(3, 'Andrea Aravena', 'aaravena12', 'aaravena@gmail.com', '$2b$10$vkLvd56WXvPZ6CK3OG19eexoqS1Lq58z1eMHFVbfH3skOj4dTY70K', NULL, 0, 0, 0, NULL, NULL, 'images/users/default_avatar.png', NULL, NULL, NULL, 3, 1, 1),
+(4, 'admin', 'adminc', 'admin@evalcoach.cl', '$2b$10$FTB1MfC2guCn/mCkCk44WeMzEwyiX3h6UIHjYnVcwMm6scpSCytEu', NULL, 0, 0, 0, NULL, NULL, 'images/users/default_avatar.png', NULL, NULL, NULL, 1, 1, 2);
 
 --
 -- Índices para tablas volcadas
@@ -1898,7 +2152,7 @@ ALTER TABLE `categorias`
 -- AUTO_INCREMENT de la tabla `detalle_respuesta`
 --
 ALTER TABLE `detalle_respuesta`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=243;
 
 --
 -- AUTO_INCREMENT de la tabla `dimension`
@@ -1928,7 +2182,7 @@ ALTER TABLE `disc_instancia`
 -- AUTO_INCREMENT de la tabla `empresa`
 --
 ALTER TABLE `empresa`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `entidad`
@@ -1952,7 +2206,7 @@ ALTER TABLE `evaluacion`
 -- AUTO_INCREMENT de la tabla `evaluacion_usuario`
 --
 ALTER TABLE `evaluacion_usuario`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de la tabla `faq`
@@ -2018,7 +2272,7 @@ ALTER TABLE `permiso_usuario`
 -- AUTO_INCREMENT de la tabla `persona`
 --
 ALTER TABLE `persona`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `preguntas`
@@ -2030,7 +2284,7 @@ ALTER TABLE `preguntas`
 -- AUTO_INCREMENT de la tabla `respuestas`
 --
 ALTER TABLE `respuestas`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de la tabla `resultados`
@@ -2078,7 +2332,7 @@ ALTER TABLE `tmp_usuarios`
 -- AUTO_INCREMENT de la tabla `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Restricciones para tablas volcadas

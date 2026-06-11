@@ -1,4 +1,4 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, signal, inject, effect} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { map } from 'rxjs/operators';
@@ -15,14 +15,22 @@ export class AuthService {
   private urlLogin = 'http://localhost:3000/api/login';
 
   constructor() {
-    // Verificar si el token existe al iniciar el servicio
-    this.isAuthenticated.set(!!localStorage.getItem('token'));
+  this.isAuthenticated.set(!!localStorage.getItem('token'));
 
-    const storedUser = localStorage.getItem('usuario');
-    if (storedUser) {
-      this.usuario.set(JSON.parse(storedUser));
-    }
+  const storedUser = localStorage.getItem('usuario');
+  if (storedUser) {
+    this.usuario.set(JSON.parse(storedUser));
   }
+
+  effect(() => {
+    const u = this.usuario();
+    if (u) {
+      console.log('[AuthService] Usuario activo:', u.nombre, '| Rol:', u.rol);
+    } else {
+      console.log('[AuthService] Sesión cerrada.');
+    }
+  });
+}
 
   login(login: string, password: string) {
     const userLogin = { login, password };

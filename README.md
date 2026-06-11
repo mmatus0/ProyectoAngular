@@ -82,26 +82,51 @@ docker-compose up --build
 
 ## Funcionalidades Implementadas
 
-### Login
-- Formulario reactivo con validaciones
-- Acepta usuario o email
-- JWT almacenado en localStorage
-- Interceptor HTTP que agrega el token automáticamente
-- Guard que protege rutas privadas
+### Autenticación y Seguridad
+- Login con JWT almacenado en localStorage
+- AuthGuard en todas las rutas privadas
+- Persistencia de sesión al recargar
+- Control de acceso por rol (Admin / Coach / Cliente)
+- Sidebar diferenciado por rol
 
+### Usuarios
+- Listado Activos / Inactivos con búsqueda en tiempo real
+- CRUD completo con modal y Reactive Forms validados
+- Carga masiva desde `.xlsx` o `.csv`
+- Exportar listado a Excel
+- Descarga de plantilla de carga
 
-### Gestión de Usuarios (CRUD completo)
+### Instituciones
+- Listado Activos / Inactivos con búsqueda
+- CRUD completo con modal
+- Carga masiva desde `.xlsx` o `.csv`
+- Descarga de plantilla de carga
 
-- Listado con tabs **Activos / Inactivos**
-- Buscador en tiempo real (pipe personalizado)
-- Badges de rol con colores
-- **Crear usuario** — modal con Reactive Form (datos generales, datos personales, membresía)
-- **Editar usuario** — mismo modal con datos precargados
-- **Desactivar usuario** — modal de confirmación (estado_id = 2)
-- **Activar usuario** — modal de confirmación (estado_id = 1)
-- **Carga Masiva** — suba `.xlsx` o `.csv` y crea/actualiza usuarios
-- **Exportar Excel** — descargue la tabla actual como `.xlsx`
-- **Plantilla de carga** — descargue el archivo base para rellenar
+### Sesiones
+- Listado con 3 tabs (Activas / Finalizadas / Inactivas)
+- CRUD completo con formulario reactivo validado
+- Cronómetro por sesión (start/stop)
+- Catastro de actividades por sesión
+- Finalización de sesión con persistencia
+
+### Herramientas
+- Asignación de herramientas a clientes (dual-list)
+- Vista cliente: cuadrante interactivo por herramienta
+- Activar / desactivar asignaciones
+
+### Evaluaciones (Tests)
+- Asignación de tests a clientes
+- Toma de test con persistencia parcial (upsert)
+- Finalización con modal de confirmación
+- Resultados con 4 tipos de visualización
+- Análisis textual personalizado por tipo de test
+
+### Perfil
+- Ver y editar datos personales y redes sociales
+
+### FAQ
+- Categorías con filtrado dinámico
+- Acordeón de preguntas integrado con backend
 
 ---
 
