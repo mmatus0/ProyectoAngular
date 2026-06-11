@@ -4,7 +4,6 @@ import { LoginComponent } from './features/auth/login/components/login.component
 import { MainLayoutComponent } from './layout/main-layout.component';
 import { DashboardComponent } from './features/dashboard/components/dashboard/dashboard.component';
 import { UsuariosListComponent } from './features/usuarios/components/usuarios-list/usuarios-list.component';
-import { DiscListComponent } from './features/disc/components/disc-list/disc-list.component';
 import { BibliotecaComponent } from './features/biblioteca/components/biblioteca/biblioteca.component';
 import { PerfilComponent } from './features/perfil/components/perfil/perfil.component';
 import { FaqComponent } from './features/faq/components/faq/faq.component';
@@ -39,7 +38,6 @@ export const routes: Routes = [
       { path: '',                             redirectTo: 'dashboard',             pathMatch: 'full' },
       { path: 'dashboard',                    component: DashboardComponent,        canActivate: [authGuard] },
       { path: 'usuarios',                     component: UsuariosListComponent,     canActivate: [authGuard] },
-      { path: 'disc',                         component: DiscListComponent,         canActivate: [authGuard] },
       { path: 'biblioteca',                   component: BibliotecaComponent,       canActivate: [authGuard] },
       { path: 'perfil',                       component: PerfilComponent,           canActivate: [authGuard] },
       { path: 'faq',                          component: FaqComponent,              canActivate: [authGuard] },
