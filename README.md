@@ -57,6 +57,9 @@ Abre automáticamente `http://localhost:4200`
 
 ## Docker
 
+Para acceder a proyecto desplegado en server pacheco, debe ingresar a: http://pacheco.chillan.ubiobio.cl:8073/login
+> **Nota:** Debe utilizar las credenciales que se encuentran más abajo para login. Cualquiera de las dos cuentas sirve como admin del sistema
+
 Para levantar con Docker, solo basta con tener ejecutado la app **Docker Desktop** y ejecutar el siguiente comando en la carpeta raíz del proyecto:
 
 ```bash
@@ -76,6 +79,8 @@ docker-compose up --build
 |---|---|
 | Usuario | `admin@evalcoach.cl` |
 | Contraseña | `password` |
+| Usuario | `mmatus0` |
+| Contraseña | `lalala123` |
 | Rol | Administrador (acceso completo) |
 
 ---
