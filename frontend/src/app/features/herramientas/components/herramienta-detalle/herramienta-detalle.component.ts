@@ -2,6 +2,9 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
+
+
 
 interface IAtributo {
   id: number;
@@ -31,7 +34,7 @@ export class HerramientaDetalleComponent implements OnInit {
   private router = inject(Router);
   private http   = inject(HttpClient);
 
-  private apiUrl = 'http://localhost:3000/api/mis-herramientas';
+  private apiUrl = `${environment.apiUrl}/mis-herramientas`;
 
   herramienta  = signal<any>(null);
   entidades    = signal<IEntidad[]>([]);

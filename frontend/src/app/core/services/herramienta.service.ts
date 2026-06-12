@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class HerramientaService {
 
   private http = inject(HttpClient);
-  private url  = 'http://localhost:3000/api/herramientas';
+  private url  = `${environment.apiUrl}/herramientas`;
 
   private headers() {
     const token = localStorage.getItem('token');

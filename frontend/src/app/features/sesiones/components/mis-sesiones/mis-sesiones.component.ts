@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
 
 interface IMiSesion {
   id: number;
@@ -34,7 +35,7 @@ export class MisSesionesComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.http.get<any>('http://localhost:3000/api/mis-sesiones', this.headers()).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/mis-sesiones`, this.headers()).subscribe({
       next: (resp) => {
         this.sesiones.set(resp.data);
         this.loading.set(false);

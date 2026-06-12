@@ -2,6 +2,7 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
 
 interface IPregunta {
   id: number;
@@ -30,7 +31,7 @@ export class EvaluacionTestComponent implements OnInit {
   private router = inject(Router);
   private http   = inject(HttpClient);
 
-  private apiUrl = 'http://localhost:3000/api/mis-evaluaciones';
+  private apiUrl = `${environment.apiUrl}/mis-evaluaciones`;
   private asignacionId!: number;
 
   evaluacion   = signal<any>(null);

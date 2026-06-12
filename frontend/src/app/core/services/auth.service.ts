@@ -2,6 +2,7 @@ import { Injectable, signal, inject, effect} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -12,7 +13,7 @@ export class AuthService {
   private http   = inject(HttpClient);
   private router = inject(Router);
 
-  private urlLogin = 'http://localhost:3000/api/login';
+  private urlLogin = `${environment.apiUrl}/login`;
 
   constructor() {
   this.isAuthenticated.set(!!localStorage.getItem('token'));

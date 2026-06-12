@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class SesionService {
 
   private http = inject(HttpClient);
-  private url  = 'http://localhost:3000/api/sesiones';
+  private url  = `${environment.apiUrl}/sesiones`;
 
   private headers() {
     const token = localStorage.getItem('token');

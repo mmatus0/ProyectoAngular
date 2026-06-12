@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-sesion-vista',
@@ -28,7 +29,7 @@ export class SesionVistaComponent implements OnInit {
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
-    this.http.get<any>(`http://localhost:3000/api/sesiones/${id}/detalle`, this.headers()).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/sesiones/${id}/detalle`, this.headers()).subscribe({
       next: (resp) => {
         this.sesion.set(resp.sesion);
         this.tipos.set(resp.tipos);

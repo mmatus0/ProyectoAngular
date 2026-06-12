@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class InstitucionService {
 
   private http   = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/api/instituciones';
+  private apiUrl = `${environment.apiUrl}/instituciones`;
 
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');

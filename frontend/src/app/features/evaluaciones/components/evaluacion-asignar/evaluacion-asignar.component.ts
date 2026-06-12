@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
 
 interface IEvaluacion {
   id: number;
@@ -26,7 +27,7 @@ export class EvaluacionAsignarComponent implements OnInit {
   private http   = inject(HttpClient);
   private router = inject(Router);
 
-  private apiUrl = 'http://localhost:3000/api/evaluaciones';
+  private apiUrl = `${environment.apiUrl}/evaluaciones`;
 
   usuarios           = signal<IUsuario[]>([]);
   disponibles        = signal<IEvaluacion[]>([]);

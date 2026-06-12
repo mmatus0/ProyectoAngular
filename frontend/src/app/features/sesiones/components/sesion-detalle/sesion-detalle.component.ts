@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-sesion-detalle',
@@ -17,7 +18,7 @@ export class SesionDetalleComponent implements OnInit, OnDestroy {
   private http   = inject(HttpClient);
   private fb     = inject(FormBuilder);
 
-  private apiUrl = 'http://localhost:3000/api/sesiones';
+  private apiUrl = `${environment.apiUrl}/sesiones`;
   private intervalId: any = null;
 
   sesion        = signal<any>(null);

@@ -1,12 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Biblioteca } from '../models/biblioteca.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class BibliotecaService {
 
   private http   = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/api/biblioteca';
+  private apiUrl = `${environment.apiUrl}/biblioteca`;
 
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');

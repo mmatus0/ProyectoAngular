@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class EvaluacionService {
 
   private http = inject(HttpClient);
-  private url  = 'http://localhost:3000/api/evaluaciones';
+  private url  = `${environment.apiUrl}/evaluaciones`;
 
   private headers() {
     const token = localStorage.getItem('token');
@@ -37,6 +38,6 @@ export class EvaluacionService {
   }
 
   getMisEvaluaciones() {
-    return this.http.get<any>('http://localhost:3000/api/mis-evaluaciones', this.headers());
+    return this.http.get<any>(`${environment.apiUrl}/mis-evaluaciones`, this.headers());
   }
 }

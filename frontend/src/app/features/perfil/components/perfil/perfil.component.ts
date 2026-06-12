@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-perfil',
@@ -14,7 +15,7 @@ export class PerfilComponent implements OnInit {
   private http = inject(HttpClient);
   private fb   = inject(FormBuilder);
 
-  private apiUrl = 'http://localhost:3000/api/perfil';
+  private apiUrl = `${environment.apiUrl}/perfil`;
 
   perfil   = signal<any>(null);
   loading  = signal<boolean>(true);

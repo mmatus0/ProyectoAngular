@@ -7,31 +7,38 @@ var fs         = require('fs');
 var jwt        = require('jsonwebtoken');
 var bcrypt     = require('bcrypt');
 var bodyParser = require('body-parser');
+require('dotenv').config();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// ── Clave secreta JWT (patrón del curso) ──────────────────────────────────────
-const SECRET_KEY = 'clave_secreta_evalcoach';
+// Clave secreta JWT 
+const SECRET_KEY = process.env.JWT_SECRET || 'clave_secreta_evalcoach';
 
-// ── CORS ──────────────────────────────────────────────────────────────────────
+// CORS
+const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:4200').split(',');
+
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
+    const origin = req.headers.origin;
+    if (!origin || allowedOrigins.includes(origin)) {
+        res.header('Access-Control-Allow-Origin', origin || '*');
+    }
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     if (req.method === 'OPTIONS') return res.sendStatus(200);
     next();
 });
 
-// ── Conexión MySQL con reconexión automática ──────────────────────────────────
+// Conexión MySQL
 var conn;
 
 function conectar() {
     conn = mysql.createConnection({
-        host:     'localhost',
-        user:     'root',
-        password: '',
-        database: 'coachingnew'
+        host:     process.env.DB_HOST || 'localhost',
+        port:     process.env.DB_PORT || 3306,
+        user:     process.env.DB_USER || 'root',
+        password: process.env.DB_PASSWORD || '',
+        database: process.env.DB_DATABASE || 'coachingnew'
     });
 
     conn.connect((err) => {
@@ -55,11 +62,11 @@ function conectar() {
 
 conectar();
 
-// ── Multer para carga masiva ──────────────────────────────────────────────────
+//  carga masiva 
 var upload = multer({ storage: multer.memoryStorage() });
 
-// ── Middleware JWT ────────────────────────────────────────────────────────────
-// OJO: debe ubicarse DESPUÉS de /api/login, sino el login quedará privado
+// Middleware JWT
+
 function verificarToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     if (!authHeader) {
@@ -1630,6 +1637,7 @@ app.use((req, res) => {
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────
-app.listen(3000, () => {
-    console.log('Servidor backend EvalCoach escuchando en puerto 3000');
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Servidor backend EvalCoach escuchando en puerto ${PORT}`);
 });

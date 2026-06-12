@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { environment } from '../../../../../environments/environment';
 
 interface IMiHerramienta {
   id: number;
@@ -21,7 +22,7 @@ interface IMiHerramienta {
 export class MisHerramientasComponent implements OnInit {
 
   private http = inject(HttpClient);
-  private url  = 'http://localhost:3000/api/mis-herramientas';
+  private url  = `${environment.apiUrl}/mis-herramientas`;
   private router = inject(Router);
 
 

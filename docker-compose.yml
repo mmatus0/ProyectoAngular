@@ -1,44 +1,48 @@
 version: '3.9'
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: evalcoach_mysql
+  db:
+    image: mariadb:10.11
+    container_name: evalcoach_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: coachingnew
-    ports:
-      - "3306:3306"
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${DB_DATABASE}
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - mysql_data:/var/lib/mysql
-      - ./database/coachingnew.sql:/docker-entrypoint-initdb.d/coachingnew.sql
+      - db_data:/var/lib/mysql
+      - ./database/coachingnew.sql:/docker-entrypoint-initdb.d/coachingnew.sql:ro
+    networks:
+      - evalcoach_net
 
   backend:
     build: ./backend
     container_name: evalcoach_backend
     restart: always
-    ports:
-      - "3000:3000"
-    depends_on:
-      - mysql
     env_file:
       - ./backend/.env
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
+    ports:
+      - "8074:3000"
+    depends_on:
+      - db
+    networks:
+      - evalcoach_net
 
   frontend:
     build: ./frontend
     container_name: evalcoach_frontend
     restart: always
     ports:
-      - "4200:4200"
+      - "8073:80"
     depends_on:
       - backend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+    networks:
+      - evalcoach_net
+
+networks:
+  evalcoach_net:
+    driver: bridge
 
 volumes:
-  mysql_data:
+  db_data:

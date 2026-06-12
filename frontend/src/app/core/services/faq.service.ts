@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class FaqService {
 
   private http = inject(HttpClient);
-  private url  = 'http://localhost:3000/api/faq';
+  private url  = `${environment.apiUrl}/faq`;
 
   private headers() {
     const token = localStorage.getItem('token');
