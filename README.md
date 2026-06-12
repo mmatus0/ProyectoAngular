@@ -1,7 +1,11 @@
 # EvalCoach — Plataforma de Gestión de Evaluaciones
 
 ---
+## Avances
 
+Todas las modificaciones y avances de la entrega del 12/06 se encuentran en la rama "avance2"
+
+---
 ## Base de Datos
 
 El proyecto usa la base de datos **`coachingnew`** (`.sql`) el cual se encuentra dentro de la carpeta `database`.
