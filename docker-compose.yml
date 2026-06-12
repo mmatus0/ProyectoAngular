@@ -1,5 +1,4 @@
 version: '3.9'
-
 services:
   db:
     image: mariadb:10.11
@@ -15,7 +14,6 @@ services:
       - ./database/coachingnew.sql:/docker-entrypoint-initdb.d/coachingnew.sql:ro
     networks:
       - evalcoach_net
-
   backend:
     build: ./backend
     container_name: evalcoach_backend
@@ -28,7 +26,6 @@ services:
       - db
     networks:
       - evalcoach_net
-
   frontend:
     build: ./frontend
     container_name: evalcoach_frontend
@@ -39,10 +36,11 @@ services:
       - backend
     networks:
       - evalcoach_net
-
 networks:
   evalcoach_net:
     driver: bridge
-
+    ipam:
+      config:
+        - subnet: 10.50.60.0/24
 volumes:
   db_data:
