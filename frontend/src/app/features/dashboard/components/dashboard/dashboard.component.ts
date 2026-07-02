@@ -1,14 +1,21 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../../core/services/auth.service';
 import { environment } from '../../../../../environments/environment';
 
-interface Metricas {
-  clientes_total:          number;
-  clientes_por_asesorar:   number;
-  clientes_asesorados:     number;
-  evaluaciones_pendientes: number;
+interface MetricasAdmin {
+  clientes_total:           number;
+  clientes_por_asesorar:    number;
+  clientes_asesorados:      number;
+  evaluaciones_pendientes:  number;
   evaluaciones_finalizadas: number;
+}
+
+interface MetricasCliente {
+  evaluaciones_pendientes:  number;
+  evaluaciones_finalizadas: number;
+  herramientas_asignadas:   number;
+  sesiones_activas:         number;
 }
 
 @Component({
@@ -25,7 +32,11 @@ export class DashboardComponent implements OnInit {
 
   user     = this.authService.usuario;
   loading  = signal<boolean>(true);
-  metricas = signal<Metricas | null>(null);
+
+  esCliente  = computed(() => this.authService.esCliente());
+
+  metricasAdmin   = signal<MetricasAdmin | null>(null);
+  metricasCliente = signal<MetricasCliente | null>(null);
 
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
@@ -33,9 +44,16 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.http.get<any>(`${environment.apiUrl}/dashboard`, { headers: this.getAuthHeaders() }).subscribe({
-      next: r  => { this.metricas.set(r.data); this.loading.set(false); },
-      error: () => this.loading.set(false)
-    });
+    if (this.esCliente()) {
+      this.http.get<any>(`${environment.apiUrl}/dashboard/cliente`, { headers: this.getAuthHeaders() }).subscribe({
+        next: r  => { this.metricasCliente.set(r.data); this.loading.set(false); },
+        error: () => this.loading.set(false)
+      });
+    } else {
+      this.http.get<any>(`${environment.apiUrl}/dashboard`, { headers: this.getAuthHeaders() }).subscribe({
+        next: r  => { this.metricasAdmin.set(r.data); this.loading.set(false); },
+        error: () => this.loading.set(false)
+      });
+    }
   }
 }

@@ -9,60 +9,95 @@
   <div class="text-center py-5 text-muted">
     <div class="spinner-border spinner-border-sm me-2"></div> Cargando métricas...
   </div>
-} @else {
+}
 
-  <!-- Sección Clientes -->
+<!-- ══ VISTA ADMIN / COACH ══════════════════════════════════════════════════ -->
+@if (!loading() && !esCliente()) {
+
   <p class="text-muted small fw-semibold text-uppercase mb-2 mt-1">Clientes</p>
   <div class="row g-3 mb-4">
-
     <div class="col-md-4">
       <div class="dash-card dash-card--teal">
         <div class="dash-card__icon"><i class="bi bi-people-fill"></i></div>
         <h6 class="dash-card__title">Total Clientes</h6>
-        <p class="dash-card__value">{{ metricas()?.clientes_total ?? '—' }}</p>
+        <p class="dash-card__value">{{ metricasAdmin()?.clientes_total ?? '—' }}</p>
       </div>
     </div>
-
     <div class="col-md-4">
       <div class="dash-card dash-card--sky">
         <div class="dash-card__icon"><i class="bi bi-hourglass-split"></i></div>
         <h6 class="dash-card__title">Por Asesorar</h6>
-        <p class="dash-card__value">{{ metricas()?.clientes_por_asesorar ?? '—' }}</p>
+        <p class="dash-card__value">{{ metricasAdmin()?.clientes_por_asesorar ?? '—' }}</p>
         <small style="opacity:.8;font-size:.7rem">Con sesión activa pendiente</small>
       </div>
     </div>
-
     <div class="col-md-4">
       <div class="dash-card dash-card--blue">
         <div class="dash-card__icon"><i class="bi bi-person-check-fill"></i></div>
         <h6 class="dash-card__title">Ya Asesorados</h6>
-        <p class="dash-card__value">{{ metricas()?.clientes_asesorados ?? '—' }}</p>
+        <p class="dash-card__value">{{ metricasAdmin()?.clientes_asesorados ?? '—' }}</p>
         <small style="opacity:.8;font-size:.7rem">Con al menos una sesión finalizada</small>
       </div>
     </div>
-
   </div>
 
-  <!-- Sección Evaluaciones -->
   <p class="text-muted small fw-semibold text-uppercase mb-2">Evaluaciones</p>
   <div class="row g-3">
-
     <div class="col-md-6">
       <div class="dash-card dash-card--violet">
         <div class="dash-card__icon"><i class="bi bi-clipboard2-pulse-fill"></i></div>
         <h6 class="dash-card__title">Pendientes / En proceso</h6>
-        <p class="dash-card__value">{{ metricas()?.evaluaciones_pendientes ?? '—' }}</p>
+        <p class="dash-card__value">{{ metricasAdmin()?.evaluaciones_pendientes ?? '—' }}</p>
       </div>
     </div>
-
     <div class="col-md-6">
       <div class="dash-card dash-card--teal">
         <div class="dash-card__icon"><i class="bi bi-clipboard2-check-fill"></i></div>
         <h6 class="dash-card__title">Finalizadas</h6>
-        <p class="dash-card__value">{{ metricas()?.evaluaciones_finalizadas ?? '—' }}</p>
+        <p class="dash-card__value">{{ metricasAdmin()?.evaluaciones_finalizadas ?? '—' }}</p>
       </div>
     </div>
+  </div>
 
+}
+
+<!-- ══ VISTA CLIENTE ════════════════════════════════════════════════════════ -->
+@if (!loading() && esCliente()) {
+
+  <p class="text-muted small fw-semibold text-uppercase mb-2 mt-1">Mis Evaluaciones</p>
+  <div class="row g-3 mb-4">
+    <div class="col-md-6">
+      <div class="dash-card dash-card--violet">
+        <div class="dash-card__icon"><i class="bi bi-clipboard2-pulse-fill"></i></div>
+        <h6 class="dash-card__title">Pendientes / En proceso</h6>
+        <p class="dash-card__value">{{ metricasCliente()?.evaluaciones_pendientes ?? '—' }}</p>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="dash-card dash-card--teal">
+        <div class="dash-card__icon"><i class="bi bi-clipboard2-check-fill"></i></div>
+        <h6 class="dash-card__title">Finalizadas</h6>
+        <p class="dash-card__value">{{ metricasCliente()?.evaluaciones_finalizadas ?? '—' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="text-muted small fw-semibold text-uppercase mb-2">Mi Actividad</p>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="dash-card dash-card--blue">
+        <div class="dash-card__icon"><i class="bi bi-tools"></i></div>
+        <h6 class="dash-card__title">Herramientas Asignadas</h6>
+        <p class="dash-card__value">{{ metricasCliente()?.herramientas_asignadas ?? '—' }}</p>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="dash-card dash-card--sky">
+        <div class="dash-card__icon"><i class="bi bi-calendar2-event-fill"></i></div>
+        <h6 class="dash-card__title">Sesiones Activas</h6>
+        <p class="dash-card__value">{{ metricasCliente()?.sesiones_activas ?? '—' }}</p>
+      </div>
+    </div>
   </div>
 
 }
