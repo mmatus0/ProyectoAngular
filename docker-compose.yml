@@ -12,8 +12,15 @@ services:
     volumes:
       - db_data:/var/lib/mysql
       - ./database/coachingnew.sql:/docker-entrypoint-initdb.d/coachingnew.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - evalcoach_net
+
   backend:
     build: ./backend
     container_name: evalcoach_backend
@@ -22,10 +29,14 @@ services:
       - ./backend/.env
     ports:
       - "8074:3000"
+    volumes:
+      - uploads_data:/app/uploads
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - evalcoach_net
+
   frontend:
     build: ./frontend
     container_name: evalcoach_frontend
@@ -36,11 +47,14 @@ services:
       - backend
     networks:
       - evalcoach_net
+
 networks:
   evalcoach_net:
     driver: bridge
     ipam:
       config:
         - subnet: 10.50.60.0/24
+
 volumes:
   db_data:
+  uploads_data:

@@ -15,6 +15,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // Clave secreta JWT 
 const SECRET_KEY = process.env.JWT_SECRET || 'clave_secreta_evalcoach';
 
+const path = require('path');
+
 // CORS
 const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:4200').split(',');
 
@@ -28,6 +30,8 @@ app.use((req, res, next) => {
     if (req.method === 'OPTIONS') return res.sendStatus(200);
     next();
 });
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Conexión MySQL
 var conn;
@@ -1629,6 +1633,194 @@ app.post('/api/instituciones/carga-masiva', verificarToken, upload.single('archi
     } catch (e) {
         res.status(500).json({ ok: false, mensaje: 'Error al procesar el archivo.' });
     }
+});
+
+// ── GET /api/dashboard ────────────────────────────────────────────────────────
+app.get('/api/dashboard', verificarToken, (req, res) => {
+  let completadas = 0;
+  const resultado = {};
+  const total = 5;
+  const check = () => { if (++completadas === total) res.json({ ok: true, data: resultado }); };
+
+  // Total clientes activos
+  conn.query(
+    `SELECT COUNT(*) as total FROM user WHERE rolusuario_id = 3 AND estado_id = 1`,
+    (err, r) => { resultado.clientes_total = err ? 0 : r[0].total; check(); }
+  );
+
+  // Clientes con al menos una sesión pendiente (estado 1) → por asesorar
+  conn.query(
+    `SELECT COUNT(DISTINCT usuario_id) as total FROM sesion WHERE estado_id = 1`,
+    (err, r) => { resultado.clientes_por_asesorar = err ? 0 : r[0].total; check(); }
+  );
+
+  // Clientes con al menos una sesión finalizada (estado 4) → ya asesorados
+  conn.query(
+    `SELECT COUNT(DISTINCT usuario_id) as total FROM sesion WHERE estado_id = 4`,
+    (err, r) => { resultado.clientes_asesorados = err ? 0 : r[0].total; check(); }
+  );
+
+  // Evaluaciones pendientes o en proceso (estado 1 o 3)
+  conn.query(
+    `SELECT COUNT(*) as total FROM evaluacion_usuario WHERE estado_id IN (1, 3)`,
+    (err, r) => { resultado.evaluaciones_pendientes = err ? 0 : r[0].total; check(); }
+  );
+
+  // Evaluaciones finalizadas (estado 4)
+  conn.query(
+    `SELECT COUNT(*) as total FROM evaluacion_usuario WHERE estado_id = 4`,
+    (err, r) => { resultado.evaluaciones_finalizadas = err ? 0 : r[0].total; check(); }
+  );
+});
+
+// Servir archivos subidos
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// ── GET /api/categorias ───────────────────────────────────────────────────────
+app.get('/api/categorias', verificarToken, (req, res) => {
+  conn.query('SELECT id, nombre FROM categorias ORDER BY nombre', (err, rows) => {
+    if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+    res.json({ ok: true, data: rows });
+  });
+});
+
+// ── GET /api/biblioteca?tipo=digital|audiovisual&estado=1|2 ───────────────────
+app.get('/api/biblioteca', verificarToken, (req, res) => {
+  const tipo   = req.query.tipo   || 'digital';
+  const estado = req.query.estado || 1;
+  const sql = `SELECT b.id, b.titulo, b.descripcion, b.tipo,
+                      b.ruta_archivo, b.url, b.estado_id, b.usuario_id,
+                      c.nombre as categoria, c.id as categoria_id,
+                      u.nombre as usuario,
+                      e.nombre as estado
+               FROM biblioteca b
+               LEFT JOIN categorias c ON c.id = b.categoria_id
+               LEFT JOIN user u       ON u.id = b.usuario_id
+               LEFT JOIN estado e     ON e.id = b.estado_id
+               WHERE b.tipo = ? AND b.estado_id = ?
+               ORDER BY b.id DESC`;
+  conn.query(sql, [tipo, estado], (err, rows) => {
+    if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+    res.json({ ok: true, data: rows });
+  });
+});
+
+// ── POST /api/biblioteca/digital ─────────────────────────────────────────────
+app.post('/api/biblioteca/digital', verificarToken, upload.single('archivo'), (req, res) => {
+  const { titulo, descripcion, categoria_id } = req.body;
+  if (!titulo || !categoria_id || !req.file) {
+    return res.status(400).json({ ok: false, mensaje: 'Título, categoría y archivo son requeridos.' });
+  }
+
+  const uploadDir = path.join(__dirname, 'uploads', 'biblioteca');
+  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+  const ext      = path.extname(req.file.originalname) || '.pdf';
+  const filename = `doc_${Date.now()}${ext}`;
+  const filepath = path.join(uploadDir, filename);
+  fs.writeFileSync(filepath, req.file.buffer);
+
+  const ruta_archivo = `biblioteca/${filename}`;
+  const sql = `INSERT INTO biblioteca (titulo, descripcion, tipo, ruta_archivo, url, categoria_id, estado_id, usuario_id, created_at, updated_at)
+               VALUES (?, ?, 'digital', ?, NULL, ?, 1, ?, NOW(), NOW())`;
+  conn.query(sql, [titulo, descripcion || null, ruta_archivo, categoria_id, req.usuario.id], (err, result) => {
+    if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+    res.status(201).json({ ok: true, mensaje: 'Documento agregado correctamente.', id: result.insertId });
+  });
+});
+
+// ── PUT /api/biblioteca/digital/:id ──────────────────────────────────────────
+app.put('/api/biblioteca/digital/:id', verificarToken, upload.single('archivo'), (req, res) => {
+  const { id } = req.params;
+  const { titulo, descripcion, categoria_id } = req.body;
+  if (!titulo || !categoria_id) {
+    return res.status(400).json({ ok: false, mensaje: 'Título y categoría son requeridos.' });
+  }
+
+  const actualizar = (ruta_archivo) => {
+    let sql, params;
+    if (ruta_archivo) {
+      sql    = `UPDATE biblioteca SET titulo=?, descripcion=?, categoria_id=?, ruta_archivo=?, updated_at=NOW() WHERE id=? AND tipo='digital'`;
+      params = [titulo, descripcion || null, categoria_id, ruta_archivo, id];
+    } else {
+      sql    = `UPDATE biblioteca SET titulo=?, descripcion=?, categoria_id=?, updated_at=NOW() WHERE id=? AND tipo='digital'`;
+      params = [titulo, descripcion || null, categoria_id, id];
+    }
+    conn.query(sql, params, (err) => {
+      if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+      res.json({ ok: true, mensaje: 'Documento actualizado correctamente.' });
+    });
+  };
+
+  if (req.file) {
+    const uploadDir = path.join(__dirname, 'uploads', 'biblioteca');
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    const ext      = path.extname(req.file.originalname) || '.pdf';
+    const filename = `doc_${Date.now()}${ext}`;
+    fs.writeFileSync(path.join(uploadDir, filename), req.file.buffer);
+    actualizar(`biblioteca/${filename}`);
+  } else {
+    actualizar(null);
+  }
+});
+
+// ── POST /api/biblioteca/audiovisual ─────────────────────────────────────────
+app.post('/api/biblioteca/audiovisual', verificarToken, (req, res) => {
+  const { titulo, descripcion, url, categoria_id } = req.body;
+  if (!titulo || !url || !categoria_id) {
+    return res.status(400).json({ ok: false, mensaje: 'Título, URL y categoría son requeridos.' });
+  }
+  const sql = `INSERT INTO biblioteca (titulo, descripcion, tipo, ruta_archivo, url, categoria_id, estado_id, usuario_id, created_at, updated_at)
+               VALUES (?, ?, 'audiovisual', NULL, ?, ?, 1, ?, NOW(), NOW())`;
+  conn.query(sql, [titulo, descripcion || null, url, categoria_id, req.usuario.id], (err, result) => {
+    if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+    res.status(201).json({ ok: true, mensaje: 'Video agregado correctamente.', id: result.insertId });
+  });
+});
+
+// ── PUT /api/biblioteca/audiovisual/:id ───────────────────────────────────────
+app.put('/api/biblioteca/audiovisual/:id', verificarToken, (req, res) => {
+  const { id } = req.params;
+  const { titulo, descripcion, url, categoria_id } = req.body;
+  if (!titulo || !url || !categoria_id) {
+    return res.status(400).json({ ok: false, mensaje: 'Título, URL y categoría son requeridos.' });
+  }
+  const sql = `UPDATE biblioteca SET titulo=?, descripcion=?, url=?, categoria_id=?, updated_at=NOW() WHERE id=? AND tipo='audiovisual'`;
+  conn.query(sql, [titulo, descripcion || null, url, categoria_id, id], (err) => {
+    if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+    res.json({ ok: true, mensaje: 'Video actualizado correctamente.' });
+  });
+});
+
+// ── POST /api/biblioteca/:id/desactivar ───────────────────────────────────────
+app.post('/api/biblioteca/:id/desactivar', verificarToken, (req, res) => {
+  conn.query('UPDATE biblioteca SET estado_id = 2 WHERE id = ?', [req.params.id], (err) => {
+    if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+    res.json({ ok: true, mensaje: 'Registro desactivado.' });
+  });
+});
+
+// ── POST /api/biblioteca/:id/activar ─────────────────────────────────────────
+app.post('/api/biblioteca/:id/activar', verificarToken, (req, res) => {
+  conn.query('UPDATE biblioteca SET estado_id = 1 WHERE id = ?', [req.params.id], (err) => {
+    if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+    res.json({ ok: true, mensaje: 'Registro activado.' });
+  });
+});
+
+// ── GET /api/mi-biblioteca ────────────────────────────────────────────────────
+app.get('/api/mi-biblioteca', verificarToken, (req, res) => {
+  const sql = `SELECT b.id, b.titulo, b.descripcion, b.tipo,
+                      b.ruta_archivo, b.url,
+                      c.nombre as categoria
+               FROM biblioteca b
+               LEFT JOIN categorias c ON c.id = b.categoria_id
+               WHERE b.usuario_id = ? AND b.estado_id = 1
+               ORDER BY b.tipo, b.id DESC`;
+  conn.query(sql, [req.usuario.id], (err, rows) => {
+    if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+    res.json({ ok: true, data: rows });
+  });
 });
 
 // ── 404 ───────────────────────────────────────────────────────────────────────

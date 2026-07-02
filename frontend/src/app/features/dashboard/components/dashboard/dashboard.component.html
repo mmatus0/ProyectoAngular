@@ -1,54 +1,68 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
   <div>
     <h4 class="mb-0">Bienvenido, {{ user()?.nombre ?? user()?.email }}</h4>
-    <small class="text-muted">Panel de control</small>
+    <small class="text-muted">Panel de control — resumen general</small>
   </div>
 </div>
 
-<div class="row g-3">
+@if (loading()) {
+  <div class="text-center py-5 text-muted">
+    <div class="spinner-border spinner-border-sm me-2"></div> Cargando métricas...
+  </div>
+} @else {
 
-  <!-- Usuarios -->
-  <div class="col-md-3">
-    <div class="dash-card dash-card--teal">
-      <div class="dash-card__icon">
-        <i class="bi bi-people-fill"></i>
+  <!-- Sección Clientes -->
+  <p class="text-muted small fw-semibold text-uppercase mb-2 mt-1">Clientes</p>
+  <div class="row g-3 mb-4">
+
+    <div class="col-md-4">
+      <div class="dash-card dash-card--teal">
+        <div class="dash-card__icon"><i class="bi bi-people-fill"></i></div>
+        <h6 class="dash-card__title">Total Clientes</h6>
+        <p class="dash-card__value">{{ metricas()?.clientes_total ?? '—' }}</p>
       </div>
-      <h6 class="dash-card__title">Usuarios</h6>
-      <p class="dash-card__value">—</p>
     </div>
+
+    <div class="col-md-4">
+      <div class="dash-card dash-card--sky">
+        <div class="dash-card__icon"><i class="bi bi-hourglass-split"></i></div>
+        <h6 class="dash-card__title">Por Asesorar</h6>
+        <p class="dash-card__value">{{ metricas()?.clientes_por_asesorar ?? '—' }}</p>
+        <small style="opacity:.8;font-size:.7rem">Con sesión activa pendiente</small>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="dash-card dash-card--blue">
+        <div class="dash-card__icon"><i class="bi bi-person-check-fill"></i></div>
+        <h6 class="dash-card__title">Ya Asesorados</h6>
+        <p class="dash-card__value">{{ metricas()?.clientes_asesorados ?? '—' }}</p>
+        <small style="opacity:.8;font-size:.7rem">Con al menos una sesión finalizada</small>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Evaluaciones -->
-  <div class="col-md-3">
-    <div class="dash-card dash-card--violet">
-      <div class="dash-card__icon">
-        <i class="bi bi-clipboard2-check-fill"></i>
+  <!-- Sección Evaluaciones -->
+  <p class="text-muted small fw-semibold text-uppercase mb-2">Evaluaciones</p>
+  <div class="row g-3">
+
+    <div class="col-md-6">
+      <div class="dash-card dash-card--violet">
+        <div class="dash-card__icon"><i class="bi bi-clipboard2-pulse-fill"></i></div>
+        <h6 class="dash-card__title">Pendientes / En proceso</h6>
+        <p class="dash-card__value">{{ metricas()?.evaluaciones_pendientes ?? '—' }}</p>
       </div>
-      <h6 class="dash-card__title">Evaluaciones</h6>
-      <p class="dash-card__value">—</p>
     </div>
+
+    <div class="col-md-6">
+      <div class="dash-card dash-card--teal">
+        <div class="dash-card__icon"><i class="bi bi-clipboard2-check-fill"></i></div>
+        <h6 class="dash-card__title">Finalizadas</h6>
+        <p class="dash-card__value">{{ metricas()?.evaluaciones_finalizadas ?? '—' }}</p>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Sesiones -->
-  <div class="col-md-3">
-    <div class="dash-card dash-card--blue">
-      <div class="dash-card__icon">
-        <i class="bi bi-calendar2-event-fill"></i>
-      </div>
-      <h6 class="dash-card__title">Sesiones</h6>
-      <p class="dash-card__value">—</p>
-    </div>
-  </div>
-
-  <!-- Herramientas -->
-  <div class="col-md-3">
-    <div class="dash-card dash-card--sky">
-      <div class="dash-card__icon">
-        <i class="bi bi-tools"></i>
-      </div>
-      <h6 class="dash-card__title">Herramientas</h6>
-      <p class="dash-card__value">—</p>
-    </div>
-  </div>
-
-</div>
+}

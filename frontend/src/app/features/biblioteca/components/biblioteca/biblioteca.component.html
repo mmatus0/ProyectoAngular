@@ -1,6 +1,429 @@
+<!-- Encabezado -->
 <div class="d-flex justify-content-between align-items-center mb-4">
-  <h4>Biblioteca</h4>
+  <div>
+    <h4 class="mb-0">Biblioteca</h4>
+    <small class="text-muted">Gestión de documentos y contenido audiovisual</small>
+  </div>
+  @if (!esCliente() && (tabActiva() === 'digital' || tabActiva() === 'audiovisual')) {
+    <button class="btn btn-primary btn-sm" (click)="abrirModalCrear()">
+      <i class="bi bi-plus-circle me-1"></i>
+      {{ tabActiva() === 'digital' ? 'Nuevo Documento' : 'Nuevo Video' }}
+    </button>
+  }
 </div>
-<div class="card">
-  <div class="card-body text-muted">Módulo en construcción...</div>
-</div>
+
+<!-- Toast -->
+@if (toast()) {
+  <div class="alert alert-{{ toast()!.tipo }} alert-dismissible fade show" role="alert">
+    {{ toast()!.mensaje }}
+  </div>
+}
+
+<!-- Tabs principales -->
+<ul class="nav nav-tabs mb-3">
+  @if (!esCliente()) {
+    <li class="nav-item">
+      <a class="nav-link" [class.active]="tabActiva() === 'digital'"
+        (click)="cambiarTab('digital')" style="cursor:pointer">
+        <i class="bi bi-file-earmark-pdf me-1"></i> Documentos Digitales
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" [class.active]="tabActiva() === 'audiovisual'"
+        (click)="cambiarTab('audiovisual')" style="cursor:pointer">
+        <i class="bi bi-play-circle me-1"></i> Audiovisual
+      </a>
+    </li>
+  }
+  <li class="nav-item">
+    <a class="nav-link" [class.active]="tabActiva() === 'mi-biblioteca'"
+      (click)="cambiarTab('mi-biblioteca')" style="cursor:pointer">
+      <i class="bi bi-collection me-1"></i> Mi Biblioteca
+    </a>
+  </li>
+</ul>
+
+<!-- ══ VISTA MI BIBLIOTECA (clientes y todos) ══════════════════════════════ -->
+@if (tabActiva() === 'mi-biblioteca') {
+
+  <div class="mb-3">
+    <input type="text" class="form-control form-control-sm w-auto"
+      placeholder="Buscar..." [value]="busqueda()"
+      (input)="setBusqueda($any($event.target).value)">
+  </div>
+
+  @if (loading()) {
+    <div class="text-center py-5 text-muted">
+      <div class="spinner-border spinner-border-sm me-2"></div> Cargando...
+    </div>
+  } @else if (miBibliotecaFiltrada().length === 0) {
+    <div class="text-center py-5 text-muted">No tienes contenido disponible en tu biblioteca.</div>
+  } @else {
+    <div class="row g-3">
+      @for (item of miBibliotecaFiltrada(); track item.id) {
+        <div class="col-md-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-2">
+                @if (item.tipo === 'digital') {
+                  <i class="bi bi-file-earmark-pdf text-danger me-2" style="font-size:1.4rem"></i>
+                } @else {
+                  <i class="bi bi-play-circle text-primary me-2" style="font-size:1.4rem"></i>
+                }
+                <span class="fw-semibold">{{ item.titulo }}</span>
+              </div>
+              <p class="text-muted small mb-2">{{ item.descripcion || 'Sin descripción.' }}</p>
+              <span class="badge bg-secondary-subtle text-secondary">{{ item.categoria }}</span>
+            </div>
+            <div class="card-footer bg-transparent">
+              @if (item.tipo === 'digital' && item.ruta_archivo) {
+                <button class="btn btn-sm btn-outline-danger w-100" (click)="verPDF(item)">
+                  <i class="bi bi-eye me-1"></i> Ver PDF
+                </button>
+              }
+              @if (item.tipo === 'audiovisual' && item.url) {
+                <a [href]="item.url" target="_blank" class="btn btn-sm btn-outline-primary w-100">
+                  <i class="bi bi-play-circle me-1"></i> Ver Video
+                </a>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+} @else {
+
+  <!-- ══ VISTA ADMIN/COACH ════════════════════════════════════════════════ -->
+
+  <!-- Sub-tabs activo/inactivo -->
+  <ul class="nav nav-pills mb-3">
+    <li class="nav-item">
+      <a class="nav-link" [class.active]="subTabActiva() === 1"
+        (click)="cambiarSubTab(1)" style="cursor:pointer">Activos</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" [class.active]="subTabActiva() === 2"
+        (click)="cambiarSubTab(2)" style="cursor:pointer">Inactivos</a>
+    </li>
+  </ul>
+
+  <div class="mb-3">
+    <input type="text" class="form-control form-control-sm w-auto"
+      placeholder="Buscar..." [value]="busqueda()"
+      (input)="setBusqueda($any($event.target).value)">
+  </div>
+
+  <div class="card">
+    <div class="card-body p-0">
+      @if (loading()) {
+        <div class="text-center py-5 text-muted">
+          <div class="spinner-border spinner-border-sm me-2"></div> Cargando...
+        </div>
+      } @else if (listaFiltrada().length === 0) {
+        <div class="text-center py-5 text-muted">No hay registros.</div>
+      } @else {
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Título</th>
+              <th>Categoría</th>
+              <th>Descripción</th>
+              @if (tabActiva() === 'digital') { <th>Archivo</th> }
+              @if (tabActiva() === 'audiovisual') { <th>URL</th> }
+              <th>Estado</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of listaFiltrada(); track item.id) {
+              <tr>
+                <td class="fw-medium">{{ item.titulo }}</td>
+                <td>{{ item.categoria }}</td>
+                <td>{{ item.descripcion || '—' }}</td>
+                @if (tabActiva() === 'digital') {
+                  <td>
+                    @if (item.ruta_archivo) {
+                      <button class="btn btn-sm btn-outline-danger" (click)="verPDF(item)">
+                        <i class="bi bi-eye me-1"></i> Ver PDF
+                      </button>
+                    } @else { — }
+                  </td>
+                }
+                @if (tabActiva() === 'audiovisual') {
+                  <td>
+                    @if (item.url) {
+                      <a [href]="item.url" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-play-circle me-1"></i> Ver
+                      </a>
+                    } @else { — }
+                  </td>
+                }
+                <td>
+                  <span class="badge"
+                    [class.bg-success-subtle]="item.estado_id === 1"
+                    [class.text-success]="item.estado_id === 1"
+                    [class.bg-danger-subtle]="item.estado_id !== 1"
+                    [class.text-danger]="item.estado_id !== 1">
+                    {{ item.estado }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  <div class="d-flex gap-1 justify-content-end">
+                    @if (item.estado_id === 1) {
+                      <button class="btn btn-sm btn-outline-warning" (click)="abrirModalEditar(item)" title="Editar">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      <button class="btn btn-sm btn-outline-danger" (click)="abrirModalDesactivar(item)" title="Desactivar">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    } @else {
+                      <button class="btn btn-sm btn-outline-success" (click)="abrirModalActivar(item)" title="Activar">
+                        <i class="bi bi-check-circle"></i>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+}
+
+<!-- ══ MODAL CREAR ══════════════════════════════════════════════════════════ -->
+@if (modalCrear()) {
+  <div class="modal d-block" style="background:rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="bi bi-plus-circle me-2"></i>
+            {{ tabActiva() === 'digital' ? 'Nuevo Documento Digital' : 'Nuevo Video' }}
+          </h5>
+          <button class="btn-close" (click)="cerrarModales()"></button>
+        </div>
+        <div class="modal-body">
+
+          @if (tabActiva() === 'digital') {
+            <form [formGroup]="formDigital">
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">Título <span class="text-danger">*</span></label>
+                  <input class="form-control" formControlName="titulo" placeholder="Título del documento">
+                  @if (formDigital.get('titulo')?.invalid && formDigital.get('titulo')?.touched) {
+                    <div class="text-danger small mt-1">El título es obligatorio (mín. 3 caracteres).</div>
+                  }
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Descripción</label>
+                  <textarea class="form-control" formControlName="descripcion" rows="2"></textarea>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Categoría <span class="text-danger">*</span></label>
+                  <select class="form-select" formControlName="categoria_id">
+                    <option value="">Seleccione...</option>
+                    @for (cat of categorias(); track cat.id) {
+                      <option [value]="cat.id">{{ cat.nombre }}</option>
+                    }
+                  </select>
+                  @if (formDigital.get('categoria_id')?.invalid && formDigital.get('categoria_id')?.touched) {
+                    <div class="text-danger small mt-1">Selecciona una categoría.</div>
+                  }
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Archivo PDF <span class="text-danger">*</span></label>
+                  <input class="form-control" type="file" accept=".pdf" (change)="onArchivoSeleccionado($event)">
+                  <small class="text-muted">Máx. 10 MB</small>
+                </div>
+              </div>
+            </form>
+          }
+
+          @if (tabActiva() === 'audiovisual') {
+            <form [formGroup]="formAudiovisual">
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">Título <span class="text-danger">*</span></label>
+                  <input class="form-control" formControlName="titulo" placeholder="Título del video">
+                  @if (formAudiovisual.get('titulo')?.invalid && formAudiovisual.get('titulo')?.touched) {
+                    <div class="text-danger small mt-1">El título es obligatorio (mín. 3 caracteres).</div>
+                  }
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Descripción</label>
+                  <textarea class="form-control" formControlName="descripcion" rows="2"></textarea>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">URL del Video <span class="text-danger">*</span></label>
+                  <input class="form-control" formControlName="url" placeholder="https://www.youtube.com/watch?v=...">
+                  @if (formAudiovisual.get('url')?.invalid && formAudiovisual.get('url')?.touched) {
+                    <div class="text-danger small mt-1">Ingresa una URL válida.</div>
+                  }
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Categoría <span class="text-danger">*</span></label>
+                  <select class="form-select" formControlName="categoria_id">
+                    <option value="">Seleccione...</option>
+                    @for (cat of categorias(); track cat.id) {
+                      <option [value]="cat.id">{{ cat.nombre }}</option>
+                    }
+                  </select>
+                  @if (formAudiovisual.get('categoria_id')?.invalid && formAudiovisual.get('categoria_id')?.touched) {
+                    <div class="text-danger small mt-1">Selecciona una categoría.</div>
+                  }
+                </div>
+              </div>
+            </form>
+          }
+
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary btn-sm" (click)="cerrarModales()">Cancelar</button>
+          <button class="btn btn-primary btn-sm" (click)="guardarCrear()" [disabled]="guardando()">
+            @if (guardando()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+            Guardar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══ MODAL EDITAR ═════════════════════════════════════════════════════════ -->
+@if (modalEditar()) {
+  <div class="modal d-block" style="background:rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>Editar</h5>
+          <button class="btn-close" (click)="cerrarModales()"></button>
+        </div>
+        <div class="modal-body">
+
+          @if (tabActiva() === 'digital') {
+            <form [formGroup]="formDigital">
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">Título <span class="text-danger">*</span></label>
+                  <input class="form-control" formControlName="titulo">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Descripción</label>
+                  <textarea class="form-control" formControlName="descripcion" rows="2"></textarea>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Categoría <span class="text-danger">*</span></label>
+                  <select class="form-select" formControlName="categoria_id">
+                    <option value="">Seleccione...</option>
+                    @for (cat of categorias(); track cat.id) {
+                      <option [value]="cat.id">{{ cat.nombre }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Reemplazar archivo (opcional)</label>
+                  <input class="form-control" type="file" accept=".pdf" (change)="onArchivoSeleccionado($event)">
+                </div>
+              </div>
+            </form>
+          }
+
+          @if (tabActiva() === 'audiovisual') {
+            <form [formGroup]="formAudiovisual">
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">Título <span class="text-danger">*</span></label>
+                  <input class="form-control" formControlName="titulo">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Descripción</label>
+                  <textarea class="form-control" formControlName="descripcion" rows="2"></textarea>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">URL del Video <span class="text-danger">*</span></label>
+                  <input class="form-control" formControlName="url">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Categoría <span class="text-danger">*</span></label>
+                  <select class="form-select" formControlName="categoria_id">
+                    <option value="">Seleccione...</option>
+                    @for (cat of categorias(); track cat.id) {
+                      <option [value]="cat.id">{{ cat.nombre }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+            </form>
+          }
+
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary btn-sm" (click)="cerrarModales()">Cancelar</button>
+          <button class="btn btn-primary btn-sm" (click)="guardarEditar()" [disabled]="guardando()">
+            @if (guardando()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+            Actualizar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══ MODAL DESACTIVAR ═════════════════════════════════════════════════════ -->
+@if (modalDesactivar()) {
+  <div class="modal d-block" style="background:rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body text-center py-4">
+          <i class="bi bi-trash text-danger" style="font-size:3rem"></i>
+          <h5 class="mt-3">¿Desactivar registro?</h5>
+          <p class="text-muted">Se desactivará <strong class="text-danger">{{ seleccionado()?.titulo }}</strong></p>
+          <div class="d-flex justify-content-center gap-2 mt-3">
+            <button class="btn btn-secondary btn-sm" (click)="cerrarModales()">Cancelar</button>
+            <button class="btn btn-danger btn-sm" (click)="confirmarDesactivar()">Sí, desactivar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══ MODAL ACTIVAR ════════════════════════════════════════════════════════ -->
+@if (modalActivar()) {
+  <div class="modal d-block" style="background:rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body text-center py-4">
+          <i class="bi bi-check-circle text-success" style="font-size:3rem"></i>
+          <h5 class="mt-3">¿Activar registro?</h5>
+          <p class="text-muted">Se activará <strong class="text-success">{{ seleccionado()?.titulo }}</strong></p>
+          <div class="d-flex justify-content-center gap-2 mt-3">
+            <button class="btn btn-secondary btn-sm" (click)="cerrarModales()">Cancelar</button>
+            <button class="btn btn-success btn-sm" (click)="confirmarActivar()">Sí, activar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══ MODAL VER PDF ════════════════════════════════════════════════════════ -->
+@if (modalVerPDF()) {
+  <div class="modal d-block" style="background:rgba(0,0,0,0.7)">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="height:90vh">
+      <div class="modal-content h-100">
+        <div class="modal-header py-2">
+          <h5 class="modal-title"><i class="bi bi-file-earmark-pdf me-2 text-danger"></i>Visor de Documento</h5>
+          <button class="btn-close" (click)="cerrarModales()"></button>
+        </div>
+        <div class="modal-body p-0" style="height:calc(100% - 60px)">
+          <iframe [src]="pdfUrl() | trustUrl" width="100%" height="100%" style="border:none"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+}
