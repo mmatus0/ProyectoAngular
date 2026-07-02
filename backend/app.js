@@ -1602,7 +1602,7 @@ app.post('/api/instituciones/:id/activar', verificarToken, (req, res) => {
 app.post('/api/instituciones/carga-masiva', verificarToken, upload.single('archivo'), (req, res) => {
     if (!req.file) return res.status(400).json({ ok: false, mensaje: 'No se recibió archivo.' });
     try {
-        const workbook = XLSX.readFile(req.file.path);
+        const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
         const sheet    = workbook.Sheets[workbook.SheetNames[0]];
         const rows     = XLSX.utils.sheet_to_json(sheet, { defval: '' });
 
