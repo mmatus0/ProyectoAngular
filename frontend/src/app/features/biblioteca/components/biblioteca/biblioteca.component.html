@@ -35,12 +35,14 @@
       </a>
     </li>
   }
-  <li class="nav-item">
-    <a class="nav-link" [class.active]="tabActiva() === 'mi-biblioteca'"
-      (click)="cambiarTab('mi-biblioteca')" style="cursor:pointer">
-      <i class="bi bi-collection me-1"></i> Mi Biblioteca
-    </a>
-  </li>
+  @if (esCliente()) {
+    <li class="nav-item">
+      <a class="nav-link" [class.active]="tabActiva() === 'mi-biblioteca'"
+        (click)="cambiarTab('mi-biblioteca')" style="cursor:pointer">
+        <i class="bi bi-collection me-1"></i> Mi Biblioteca
+      </a>
+    </li>
+  }
 </ul>
 
 <!-- ══ VISTA MI BIBLIOTECA (clientes y todos) ══════════════════════════════ -->
