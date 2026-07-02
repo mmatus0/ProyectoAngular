@@ -55,40 +55,102 @@
       </div>
     </div>
 
-    <!-- Preguntas -->
+    <!-- ══ INSTRUCCIONES DISC ══════════════════════════════════════════════ -->
+    @if (esDisc()) {
+      <div class="alert alert-light border rounded-3 mb-4">
+        <div class="d-flex align-items-start">
+          <i class="bi bi-info-circle-fill fs-4 text-primary me-3 mt-1"></i>
+          <div>
+            <h5 class="fw-bold mb-2">Instrucciones</h5>
+            <p class="mb-2">
+              En cada grupo de palabras, seleccione solo una opción en <strong>Más</strong>
+              y solo una opción distinta en <strong>Menos</strong>.
+            </p>
+            <p class="mb-1"><strong>Más:</strong> la palabra que más lo(a) representa.</p>
+            <p class="mb-0"><strong>Menos:</strong> la palabra que menos lo(a) representa.</p>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ══ PREGUNTAS ════════════════════════════════════════════════════════ -->
     <div class="card shadow-sm border-0">
       <div class="card-body">
 
         @for (pregunta of preguntas(); track pregunta.id; let i = $index) {
-          <div class="mb-4 p-3 border rounded"
-               [class.bg-light]="!estaRespondida(pregunta.id)"
-               [class.bg-success-subtle]="estaRespondida(pregunta.id)">
-
+          <div class="mb-4 p-3 border rounded bg-light">
             <h5 class="fw-bold mb-3">
               {{ i + 1 }}. {{ pregunta.enunciado || 'Seleccione la alternativa que mejor lo represente:' }}
             </h5>
 
-            <div class="ps-2">
-              @for (alt of getAlternativasPregunta(pregunta.id); track alt.id) {
-                <div class="form-check mb-2">
-                  <input
-                    class="form-check-input"
-                    type="radio"
-                    [name]="'pregunta_' + pregunta.id"
-                    [id]="'preg_' + pregunta.id + '_alt_' + alt.id"
-                    [value]="alt.id"
-                    [checked]="respuestas()[pregunta.id] === alt.id"
-                    (change)="seleccionarRespuesta(pregunta.id, alt.id)">
-                  <label class="form-check-label"
-                         [for]="'preg_' + pregunta.id + '_alt_' + alt.id">
-                    @if (alt.letra) {
-                      <strong class="me-1">{{ alt.letra }}.</strong>
+            <!-- ── Formato DISC: tabla Más / Menos ── -->
+            @if (esDisc()) {
+              <div class="table-responsive">
+                <table class="table table-bordered align-middle mb-0">
+                  <thead class="table-light">
+                    <tr class="text-center">
+                      <th class="text-start">Concepto</th>
+                      <th style="width:110px">Más</th>
+                      <th style="width:110px">Menos</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (alt of getAlternativasPregunta(pregunta.id); track alt.id) {
+                      <tr>
+                        <td>{{ alt.alternativa }}</td>
+                        <td class="text-center">
+                          <div class="form-check d-flex justify-content-center mb-0">
+                            <input class="form-check-input"
+                              type="radio"
+                              [name]="'mas_' + pregunta.id"
+                              [checked]="getMas(pregunta.id) === alt.id"
+                              (change)="seleccionarMas(pregunta.id, alt.id)">
+                          </div>
+                        </td>
+                        <td class="text-center">
+                          <div class="form-check d-flex justify-content-center mb-0">
+                            <input class="form-check-input"
+                              type="radio"
+                              [name]="'menos_' + pregunta.id"
+                              [checked]="getMenos(pregunta.id) === alt.id"
+                              (change)="seleccionarMenos(pregunta.id, alt.id)">
+                          </div>
+                        </td>
+                      </tr>
                     }
-                    {{ alt.alternativa }}
-                  </label>
-                </div>
+                  </tbody>
+                </table>
+              </div>
+              @if (mismoSeleccionado(pregunta.id)) {
+                <small class="text-danger mt-1 d-block">
+                  No puede seleccionar la misma alternativa en Más y Menos.
+                </small>
               }
-            </div>
+            }
+
+            <!-- ── Formato normal: radio buttons ── -->
+            @if (!esDisc()) {
+              <div class="ps-3">
+                @for (alt of getAlternativasPregunta(pregunta.id); track alt.id) {
+                  <div class="form-check mb-2">
+                    <input class="form-check-input"
+                      type="radio"
+                      [id]="'preg_' + pregunta.id + '_alt_' + alt.id"
+                      [name]="'preg_' + pregunta.id"
+                      [value]="alt.id"
+                      [checked]="respuestas()[pregunta.id] === alt.id"
+                      (change)="seleccionarRespuesta(pregunta.id, alt.id)">
+                    <label class="form-check-label"
+                           [for]="'preg_' + pregunta.id + '_alt_' + alt.id">
+                      @if (alt.letra) {
+                        <strong class="me-1">{{ alt.letra }}.</strong>
+                      }
+                      {{ alt.alternativa }}
+                    </label>
+                  </div>
+                }
+              </div>
+            }
 
           </div>
         }
@@ -138,9 +200,7 @@
         }
       </div>
       <div class="modal-footer">
-        <button class="btn btn-danger" (click)="cerrarModalFinalizar()">
-          Cancelar
-        </button>
+        <button class="btn btn-danger" (click)="cerrarModalFinalizar()">Cancelar</button>
         <button class="btn btn-primary" [disabled]="guardando()"
                 (click)="confirmarFinalizar()">
           @if (guardando()) {

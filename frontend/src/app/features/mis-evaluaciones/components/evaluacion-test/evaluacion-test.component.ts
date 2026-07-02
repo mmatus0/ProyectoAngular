@@ -16,6 +16,8 @@ interface IAlternativa {
   alternativa: string;
   score: number;
   letra: string;
+  cuadrante: string;
+  grupo: string;
   pregunta_id: number;
 }
 
@@ -37,15 +39,30 @@ export class EvaluacionTestComponent implements OnInit {
   evaluacion   = signal<any>(null);
   preguntas    = signal<IPregunta[]>([]);
   alternativas = signal<IAlternativa[]>([]);
+
+  // Respuestas normales: { preguntaId: alternativaId }
   respuestas   = signal<{ [preguntaId: number]: number }>({});
-  loading      = signal<boolean>(true);
-  guardando    = signal<boolean>(false);
-  toast        = signal<{ mensaje: string; tipo: string } | null>(null);
+
+  // Respuestas DISC: { preguntaId: { mas: altId, menos: altId } }
+  respuestasDisc = signal<{ [preguntaId: number]: { mas: number | null; menos: number | null } }>({});
+
+  loading        = signal<boolean>(true);
+  guardando      = signal<boolean>(false);
+  toast          = signal<{ mensaje: string; tipo: string } | null>(null);
   modalFinalizar = signal<boolean>(false);
 
-  totalPreguntas  = computed(() => this.preguntas().length);
-  respondidas     = computed(() => Object.keys(this.respuestas()).length);
-  progreso        = computed(() =>
+  esDisc = computed(() => this.evaluacion()?.evaluacion_id === 10);
+
+  totalPreguntas = computed(() => this.preguntas().length);
+
+  respondidas = computed(() => {
+    if (this.esDisc()) {
+      return Object.values(this.respuestasDisc()).filter(r => r.mas && r.menos).length;
+    }
+    return Object.keys(this.respuestas()).length;
+  });
+
+  progreso = computed(() =>
     this.totalPreguntas() > 0
       ? Math.round((this.respondidas() / this.totalPreguntas()) * 100)
       : 0
@@ -63,7 +80,12 @@ export class EvaluacionTestComponent implements OnInit {
         this.evaluacion.set(resp.evaluacion);
         this.preguntas.set(resp.preguntas);
         this.alternativas.set(resp.alternativas);
-        this.respuestas.set(resp.respuestas || {});
+
+        if (resp.evaluacion?.evaluacion_id === 10) {
+          this.respuestasDisc.set(resp.respuestas || {});
+        } else {
+          this.respuestas.set(resp.respuestas || {});
+        }
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
@@ -72,28 +94,52 @@ export class EvaluacionTestComponent implements OnInit {
 
   getAlternativasPregunta(preguntaId: number): IAlternativa[] {
     const filtradas = this.alternativas().filter((a: any) => a.pregunta_id === preguntaId);
-    // Si no hay alternativas específicas por pregunta, devolver todas (alternativas globales)
-    if (filtradas.length === 0) {
-      return this.alternativas();
-    }
-    return filtradas;
+    return filtradas.length === 0 ? this.alternativas() : filtradas;
   }
 
-  seleccionarRespuesta(preguntaId: number, alternativaId: number) {
-    this.respuestas.update(r => ({ ...r, [preguntaId]: alternativaId }));
+  seleccionarRespuesta(preguntaId: number, altId: number) {
+    this.respuestas.update(r => ({ ...r, [preguntaId]: altId }));
   }
 
-  estaRespondida(preguntaId: number): boolean {
-    return this.respuestas()[preguntaId] !== undefined;
+  // ── DISC: selección Más / Menos ──────────────────────────────────────────
+  seleccionarMas(preguntaId: number, altId: number) {
+    this.respuestasDisc.update(r => {
+      const actual = r[preguntaId] || { mas: null, menos: null };
+      // Si el mismo alt estaba en Menos, lo limpiamos
+      const menos = actual.menos === altId ? null : actual.menos;
+      return { ...r, [preguntaId]: { mas: altId, menos } };
+    });
   }
 
-  getRespuesta(preguntaId: number): number | null {
-    return this.respuestas()[preguntaId] ?? null;
+  seleccionarMenos(preguntaId: number, altId: number) {
+    this.respuestasDisc.update(r => {
+      const actual = r[preguntaId] || { mas: null, menos: null };
+      // Si el mismo alt estaba en Más, lo limpiamos
+      const mas = actual.mas === altId ? null : actual.mas;
+      return { ...r, [preguntaId]: { mas, menos: altId } };
+    });
   }
 
+  getMas(preguntaId: number): number | null {
+    return this.respuestasDisc()[preguntaId]?.mas ?? null;
+  }
+
+  getMenos(preguntaId: number): number | null {
+    return this.respuestasDisc()[preguntaId]?.menos ?? null;
+  }
+
+  mismoSeleccionado(preguntaId: number): boolean {
+    const r = this.respuestasDisc()[preguntaId];
+    return !!(r?.mas && r?.menos && r.mas === r.menos);
+  }
+
+  // ── Guardar ───────────────────────────────────────────────────────────────
   guardarAvance() {
     this.guardando.set(true);
-    const body = { respuestas: this.respuestas(), finalizar: false };
+    const body = this.esDisc()
+      ? { respuestas: this.respuestasDisc(), finalizar: false }
+      : { respuestas: this.respuestas(), finalizar: false };
+
     this.http.post<any>(`${this.apiUrl}/${this.asignacionId}/guardar`, body, this.headers()).subscribe({
       next: () => {
         this.guardando.set(false);
@@ -101,35 +147,36 @@ export class EvaluacionTestComponent implements OnInit {
       },
       error: () => {
         this.guardando.set(false);
-        this.mostrarToast('Error al guardar avance.', 'danger');
+        this.mostrarToast('Error al guardar.', 'danger');
       }
     });
   }
-
-  abrirModalFinalizar() { this.modalFinalizar.set(true); }
-  cerrarModalFinalizar() { this.modalFinalizar.set(false); }
 
   confirmarFinalizar() {
     this.guardando.set(true);
-    const body = { respuestas: this.respuestas(), finalizar: true };
+    const body = this.esDisc()
+      ? { respuestas: this.respuestasDisc(), finalizar: true }
+      : { respuestas: this.respuestas(), finalizar: true };
+
     this.http.post<any>(`${this.apiUrl}/${this.asignacionId}/guardar`, body, this.headers()).subscribe({
       next: () => {
-        this.cerrarModalFinalizar();
         this.guardando.set(false);
-        this.mostrarToast('Evaluación finalizada correctamente.', 'success');
-        setTimeout(() => this.router.navigate(['/mis-evaluaciones']), 1500);
+        this.cerrarModalFinalizar();
+        this.router.navigate(['/mis-evaluaciones', this.asignacionId, 'resultados']);
       },
       error: () => {
         this.guardando.set(false);
-        this.mostrarToast('Error al finalizar la evaluación.', 'danger');
+        this.mostrarToast('Error al finalizar.', 'danger');
       }
     });
   }
 
+  abrirModalFinalizar()  { this.modalFinalizar.set(true); }
+  cerrarModalFinalizar() { this.modalFinalizar.set(false); }
   volver() { this.router.navigate(['/mis-evaluaciones']); }
 
   mostrarToast(mensaje: string, tipo: string) {
     this.toast.set({ mensaje, tipo });
-    setTimeout(() => this.toast.set(null), 3000);
+    setTimeout(() => this.toast.set(null), 3500);
   }
 }

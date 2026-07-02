@@ -1028,138 +1028,149 @@ app.get('/api/mis-evaluaciones/:id/test', verificarToken, (req, res) => {
     });
 });
 
-// ── POST /api/mis-evaluaciones/:id/guardar ────────────────────────────────────
+// ── POST /api/mis-evaluaciones/:id/guardar ────────────────────────────────
 app.post('/api/mis-evaluaciones/:id/guardar', verificarToken, (req, res) => {
     const { id } = req.params;
     const { respuestas, finalizar } = req.body;
-    const nuevoEstado = finalizar ? 4 : 3;
 
-    conn.query(
-        'SELECT eu.*, e.id as eval_id FROM evaluacion_usuario eu INNER JOIN evaluacion e ON e.id = eu.evaluacion_id WHERE eu.id = ? AND eu.usuario_id = ?',
-        [id, req.usuario.id],
-        (err, rows) => {
-            if (err) return res.status(500).json({ ok: false, mensaje: err.message });
-            if (rows.length === 0) return res.status(403).json({ ok: false, mensaje: 'Sin acceso.' });
+    const sqlEval = `SELECT eu.id, eu.estado_id, e.id as evaluacion_id, e.nro_alternativas
+                     FROM evaluacion_usuario eu
+                     INNER JOIN evaluacion e ON e.id = eu.evaluacion_id
+                     WHERE eu.id = ? AND eu.usuario_id = ?`;
 
-            const eu = rows[0];
-            const idTest = eu.eval_id;
+    conn.query(sqlEval, [id, req.usuario.id], (err, evals) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        if (evals.length === 0) return res.status(403).json({ ok: false, mensaje: 'Sin acceso.' });
 
-            // Actualizar estado
-            const sqlUpd = finalizar
-                ? 'UPDATE evaluacion_usuario SET estado_id=?, inicio=COALESCE(inicio, NOW()), finalizacion=NOW() WHERE id=?'
-                : 'UPDATE evaluacion_usuario SET estado_id=?, inicio=COALESCE(inicio, NOW()) WHERE id=?';
+        const ev = evals[0];
+        const esDisc = ev.evaluacion_id === 10;
 
-            conn.query(sqlUpd, [nuevoEstado, id], (err2) => {
-                if (err2) return res.status(500).json({ ok: false, mensaje: err2.message });
+        if (ev.estado_id === 4) {
+            return res.status(400).json({ ok: false, mensaje: 'Esta evaluación ya fue finalizada.' });
+        }
 
-                if (!respuestas || Object.keys(respuestas).length === 0) {
-                    return res.json({ ok: true, mensaje: finalizar ? 'Evaluación finalizada.' : 'Avance guardado.' });
-                }
+        // Marcar inicio si es primera vez
+        conn.query(
+            `UPDATE evaluacion_usuario SET inicio = COALESCE(inicio, NOW()), estado_id = 3 WHERE id = ? AND estado_id = 1`,
+            [id], () => {}
+        );
 
-                // Obtener o crear registro en respuestas (no borrar, igual que PHP)
+        const crearOUsarRespuesta = (cb) => {
+            conn.query('SELECT id FROM respuestas WHERE evaluacion_usuario_id = ? LIMIT 1', [id], (err, rows) => {
+                if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+                if (rows.length > 0) return cb(rows[0].id);
                 conn.query(
-                    'SELECT id FROM respuestas WHERE evaluacion_usuario_id = ? LIMIT 1',
-                    [id],
-                    (err3, respRows) => {
-                        if (err3) return res.status(500).json({ ok: false, mensaje: err3.message });
-
-                        const crearOUsarRespuesta = (cb) => {
-                            if (respRows.length > 0) {
-                                cb(respRows[0].id);
-                            } else {
-                                conn.query(
-                                    'INSERT INTO respuestas (evaluacion_usuario_id, estado_id, fecha, nro_intentos) VALUES (?, 1, NOW(), 1)',
-                                    [id],
-                                    (err4, result) => {
-                                        if (err4) return res.status(500).json({ ok: false, mensaje: err4.message });
-                                        cb(result.insertId);
-                                    }
-                                );
-                            }
-                        };
-
-                        crearOUsarRespuesta((respuestaId) => {
-                            // Obtener alternativas para calcular score
-                            const altIds = Object.values(respuestas);
-                            conn.query(
-                                'SELECT id, score, cuadrante FROM alternativas WHERE id IN (?)',
-                                [altIds],
-                                (err5, altsData) => {
-                                    if (err5) return res.status(500).json({ ok: false, mensaje: err5.message });
-
-                                    // Obtener preguntas para saber si son inversas
-                                    const pregIds = Object.keys(respuestas);
-                                    conn.query(
-                                        'SELECT id, inversa FROM preguntas WHERE id IN (?)',
-                                        [pregIds],
-                                        (err6, pregsData) => {
-                                            if (err6) return res.status(500).json({ ok: false, mensaje: err6.message });
-
-                                            const entries = Object.entries(respuestas);
-                                            let procesados = 0;
-
-                                            if (entries.length === 0) {
-                                                return finalizar
-                                                    ? calcularResultados(idTest, id, respuestaId, altIds, altsData, res)
-                                                    : res.json({ ok: true, mensaje: 'Avance guardado.' });
-                                            }
-
-                                            entries.forEach(([pregId, altId]) => {
-                                                const alt = altsData.find(a => a.id == altId);
-                                                const preg = pregsData.find(p => p.id == pregId);
-                                                let score = alt ? (alt.score || 0) : 0;
-
-                                                // Ajustar score según tipo de test (igual que PHP)
-                                                if (idTest == 6) {
-                                                    score = alt ? (alt.cuadrante || 0) : 0;
-                                                } else if (idTest == 5 && preg && preg.inversa == 0) {
-                                                    score = 7 - score;
-                                                } else if (idTest == 4 && preg && preg.inversa == 0) {
-                                                    score = score == 1 ? 0 : 1;
-                                                }
-
-                                                // Upsert: actualizar si existe, insertar si no
-                                                conn.query(
-                                                    'SELECT id FROM detalle_respuesta WHERE respuesta_id = ? AND pregunta_id = ? LIMIT 1',
-                                                    [respuestaId, pregId],
-                                                    (err7, existe) => {
-                                                        if (err7) { procesados++; check(); return; }
-
-                                                        if (existe && existe.length > 0) {
-                                                            conn.query(
-                                                                'UPDATE detalle_respuesta SET alternativa_id=?, resultado=? WHERE id=?',
-                                                                [altId, score, existe[0].id],
-                                                                () => { procesados++; check(); }
-                                                            );
-                                                        } else {
-                                                            conn.query(
-                                                                'INSERT INTO detalle_respuesta (respuesta_id, alternativa_id, pregunta_id, resultado, estado_id) VALUES (?,?,?,?,1)',
-                                                                [respuestaId, altId, pregId, score],
-                                                                () => { procesados++; check(); }
-                                                            );
-                                                        }
-                                                    }
-                                                );
-                                            });
-
-                                            function check() {
-                                                if (procesados === entries.length) {
-                                                    if (!finalizar) {
-                                                        return res.json({ ok: true, mensaje: 'Avance guardado.' });
-                                                    }
-                                                    calcularResultados(idTest, id, respuestaId, altIds, altsData, res);
-                                                }
-                                            }
-                                        }
-                                    );
-                                }
-                            );
-                        });
+                    'INSERT INTO respuestas (evaluacion_usuario_id, estado_id, fecha, nro_intentos) VALUES (?, 1, NOW(), 1)',
+                    [id], (err2, result) => {
+                        if (err2) return res.status(500).json({ ok: false, mensaje: err2.message });
+                        cb(result.insertId);
                     }
                 );
             });
-        }
-    );
+        };
+
+        crearOUsarRespuesta((respuestaId) => {
+
+            if (esDisc) {
+                // ── Guardar respuestas DISC (mas=1, menos=-1) ─────────────────
+                const entries = Object.entries(respuestas || {});
+                let idx = 0;
+                const siguiente = () => {
+                    if (idx >= entries.length) {
+                        if (finalizar) return finalizarEval();
+                        return res.json({ ok: true, mensaje: 'Avance DISC guardado.' });
+                    }
+                    const [pregId, vals] = entries[idx++];
+                    const { mas, menos } = vals;
+
+                    const guardarAlt = (altId, resultado, next) => {
+                        if (!altId) return next();
+                        conn.query(
+                            'SELECT id FROM detalle_respuesta WHERE respuesta_id = ? AND pregunta_id = ? AND resultado = ? LIMIT 1',
+                            [respuestaId, pregId, resultado],
+                            (err, rows) => {
+                                if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+                                if (rows.length > 0) {
+                                    conn.query(
+                                        'UPDATE detalle_respuesta SET alternativa_id = ? WHERE id = ?',
+                                        [altId, rows[0].id], next
+                                    );
+                                } else {
+                                    conn.query(
+                                        'INSERT INTO detalle_respuesta (respuesta_id, alternativa_id, pregunta_id, resultado, estado_id) VALUES (?,?,?,?,1)',
+                                        [respuestaId, altId, pregId, resultado], next
+                                    );
+                                }
+                            }
+                        );
+                    };
+
+                    guardarAlt(mas, '1', () => guardarAlt(menos, '-1', siguiente));
+                };
+                siguiente();
+
+            } else {
+                // ── Guardar respuestas normales ────────────────────────────────
+                const entries = Object.entries(respuestas || {});
+                if (entries.length === 0) {
+                    if (finalizar) return finalizarEval();
+                    return res.json({ ok: true, mensaje: 'Avance guardado.' });
+                }
+
+                const altIds = Object.values(respuestas).map(Number);
+                conn.query(
+                    `SELECT id, score FROM alternativas WHERE id IN (${altIds.map(() => '?').join(',')})`,
+                    altIds,
+                    (err, altsData) => {
+                        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+
+                        const altMap = {};
+                        altsData.forEach(a => altMap[a.id] = a.score);
+
+                        let idx = 0;
+                        const siguiente = () => {
+                            if (idx >= entries.length) {
+                                if (finalizar) return calcularResultados(ev.evaluacion_id, id, respuestaId, altIds, altsData, res);
+                                return res.json({ ok: true, mensaje: 'Avance guardado.' });
+                            }
+                            const [pregId, altId] = entries[idx++];
+                            const score = altMap[altId] ?? 0;
+
+                            conn.query(
+                                'SELECT id FROM detalle_respuesta WHERE respuesta_id = ? AND pregunta_id = ? LIMIT 1',
+                                [respuestaId, pregId],
+                                (err, rows) => {
+                                    if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+                                    if (rows.length > 0) {
+                                        conn.query(
+                                            'UPDATE detalle_respuesta SET alternativa_id=?, resultado=? WHERE id=?',
+                                            [altId, score, rows[0].id], siguiente
+                                        );
+                                    } else {
+                                        conn.query(
+                                            'INSERT INTO detalle_respuesta (respuesta_id, alternativa_id, pregunta_id, resultado, estado_id) VALUES (?,?,?,?,1)',
+                                            [respuestaId, altId, pregId, score], siguiente
+                                        );
+                                    }
+                                }
+                            );
+                        };
+                        siguiente();
+                    }
+                );
+            }
+
+            const finalizarEval = () => {
+                conn.query(
+                    `UPDATE evaluacion_usuario SET estado_id = 4, finalizacion = NOW() WHERE id = ?`,
+                    [id], (err) => {
+                        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+                        res.json({ ok: true, mensaje: 'Evaluación finalizada correctamente.' });
+                    }
+                );
+            };
+        });
+    });
 });
 
 // ── POST /api/mis-evaluaciones/:id/guardar ────────────────────────────────────
