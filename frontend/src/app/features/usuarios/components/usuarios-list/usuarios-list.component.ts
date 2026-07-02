@@ -186,10 +186,16 @@ subirCarga() {
 }
 
 descargarPlantilla() {
-  const link      = document.createElement('a');
-  link.href       = 'plantilla_carga_usuarios.xlsx';
-  link.download   = 'plantilla_carga_usuarios.xlsx';
-  link.click();
+  import('xlsx').then(XLSX => {
+    const datos = [
+      ['rolusuario', 'nombre', 'usuario', 'email', 'password', 'empresa'],
+      ['Cliente', 'Juan Pérez', 'jperez', 'jperez@gmail.com', 'password123', 'Empresa Demo']
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(datos);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Usuarios');
+    XLSX.writeFile(wb, 'plantilla_carga_usuarios.xlsx');
+  });
 }
 
   exportarExcel() {

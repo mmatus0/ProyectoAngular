@@ -325,52 +325,77 @@ app.post('/api/usuarios/:id/activar', verificarToken, (req, res) => {
 app.post('/api/usuarios/carga-masiva', verificarToken, upload.single('archivo'), (req, res) => {
     if (!req.file) return res.status(400).json({ ok: false, mensaje: 'No se recibió archivo.' });
 
-    const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+    const workbook = XLSX.read(req.file.buffer, { type: 'buffer', cellDates: true, raw: false, dense: false });
     const sheet    = workbook.Sheets[workbook.SheetNames[0]];
     const rows     = XLSX.utils.sheet_to_json(sheet);
 
-    var creados = 0, errores = [], procesados = 0, total = rows.length;
+    if (rows.length === 0) return res.json({ ok: true, creados: 0, errores: [], mensaje: 'Archivo vacío.' });
 
-    if (total === 0) return res.json({ ok: true, creados: 0, errores: [], mensaje: 'Archivo vacío.' });
+    // Cargar roles y empresas para resolver nombres
+    conn.query('SELECT id, rolusuario FROM rol_usuario', (errRol, roles) => {
+        if (errRol) return res.status(500).json({ ok: false, mensaje: errRol.message });
 
-    rows.forEach((row) => {
-        const nombre  = row.nombre?.toString().trim() || row.Nombre?.toString().trim() || '';
-        const usuario = row.usuario?.toString().trim() || row.Usuario?.toString().trim() || '';
-        const email   = row.email?.toString().trim().toLowerCase() || row.Email?.toString().trim().toLowerCase() || '';
-        const pass    = row.password?.toString().trim() || 'password123';
-        const rolId   = row.rolusuario_id || 3;
-        const empId   = row.empresa_id    || 1;
+        conn.query('SELECT id, empresa FROM empresa WHERE estado_id = 1', (errEmp, empresas) => {
+            if (errEmp) return res.status(500).json({ ok: false, mensaje: errEmp.message });
 
-        if (!nombre || !usuario || !email) {
-            errores.push(`Fila omitida: nombre/usuario/email vacío`);
-            procesados++;
-            if (procesados === total) res.json({ ok: true, creados, errores });
-            return;
-        }
+            const rolMap = {};
+            roles.forEach(r => { rolMap[r.rolusuario.toLowerCase()] = r.id; });
+            // IDs directos como fallback
+            rolMap['admin'] = rolMap['admin'] || 1;
+            rolMap['coach'] = rolMap['coach'] || 2;
+            rolMap['cliente'] = rolMap['cliente'] || 3;
 
-        bcrypt.hash(pass, 10, (errHash, hash) => {
-            if (errHash) {
-                errores.push(`${usuario}: error hash`);
-                procesados++;
-                if (procesados === total) res.json({ ok: true, creados, errores });
-                return;
-            }
+            const empMap = {};
+            empresas.forEach(e => { empMap[e.empresa.toLowerCase()] = e.id; });
 
-            const sql = `INSERT INTO user
-                         (nombre, usuario, email, password, rolusuario_id, empresa_id,
-                          estado_id, acreditado, eval_asignadas, disc_asignados, ruta_avatar)
-                         VALUES (?, ?, ?, ?, ?, ?, 1, 0, 0, 0, 'images/users/default_avatar.png')`;
+            var creados = 0, errores = [], procesados = 0, total = rows.length;
 
-            conn.query(sql, [nombre, usuario, email, hash, rolId, empId], (err2, result) => {
-                if (err2) {
-                    errores.push(`${usuario}: ${err2.message}`);
-                } else {
-                    conn.query('INSERT INTO persona (usuario_id, empresa_id, estado_id) VALUES (?, ?, 1)',
-                        [result.insertId, empId]);
-                    creados++;
+            rows.forEach((row) => {
+                const nombre  = (row.nombre  || row.Nombre  || '').toString().trim();
+                const usuario = (row.usuario || row.Usuario || '').toString().trim();
+                const email   = (row.email   || row.Email   || '').toString().trim().toLowerCase();
+                const pass    = (row.password || 'password123').toString().trim();
+
+                // Resolver rol — acepta nombre ("Cliente") o id (3)
+                const rolRaw = (row.rolusuario || row.rolusuario_id || 'cliente').toString().trim().toLowerCase();
+                const rolId  = rolMap[rolRaw] || parseInt(rolRaw) || 3;
+
+                // Resolver empresa — acepta nombre ("Empresa Demo") o id
+                const empRaw = (row.empresa || row.empresa_id || '').toString().trim().toLowerCase();
+                const empId  = empMap[empRaw] || parseInt(empRaw) || 1;
+
+                if (!nombre || !usuario || !email) {
+                    errores.push(`Fila omitida: nombre/usuario/email vacío`);
+                    procesados++;
+                    if (procesados === total) res.json({ ok: true, creados, errores });
+                    return;
                 }
-                procesados++;
-                if (procesados === total) res.json({ ok: true, creados, errores });
+
+                bcrypt.hash(pass, 10, (errHash, hash) => {
+                    if (errHash) {
+                        errores.push(`${usuario}: error hash`);
+                        procesados++;
+                        if (procesados === total) res.json({ ok: true, creados, errores });
+                        return;
+                    }
+
+                    const sql = `INSERT INTO user
+                                 (nombre, usuario, email, password, rolusuario_id, empresa_id,
+                                  estado_id, acreditado, eval_asignadas, disc_asignados, ruta_avatar)
+                                 VALUES (?, ?, ?, ?, ?, ?, 1, 0, 0, 0, 'images/users/default_avatar.png')`;
+
+                    conn.query(sql, [nombre, usuario, email, hash, rolId, empId], (err2, result) => {
+                        if (err2) {
+                            errores.push(`${usuario}: ${err2.message}`);
+                        } else {
+                            conn.query('INSERT INTO persona (usuario_id, empresa_id, estado_id) VALUES (?, ?, 1)',
+                                [result.insertId, empId]);
+                            creados++;
+                        }
+                        procesados++;
+                        if (procesados === total) res.json({ ok: true, creados, errores });
+                    });
+                });
             });
         });
     });
@@ -1602,7 +1627,7 @@ app.post('/api/instituciones/:id/activar', verificarToken, (req, res) => {
 app.post('/api/instituciones/carga-masiva', verificarToken, upload.single('archivo'), (req, res) => {
     if (!req.file) return res.status(400).json({ ok: false, mensaje: 'No se recibió archivo.' });
     try {
-        const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+        const workbook = XLSX.read(req.file.buffer, { type: 'buffer', cellDates: true, raw: false, dense: false });
         const sheet    = workbook.Sheets[workbook.SheetNames[0]];
         const rows     = XLSX.utils.sheet_to_json(sheet, { defval: '' });
 
