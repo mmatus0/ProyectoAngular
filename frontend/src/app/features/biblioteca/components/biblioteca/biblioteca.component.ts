@@ -16,10 +16,16 @@ interface IBiblioteca {
   estado: string;
   categoria: string;
   categoria_id: number;
+  usuario_id: number;
   usuario: string;
 }
 
 interface ICategoria {
+  id: number;
+  nombre: string;
+}
+
+interface ICliente {
   id: number;
   nombre: string;
 }
@@ -36,22 +42,21 @@ export class BibliotecaComponent implements OnInit {
   private authService       = inject(AuthService);
   private fb                = inject(FormBuilder);
 
-  // Determinar vista según rol
-  esCliente = computed(() => this.authService.usuario()?.rol_id === 3);
+  esCliente = computed(() => this.authService.esCliente());
 
-  // Tab principal: 'digital' | 'audiovisual' | 'mi-biblioteca'
   tabActiva    = signal<string>('digital');
-  subTabActiva = signal<number>(1); // 1=activos 2=inactivos
+  subTabActiva = signal<number>(1);
 
-  activos   = signal<IBiblioteca[]>([]);
-  inactivos = signal<IBiblioteca[]>([]);
+  activos      = signal<IBiblioteca[]>([]);
+  inactivos    = signal<IBiblioteca[]>([]);
   miBiblioteca = signal<IBiblioteca[]>([]);
   categorias   = signal<ICategoria[]>([]);
+  clientes     = signal<ICliente[]>([]);
 
-  loading  = signal<boolean>(true);
+  loading   = signal<boolean>(true);
   guardando = signal<boolean>(false);
-  busqueda = signal<string>('');
-  toast    = signal<{ mensaje: string; tipo: string } | null>(null);
+  busqueda  = signal<string>('');
+  toast     = signal<{ mensaje: string; tipo: string } | null>(null);
 
   modalCrear      = signal<boolean>(false);
   modalEditar     = signal<boolean>(false);
@@ -85,14 +90,16 @@ export class BibliotecaComponent implements OnInit {
   formDigital = this.fb.group({
     titulo:       ['', [Validators.required, Validators.minLength(3)]],
     descripcion:  [''],
-    categoria_id: ['', Validators.required]
+    categoria_id: ['', Validators.required],
+    usuario_id:   ['', Validators.required]
   });
 
   formAudiovisual = this.fb.group({
     titulo:       ['', [Validators.required, Validators.minLength(3)]],
     descripcion:  [''],
     url:          ['', [Validators.required, Validators.pattern('https?://.+')]],
-    categoria_id: ['', Validators.required]
+    categoria_id: ['', Validators.required],
+    usuario_id:   ['', Validators.required]
   });
 
   ngOnInit() {
@@ -100,8 +107,12 @@ export class BibliotecaComponent implements OnInit {
       next: r => this.categorias.set(r.data)
     });
     if (this.esCliente()) {
+      this.tabActiva.set('mi-biblioteca');
       this.cargarMiBiblioteca();
     } else {
+      this.bibliotecaService.getClientes().subscribe({
+        next: r => this.clientes.set(r.data)
+      });
       this.cargarLista();
     }
   }
@@ -128,7 +139,6 @@ export class BibliotecaComponent implements OnInit {
     const tipo = this.tabActiva() as 'digital' | 'audiovisual';
     let cargadas = 0;
     const check = () => { if (++cargadas === 2) this.loading.set(false); };
-
     this.bibliotecaService.getByTipo(tipo, 1).subscribe({
       next: r => { this.activos.set(r.data); check(); }, error: check
     });
@@ -147,7 +157,6 @@ export class BibliotecaComponent implements OnInit {
 
   setBusqueda(v: string) { this.busqueda.set(v); }
 
-  // ── Modales CRUD ─────────────────────────────────────────────────────────────
   abrirModalCrear() {
     this.formDigital.reset();
     this.formAudiovisual.reset();
@@ -158,9 +167,20 @@ export class BibliotecaComponent implements OnInit {
   abrirModalEditar(item: IBiblioteca) {
     this.seleccionado.set(item);
     if (this.tabActiva() === 'digital') {
-      this.formDigital.patchValue({ titulo: item.titulo, descripcion: item.descripcion, categoria_id: item.categoria_id as any });
+      this.formDigital.patchValue({
+        titulo: item.titulo,
+        descripcion: item.descripcion,
+        categoria_id: item.categoria_id as any,
+        usuario_id: item.usuario_id as any
+      });
     } else {
-      this.formAudiovisual.patchValue({ titulo: item.titulo, descripcion: item.descripcion, url: item.url, categoria_id: item.categoria_id as any });
+      this.formAudiovisual.patchValue({
+        titulo: item.titulo,
+        descripcion: item.descripcion,
+        url: item.url,
+        categoria_id: item.categoria_id as any,
+        usuario_id: item.usuario_id as any
+      });
     }
     this.archivoSeleccionado.set(null);
     this.modalEditar.set(true);
@@ -195,6 +215,7 @@ export class BibliotecaComponent implements OnInit {
       fd.append('titulo',       this.formDigital.value.titulo!);
       fd.append('descripcion',  this.formDigital.value.descripcion || '');
       fd.append('categoria_id', this.formDigital.value.categoria_id!);
+      fd.append('usuario_id',   this.formDigital.value.usuario_id!);
       fd.append('archivo',      this.archivoSeleccionado()!);
       this.bibliotecaService.crearDigital(fd).subscribe({
         next: () => { this.cerrarModales(); this.cargarLista(); this.guardando.set(false); this.mostrarToast('Documento agregado correctamente.', 'success'); },
@@ -219,6 +240,7 @@ export class BibliotecaComponent implements OnInit {
       fd.append('titulo',       this.formDigital.value.titulo!);
       fd.append('descripcion',  this.formDigital.value.descripcion || '');
       fd.append('categoria_id', this.formDigital.value.categoria_id!);
+      fd.append('usuario_id',   this.formDigital.value.usuario_id!);
       if (this.archivoSeleccionado()) fd.append('archivo', this.archivoSeleccionado()!);
       this.bibliotecaService.editarDigital(id, fd).subscribe({
         next: () => { this.cerrarModales(); this.cargarLista(); this.guardando.set(false); this.mostrarToast('Documento actualizado correctamente.', 'success'); },
@@ -249,15 +271,6 @@ export class BibliotecaComponent implements OnInit {
   verPDF(item: IBiblioteca) {
     this.pdfUrl.set(this.bibliotecaService.getUrlArchivo(item.ruta_archivo));
     this.modalVerPDF.set(true);
-  }
-
-  getYoutubeEmbed(url: string): string {
-    try {
-      const u = new URL(url);
-      let id = u.searchParams.get('v');
-      if (!id && u.hostname === 'youtu.be') id = u.pathname.slice(1);
-      return id ? `https://www.youtube.com/embed/${id}` : url;
-    } catch { return url; }
   }
 
   mostrarToast(mensaje: string, tipo: string) {

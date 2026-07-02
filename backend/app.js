@@ -1389,8 +1389,10 @@ app.get('/api/biblioteca', verificarToken, (req, res) => {
 });
 
 app.post('/api/biblioteca/digital', verificarToken, upload.single('archivo'), (req, res) => {
-    const { titulo, descripcion, categoria_id } = req.body;
-    if (!titulo || !categoria_id || !req.file) return res.status(400).json({ ok: false, mensaje: 'Título, categoría y archivo son requeridos.' });
+    const { titulo, descripcion, categoria_id, usuario_id } = req.body;
+    if (!titulo || !categoria_id || !req.file || !usuario_id) {
+        return res.status(400).json({ ok: false, mensaje: 'Título, categoría, archivo y cliente son requeridos.' });
+    }
 
     const uploadDir = path.join(__dirname, 'uploads', 'biblioteca');
     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
@@ -1399,7 +1401,7 @@ app.post('/api/biblioteca/digital', verificarToken, upload.single('archivo'), (r
     fs.writeFileSync(path.join(uploadDir, filename), req.file.buffer);
 
     conn.query('INSERT INTO biblioteca (titulo, descripcion, tipo, ruta_archivo, url, categoria_id, estado_id, usuario_id, created_at, updated_at) VALUES (?, ?, \'digital\', ?, NULL, ?, 1, ?, NOW(), NOW())',
-        [titulo, descripcion || null, `biblioteca/${filename}`, categoria_id, req.usuario.id], (err, result) => {
+        [titulo, descripcion || null, `biblioteca/${filename}`, categoria_id, usuario_id], (err, result) => {
         if (err) return res.status(500).json({ ok: false, mensaje: err.message });
         res.status(201).json({ ok: true, mensaje: 'Documento agregado correctamente.', id: result.insertId });
     });
@@ -1438,10 +1440,13 @@ app.put('/api/biblioteca/digital/:id', verificarToken, upload.single('archivo'),
 });
 
 app.post('/api/biblioteca/audiovisual', verificarToken, (req, res) => {
-    const { titulo, descripcion, url, categoria_id } = req.body;
-    if (!titulo || !url || !categoria_id) return res.status(400).json({ ok: false, mensaje: 'Título, URL y categoría son requeridos.' });
+    const { titulo, descripcion, url, categoria_id, usuario_id } = req.body;
+    if (!titulo || !url || !categoria_id || !usuario_id) {
+        return res.status(400).json({ ok: false, mensaje: 'Título, URL, categoría y cliente son requeridos.' });
+    }
+
     conn.query('INSERT INTO biblioteca (titulo, descripcion, tipo, ruta_archivo, url, categoria_id, estado_id, usuario_id, created_at, updated_at) VALUES (?, ?, \'audiovisual\', NULL, ?, ?, 1, ?, NOW(), NOW())',
-        [titulo, descripcion || null, url, categoria_id, req.usuario.id], (err, result) => {
+        [titulo, descripcion || null, url, categoria_id, usuario_id], (err, result) => {
         if (err) return res.status(500).json({ ok: false, mensaje: err.message });
         res.status(201).json({ ok: true, mensaje: 'Video agregado correctamente.', id: result.insertId });
     });
@@ -1476,6 +1481,15 @@ app.get('/api/mi-biblioteca', verificarToken, (req, res) => {
                 FROM biblioteca b LEFT JOIN categorias c ON c.id = b.categoria_id
                 WHERE b.usuario_id = ? AND b.estado_id = 1 ORDER BY b.tipo, b.id DESC`,
         [req.usuario.id], (err, rows) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+        res.json({ ok: true, data: rows });
+    });
+});
+
+// ── GET /api/biblioteca/clientes ─────────────────────────────────────────────
+app.get('/api/biblioteca/clientes', verificarToken, (req, res) => {
+    conn.query('SELECT id, nombre FROM user WHERE rolusuario_id = 3 AND estado_id = 1 ORDER BY nombre',
+        (err, rows) => {
         if (err) return res.status(500).json({ ok: false, mensaje: err.message });
         res.json({ ok: true, data: rows });
     });

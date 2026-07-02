@@ -12,48 +12,41 @@
   }
 </div>
 
-<!-- Toast -->
 @if (toast()) {
   <div class="alert alert-{{ toast()!.tipo }} alert-dismissible fade show" role="alert">
     {{ toast()!.mensaje }}
   </div>
 }
 
-<!-- Tabs principales -->
+<!-- Tabs -->
 <ul class="nav nav-tabs mb-3">
   @if (!esCliente()) {
     <li class="nav-item">
-      <a class="nav-link" [class.active]="tabActiva() === 'digital'"
-        (click)="cambiarTab('digital')" style="cursor:pointer">
+      <a class="nav-link" [class.active]="tabActiva() === 'digital'" (click)="cambiarTab('digital')" style="cursor:pointer">
         <i class="bi bi-file-earmark-pdf me-1"></i> Documentos Digitales
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" [class.active]="tabActiva() === 'audiovisual'"
-        (click)="cambiarTab('audiovisual')" style="cursor:pointer">
+      <a class="nav-link" [class.active]="tabActiva() === 'audiovisual'" (click)="cambiarTab('audiovisual')" style="cursor:pointer">
         <i class="bi bi-play-circle me-1"></i> Audiovisual
       </a>
     </li>
   }
   @if (esCliente()) {
     <li class="nav-item">
-      <a class="nav-link" [class.active]="tabActiva() === 'mi-biblioteca'"
-        (click)="cambiarTab('mi-biblioteca')" style="cursor:pointer">
+      <a class="nav-link" [class.active]="tabActiva() === 'mi-biblioteca'" (click)="cambiarTab('mi-biblioteca')" style="cursor:pointer">
         <i class="bi bi-collection me-1"></i> Mi Biblioteca
       </a>
     </li>
   }
 </ul>
 
-<!-- ══ VISTA MI BIBLIOTECA (clientes y todos) ══════════════════════════════ -->
+<!-- ══ VISTA MI BIBLIOTECA ══════════════════════════════════════════════════ -->
 @if (tabActiva() === 'mi-biblioteca') {
-
   <div class="mb-3">
-    <input type="text" class="form-control form-control-sm w-auto"
-      placeholder="Buscar..." [value]="busqueda()"
-      (input)="setBusqueda($any($event.target).value)">
+    <input type="text" class="form-control form-control-sm w-auto" placeholder="Buscar..."
+      [value]="busqueda()" (input)="setBusqueda($any($event.target).value)">
   </div>
-
   @if (loading()) {
     <div class="text-center py-5 text-muted">
       <div class="spinner-border spinner-border-sm me-2"></div> Cargando...
@@ -94,29 +87,21 @@
       }
     </div>
   }
-
 } @else {
 
-  <!-- ══ VISTA ADMIN/COACH ════════════════════════════════════════════════ -->
-
-  <!-- Sub-tabs activo/inactivo -->
+<!-- ══ VISTA ADMIN/COACH ════════════════════════════════════════════════════ -->
   <ul class="nav nav-pills mb-3">
     <li class="nav-item">
-      <a class="nav-link" [class.active]="subTabActiva() === 1"
-        (click)="cambiarSubTab(1)" style="cursor:pointer">Activos</a>
+      <a class="nav-link" [class.active]="subTabActiva() === 1" (click)="cambiarSubTab(1)" style="cursor:pointer">Activos</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" [class.active]="subTabActiva() === 2"
-        (click)="cambiarSubTab(2)" style="cursor:pointer">Inactivos</a>
+      <a class="nav-link" [class.active]="subTabActiva() === 2" (click)="cambiarSubTab(2)" style="cursor:pointer">Inactivos</a>
     </li>
   </ul>
-
   <div class="mb-3">
-    <input type="text" class="form-control form-control-sm w-auto"
-      placeholder="Buscar..." [value]="busqueda()"
-      (input)="setBusqueda($any($event.target).value)">
+    <input type="text" class="form-control form-control-sm w-auto" placeholder="Buscar..."
+      [value]="busqueda()" (input)="setBusqueda($any($event.target).value)">
   </div>
-
   <div class="card">
     <div class="card-body p-0">
       @if (loading()) {
@@ -130,6 +115,7 @@
           <thead class="table-light">
             <tr>
               <th>Título</th>
+              <th>Cliente</th>
               <th>Categoría</th>
               <th>Descripción</th>
               @if (tabActiva() === 'digital') { <th>Archivo</th> }
@@ -142,6 +128,7 @@
             @for (item of listaFiltrada(); track item.id) {
               <tr>
                 <td class="fw-medium">{{ item.titulo }}</td>
+                <td>{{ item.usuario || '—' }}</td>
                 <td>{{ item.categoria }}</td>
                 <td>{{ item.descripcion || '—' }}</td>
                 @if (tabActiva() === 'digital') {
@@ -164,10 +151,8 @@
                 }
                 <td>
                   <span class="badge"
-                    [class.bg-success-subtle]="item.estado_id === 1"
-                    [class.text-success]="item.estado_id === 1"
-                    [class.bg-danger-subtle]="item.estado_id !== 1"
-                    [class.text-danger]="item.estado_id !== 1">
+                    [class.bg-success-subtle]="item.estado_id === 1" [class.text-success]="item.estado_id === 1"
+                    [class.bg-danger-subtle]="item.estado_id !== 1" [class.text-danger]="item.estado_id !== 1">
                     {{ item.estado }}
                   </span>
                 </td>
@@ -209,7 +194,6 @@
           <button class="btn-close" (click)="cerrarModales()"></button>
         </div>
         <div class="modal-body">
-
           @if (tabActiva() === 'digital') {
             <form [formGroup]="formDigital">
               <div class="row g-3">
@@ -225,6 +209,18 @@
                   <textarea class="form-control" formControlName="descripcion" rows="2"></textarea>
                 </div>
                 <div class="col-md-6">
+                  <label class="form-label">Cliente <span class="text-danger">*</span></label>
+                  <select class="form-select" formControlName="usuario_id">
+                    <option value="">Seleccione cliente...</option>
+                    @for (c of clientes(); track c.id) {
+                      <option [value]="c.id">{{ c.nombre }}</option>
+                    }
+                  </select>
+                  @if (formDigital.get('usuario_id')?.invalid && formDigital.get('usuario_id')?.touched) {
+                    <div class="text-danger small mt-1">Selecciona un cliente.</div>
+                  }
+                </div>
+                <div class="col-md-6">
                   <label class="form-label">Categoría <span class="text-danger">*</span></label>
                   <select class="form-select" formControlName="categoria_id">
                     <option value="">Seleccione...</option>
@@ -236,7 +232,7 @@
                     <div class="text-danger small mt-1">Selecciona una categoría.</div>
                   }
                 </div>
-                <div class="col-md-6">
+                <div class="col-12">
                   <label class="form-label">Archivo PDF <span class="text-danger">*</span></label>
                   <input class="form-control" type="file" accept=".pdf" (change)="onArchivoSeleccionado($event)">
                   <small class="text-muted">Máx. 10 MB</small>
@@ -244,7 +240,6 @@
               </div>
             </form>
           }
-
           @if (tabActiva() === 'audiovisual') {
             <form [formGroup]="formAudiovisual">
               <div class="row g-3">
@@ -267,6 +262,18 @@
                   }
                 </div>
                 <div class="col-md-6">
+                  <label class="form-label">Cliente <span class="text-danger">*</span></label>
+                  <select class="form-select" formControlName="usuario_id">
+                    <option value="">Seleccione cliente...</option>
+                    @for (c of clientes(); track c.id) {
+                      <option [value]="c.id">{{ c.nombre }}</option>
+                    }
+                  </select>
+                  @if (formAudiovisual.get('usuario_id')?.invalid && formAudiovisual.get('usuario_id')?.touched) {
+                    <div class="text-danger small mt-1">Selecciona un cliente.</div>
+                  }
+                </div>
+                <div class="col-md-6">
                   <label class="form-label">Categoría <span class="text-danger">*</span></label>
                   <select class="form-select" formControlName="categoria_id">
                     <option value="">Seleccione...</option>
@@ -281,7 +288,6 @@
               </div>
             </form>
           }
-
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary btn-sm" (click)="cerrarModales()">Cancelar</button>
@@ -305,7 +311,6 @@
           <button class="btn-close" (click)="cerrarModales()"></button>
         </div>
         <div class="modal-body">
-
           @if (tabActiva() === 'digital') {
             <form [formGroup]="formDigital">
               <div class="row g-3">
@@ -318,6 +323,15 @@
                   <textarea class="form-control" formControlName="descripcion" rows="2"></textarea>
                 </div>
                 <div class="col-md-6">
+                  <label class="form-label">Cliente <span class="text-danger">*</span></label>
+                  <select class="form-select" formControlName="usuario_id">
+                    <option value="">Seleccione cliente...</option>
+                    @for (c of clientes(); track c.id) {
+                      <option [value]="c.id">{{ c.nombre }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="col-md-6">
                   <label class="form-label">Categoría <span class="text-danger">*</span></label>
                   <select class="form-select" formControlName="categoria_id">
                     <option value="">Seleccione...</option>
@@ -326,14 +340,13 @@
                     }
                   </select>
                 </div>
-                <div class="col-md-6">
+                <div class="col-12">
                   <label class="form-label">Reemplazar archivo (opcional)</label>
                   <input class="form-control" type="file" accept=".pdf" (change)="onArchivoSeleccionado($event)">
                 </div>
               </div>
             </form>
           }
-
           @if (tabActiva() === 'audiovisual') {
             <form [formGroup]="formAudiovisual">
               <div class="row g-3">
@@ -350,6 +363,15 @@
                   <input class="form-control" formControlName="url">
                 </div>
                 <div class="col-md-6">
+                  <label class="form-label">Cliente <span class="text-danger">*</span></label>
+                  <select class="form-select" formControlName="usuario_id">
+                    <option value="">Seleccione cliente...</option>
+                    @for (c of clientes(); track c.id) {
+                      <option [value]="c.id">{{ c.nombre }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="col-md-6">
                   <label class="form-label">Categoría <span class="text-danger">*</span></label>
                   <select class="form-select" formControlName="categoria_id">
                     <option value="">Seleccione...</option>
@@ -361,7 +383,6 @@
               </div>
             </form>
           }
-
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary btn-sm" (click)="cerrarModales()">Cancelar</button>

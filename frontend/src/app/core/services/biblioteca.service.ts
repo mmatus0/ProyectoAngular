@@ -17,6 +17,10 @@ export class BibliotecaService {
     return this.http.get<any>(`${this.api}/categorias`, { headers: this.getAuthHeaders() });
   }
 
+  getClientes() {
+    return this.http.get<any>(`${this.api}/biblioteca/clientes`, { headers: this.getAuthHeaders() });
+  }
+
   getByTipo(tipo: 'digital' | 'audiovisual', estado: number = 1) {
     return this.http.get<any>(`${this.api}/biblioteca?tipo=${tipo}&estado=${estado}`, { headers: this.getAuthHeaders() });
   }
