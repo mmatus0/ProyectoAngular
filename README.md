@@ -84,8 +84,6 @@ docker logs evalcoach_backend       # debe mostrar "Conectado a MySQL correctame
 |---|---|
 | Usuario | `admin@evalcoach.cl` |
 | Contraseña | `password` |
-| Usuario | `mmatus0` |
-| Contraseña | `lalala123` |
 | Rol | Administrador (acceso completo) |
 
 ---
@@ -147,6 +145,20 @@ docker logs evalcoach_backend       # debe mostrar "Conectado a MySQL correctame
 ### FAQ
 - Categorías con filtrado dinámico
 - Acordeón de preguntas integrado con backend
+
+## Alcance Final de Proyecto
+
+---
+
+## Alcance Final del Proyecto
+
+Respecto a la propuesta inicial, se fue ajustando el alcance durante el desarrollo, priorizando estabilidad en los módulos implementados por sobre la cobertura total de la propuesta inicial:
+
+- **Generación de informes en PDF** (exportar resultados de un cliente junto con información complementaria) fue evaluada y descartada del alcance final debido a su complejidad y tiempo disponible que requería para desarrollarla. Se determinó que su implementación podría comprometer la estabilidad del resto del sistema y se priorizó, en su lugar, desarrollar los módulos de **Dashboard** y **Biblioteca** (documentos digitales y audiovisuales) junto a correcciones generales de lo ya implementado.
+
+- **Gestión de evaluaciones** se implementó como **asignación** de un catálogo fijo de 10 tests psicométricos/organizacionales predefinidos (heredados y migrados del sistema original) a clientes específicos, en vez de una herramienta de creación de tests desde cero. Esto refleja el uso real del sistema por parte del cliente: los instrumentos de evaluación son fijos y validados en vez de crearse nuevos dinámicamente.
+
+El resto de las funcionalidades comprometidas en la propuesta (gestión de usuarios, evaluaciones, sesiones, herramientas, documentos, búsqueda/filtrado y control de acceso por rol) se encuentran implementadas y operativas en su totalidad sin datos harcodeados.
 
 ---
 
