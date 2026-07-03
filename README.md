@@ -18,6 +18,7 @@ Esta entrega exige que el proyecto se levante completo (frontend + backend + bas
 ### Requisitos
 
 - Tener **Docker Desktop** instalado y en ejecución.
+- Exportar el proyecto del repositorio a través de la rama "avance3" ya que esa rama cuenta con todos los avances de la entrega final (entrega 3)
 
 ### Pasos
 
@@ -85,6 +86,10 @@ docker logs evalcoach_backend       # debe mostrar "Conectado a MySQL correctame
 | Usuario | `admin@evalcoach.cl` |
 | Contraseña | `password` |
 | Rol | Administrador (acceso completo) |
+|---|---|
+| Usuario | `ursula@gmail.com` |
+| Contraseña | `12345678` |
+| Rol | Cliente|
 
 ---
 
