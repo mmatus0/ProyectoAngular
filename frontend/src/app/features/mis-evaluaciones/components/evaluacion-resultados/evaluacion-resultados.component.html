@@ -232,6 +232,47 @@
       </div>
     }
 
+    <!-- TEST DISC (ID 10) -->
+    @if (esDisc() && resultados().length > 0) {
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-transparent border-bottom py-3">
+          <h5 class="mb-0 fw-bold text-primary">
+            <i class="bi bi-diagram-3 me-2"></i>Perfil DISC
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-3 mb-4">
+            @for (r of getPerfilDisc(); track r.dimension) {
+              <div class="col-md-6">
+                <div class="p-3 border rounded h-100">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold">
+                      <span class="badge me-2" [class]="'bg-' + colorLetraDisc(r.dimension)">{{ r.dimension }}</span>
+                    </span>
+                    <span class="badge bg-light text-dark border">Más: {{ r.Mas }} · Menos: {{ r.Menos }}</span>
+                  </div>
+                  <div class="progress mb-2" style="height:10px;">
+                    <div class="progress-bar" [class]="'bg-' + colorLetraDisc(r.dimension)"
+                         [style.width.%]="porcentajeIntensidadDisc(r.Puntaje)"></div>
+                  </div>
+                  <small class="text-muted">Intensidad: {{ r.Puntaje }}/28 · Segmento {{ r.Segmento }}</small>
+                </div>
+              </div>
+            }
+          </div>
+          @if (getPerfilDominanteDisc()) {
+            <div class="alert alert-primary">
+              <h6 class="fw-bold mb-1">
+                <i class="bi bi-award me-2"></i>Perfil Dominante
+              </h6>
+              <p class="mb-1 fw-bold">{{ getPerfilDominanteDisc().Resultado }}</p>
+              <p class="mb-0 small">{{ getPerfilDominanteDisc().ResultadoDescripcion }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
     <!-- SECCIÓN DE ANÁLISIS (todos los tipos) -->
     @if (analisis()) {
       <div class="card border-0 mb-4" style="background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 100%); border-left: 4px solid #6366f1 !important; border-left-style: solid !important;">

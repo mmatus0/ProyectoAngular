@@ -984,14 +984,14 @@ app.post('/api/mis-evaluaciones/:id/guardar', verificarToken, (req, res) => {
                 // ── DISC: guardar mas (resultado='1') y menos (resultado='-1') ──
                 const entries = Object.entries(respuestas || {});
                 if (entries.length === 0) {
-                    if (finalizar) return finalizarEval(null);
+                    if (finalizar) return finalizarEval(() => calcularResultadosDisc(id, respuestaId, res));
                     return res.json({ ok: true, mensaje: 'Avance DISC guardado.' });
                 }
 
                 let idx = 0;
                 const siguiente = () => {
                     if (idx >= entries.length) {
-                        if (finalizar) return finalizarEval(null);
+                        if (finalizar) return finalizarEval(() => calcularResultadosDisc(id, respuestaId, res));
                         return res.json({ ok: true, mensaje: 'Avance DISC guardado.' });
                     }
                     const [pregId, vals] = entries[idx++];
@@ -1263,6 +1263,97 @@ function calcularResultados(idTest, euId, respuestaId, altIds, altsData, res) {
         const puntajeTotal = altsData.reduce((sum, a) => sum + (a.score || 0), 0);
         guardarResultados({ Resultados: [{ Puntaje: puntajeTotal, Resultado: 'Test completado', ResultadoDescripcion: '', dimension: null }] });
     }
+}
+// ── FUNCIÓN calcularResultadosDisc ──────────────────────────────────────────────
+function calcularResultadosDisc(euId, respuestaId, res) {
+    const sql = `SELECT a.grupo as letra, dr.resultado
+                 FROM detalle_respuesta dr
+                 INNER JOIN alternativas a ON a.id = dr.alternativa_id
+                 WHERE dr.respuesta_id = ? AND dr.estado_id = 1`;
+    conn.query(sql, [respuestaId], (err, rows) => {
+        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+
+        const letras = ['D', 'I', 'S', 'C'];
+        const mas    = { D: 0, I: 0, S: 0, C: 0 };
+        const menos  = { D: 0, I: 0, S: 0, C: 0 };
+
+        rows.forEach(r => {
+            const letra = (r.letra || '').toUpperCase().trim();
+            if (!letras.includes(letra)) return;
+            if (String(r.resultado) === '1') mas[letra]++;
+            else if (String(r.resultado) === '-1') menos[letra]++;
+        });
+
+        const intensidadBruta = {};
+        letras.forEach(l => { intensidadBruta[l] = mas[l] - menos[l]; });
+
+        // Buscar segmento e intensidad normalizada real en disc_codigo, una consulta por letra
+        let pendientes = letras.length;
+        const codigos = {};
+
+        letras.forEach(letra => {
+            conn.query(
+                // ORDER BY + LIMIT 1: la tabla disc_codigo original trae algunos rangos
+                // superpuestos en valores límite (verificado con datos reales); en caso de
+                // empate se prioriza el segmento más alto para mantener un resultado
+                // determinístico y consistente cada vez que se recalcula.
+                'SELECT segmento, intensidad FROM disc_codigo WHERE letra = ? AND rango_min <= ? AND rango_max >= ? AND estado_id = 1 ORDER BY segmento DESC LIMIT 1',
+                [letra, intensidadBruta[letra], intensidadBruta[letra]],
+                (errC, filas) => {
+                    codigos[letra] = filas && filas[0] ? filas[0] : { segmento: 4, intensidad: 0 };
+                    if (--pendientes === 0) continuar();
+                }
+            );
+        });
+
+        function continuar() {
+            // Letra dominante = mayor intensidad normalizada (criterio real del sistema original)
+            let letraDominante = 'D';
+            let maxIntensidad = -Infinity;
+            letras.forEach(l => {
+                if (codigos[l].intensidad > maxIntensidad) {
+                    maxIntensidad = codigos[l].intensidad;
+                    letraDominante = l;
+                }
+            });
+
+            conn.query(
+                'SELECT nombre_patron, meta, juzga, influye, teme, bajopresion FROM disc_analisis WHERE dominancia = ? AND estado_id = 1 LIMIT 1',
+                [letraDominante],
+                (errA, analisisRows) => {
+                    const analisis = analisisRows && analisisRows[0] ? analisisRows[0] : null;
+
+                    const resultadosArray = letras.map(l => ({
+                        dimension: l,
+                        Puntaje: codigos[l].intensidad,
+                        IntensidadBruta: intensidadBruta[l],
+                        Segmento: codigos[l].segmento,
+                        Mas: mas[l],
+                        Menos: menos[l],
+                        Resultado: l,
+                        ResultadoDescripcion: null
+                    }));
+
+                    resultadosArray.push({
+                        dimension: 'Perfil Dominante',
+                        Puntaje: maxIntensidad,
+                        Resultado: analisis ? `${letraDominante} — ${analisis.nombre_patron}` : letraDominante,
+                        ResultadoDescripcion: analisis ? analisis.meta : null,
+                        Juzga: analisis ? analisis.juzga : null,
+                        Influye: analisis ? analisis.influye : null,
+                        Teme: analisis ? analisis.teme : null,
+                        BajoPresion: analisis ? analisis.bajopresion : null
+                    });
+
+                    conn.query('UPDATE evaluacion_usuario SET resultados=? WHERE id=?',
+                        [JSON.stringify({ Resultados: resultadosArray }), euId], (errU) => {
+                        if (errU) return res.status(500).json({ ok: false, mensaje: errU.message });
+                        res.json({ ok: true, mensaje: 'Evaluación finalizada correctamente.' });
+                    });
+                }
+            );
+        }
+    });
 }
 
 // ── INSTITUCIONES ─────────────────────────────────────────────────────────────

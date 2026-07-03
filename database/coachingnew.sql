@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 03-07-2026 a las 02:18:58
+-- Tiempo de generación: 03-07-2026 a las 05:00:29
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -799,6 +799,30 @@ CREATE TABLE `disc_analisis` (
   `estado_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Volcado de datos para la tabla `disc_analisis`
+--
+
+INSERT INTO `disc_analisis` (`id`, `created_at`, `updated_at`, `meta`, `juzga`, `emociones`, `seria`, `bajopresion`, `influye`, `teme`, `dominancia`, `abusa`, `nombre_patron`, `regla`, `suvalor`, `estado_id`) VALUES
+(1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '-', NULL, 'Superactivo', '- Límite inferior', NULL, 1),
+(2, NULL, NULL, 'Controlar su ambiente o a su público.', 'La forma en que proyecta su fuerza personal, carácter y posición social. ', 'Acepta la agresión, tiende a aparentar dar poca importancia a la necesidad que tiene de afecto.', 'Fuera más genuina su sensibilidad; estuviera más dispuesto a ayudar a otros a tener éxito en su propio desarrollo personal.', 'Se vuelve manipulador, pendenciero, beligerante.', 'Su encanto, dirección, intimidación, uso de recompensas. ', 'Ser demasiado blando, perder su posición social.', 'DI; [14] DIS', 'Su enfoque de que “el fin justifica los medios”.', 'Alentador', 'D e I >0   D = I; [14] D, I, S >0 En cualquier orden', 'Mueve a la gente, inicia, ordena, felicita disciplina.', 1),
+(3, NULL, NULL, '“Ganar” con estilo.', 'Su capacidad de tomar iniciativa.', 'Un fuerte impulso por causar buena impresión.', 'Llevara a cabo el seguimiento hasta el final; mostrara empatía al estar en desacuerdo; se marcara un ritmo más realista para sus actividades.', 'Se torna intranquilo; crítico; impaciente.', 'Influye en los demás al hacerles competir por su reconocimiento.', '“Perder”; quedar mal ante los demás.', 'IC; [15] DIC', 'Su autoridad e ingenio.', 'Evaluador', 'I y C >0 en cualquier orden; [15] C, I, C >0 En cualquier orden', 'Obtiene sus metas a través de los demás.', 1),
+(4, NULL, NULL, 'Logros personales, en ocasiones a expensas de la meta de grupo.', 'El logro de resultados concretos.', 'Activo, diligente, muestra frustración.', 'Dejara de pensar en “esto o lo otro”, estableciera su prioridades con mayor claridad y aceptara enfoques alternativos, estuviera dispuesto a sacrificar los beneficios a corto plazo por otros a largo plazo.', 'Se frustra e impacienta con los demás, se convierte en una persona que “lo hace todo”  en vez de ser alguien que delega.', 'La aceptación de responsabilidad por su propio trabajo.', 'A quienes tienen niveles inferiores o competitivos de trabajo, que afectan los resultados.', 'DS', 'Confianza en si mismo, absorción en el trabajo.', 'Realizador', 'D y S >0 En cualquier orden', 'Se propone y consigue resultados en áreas clave.', 1),
+(5, NULL, NULL, 'Dominar, logros únicos.', 'Sus propias normas, las ideas progresivas al llevar a cabo el trabajo.', 'Acepta la agresión, puede contenerse al expresarse.', 'Fuera más amable, usara más tacto al comunicarse, cooperara más con el equipo, reconociera que existen sanciones.', 'Se aburre fácilmente con el trabajo rutinario, cuando se le restringe se torna malhumorado, es independiente.', 'El establecimiento de un ritmo a seguir para desarrollar sistemas y enfoques innovadores.', 'No poder influir, no alcanzar el nivel establecido.', 'DC ', 'La brusquedad, la actitud crítica o condescendiente.', 'Creativo', 'D y C >0 En cualquier orden', 'El iniciar o diseñar cambios.', 1),
+(6, NULL, NULL, 'Dominio e independencia.', 'Su capacidad para realizar las tareas con rapidez.', 'Una gran expresión verbal de la fuerza del ego; muestra un fuerte individualismo.', 'Verbalizara su proceso de razonamiento; buscara otros puntos de vista e ideas sobre sus objetivos al resolver problemas; su preocupación por los demás fuera más genuina; fuera más paciente y humilde.', 'Se vuelve criticón y se dedica a encontrar errores; se niega a trabajar en equipo; se excede en sus prerrogativas.', 'Su fuerza de carácter; su persistencia.', 'Que otros se aprovechen de él; la lentitud, en especial en las actividades del trabajo; ser demasiado “blando” o “íntimo” con los demás.', 'DI', 'La impaciencia; sentido competitivo de “ganar o perder”.', 'Orientado a resultados', 'D e I >0   D > I', 'Sus acciones y actitud de “yo les muestro cómo”.', 1),
+(7, NULL, NULL, 'El poder que generan la autoridad, la posición y los roles formales.', 'El uso de la información objetiva.', 'Desapasionado; autodisciplinado.', 'Fuera más flexible; aceptara a los demás; si participara más con los demás.', 'Tiende a interiorizar los conflictos; recuerda el mal que se le ha hecho.', 'Su determinación; su tenacidad.', 'Involucrarse con las masas; vender ideas abstractas.', 'DSC', 'La franqueza; su desconfianza hacia los demás.', 'Investigador', 'D, S, C >0 En cualquier orden', 'Seguimiento concienzudo para realizar su trabajo en forma constante y persistente sea individual o en grupos pequeños.', 1),
+(8, NULL, NULL, 'Una nueva oportunidad; un nuevo reto.', 'Su capacidad para alcanzar las normas establecidas por él mismo.', 'Individualista en lo que se refiere a sus necesidades personales.', 'Mostrara más paciencia, empatía;  participara y colaborara con los demás;  diera más seguimiento y atención a la importancia del control de calidad.', 'Se aparta cuando se tienen que hacer las cosas; se torna beligerante cuando ve su individualidad amenazada o se le cierran las puertas al reto.', 'Las soluciones a los problemas; al proyectar una imagen de poder.', 'Al aburrimiento;  a la pérdida del control.', 'D', 'Del control que ejerce sobre los demás en su afán de alcanzar sus propios resultados.', 'Resolutivo', 'D>0', 'Acepta la responsabilidad, no dice “no es mi culpa”; ofrece formas nuevas e innovadoras de resolver problemas.', 1),
+(9, NULL, NULL, 'La amistad; la felicidad.', 'Su aceptación positiva; generalmente busca el lado bueno de las personas.', 'Es fácil de abordar, afectuoso y comprensivo.', 'Presenta más atención a las fechas límite; tuviera más iniciativa para realizar el trabajo.', 'Se torna demasiado flexible e íntimo; confía demasiado en todos sin distinción.', 'Las relaciones personales, al practicar la política de “puertas abiertas”.', 'Presionar a los demás; que se le acuse de hacer daño.', 'IS', 'Acercamiento indirecto, tolerancia.', 'Consejero', 'I y S >0 I => S', 'Estable, predecible; una amplia esfera de amistades; sabe escuchar.', 1),
+(10, NULL, NULL, 'Autoridad y prestigio; diversos símbolos de prestigio.', 'Su capacidad de expresión verbal; su flexibilidad.', 'Confía en los demás es entusiasta.', 'Se le asignaran tareas que le impliquen un reto; prestara más atención al servicio y detalles elementales clave para el trabajo; hiciera un análisis objetivo de la información.', 'Es discreto, diplomático.', 'Un comportamiento amistoso; franqueza; habilidad en su expresión verbal.', 'Un ambiente inalterable; relaciones complejas.', 'ID', 'Su entusiasmo; su habilidad para vender; su optimismo.', 'Persuasivo', 'D e I >0   I > D', 'Sabe vender y cerrar tratos; delega responsabilidades; sereno, seguridad en sí mismo.', 1),
+(11, NULL, NULL, 'Ser aceptado por los demás.', 'La tolerancia y participación.', 'Acepta el afecto; rechaza la agresión.', 'Tuviera más conciencia de quién es y de lo que puede hacer; mostrara más firmeza y agresividad; dijera “no” en los momentos adecuados.', 'Se vuelve persuasivo haciendo, si fuese necesario, uso de información que posee o de amistades clave.', 'La Comprensión; amistad.', 'El desacuerdo, el conflicto.', 'SI', 'La amabilidad.', 'Agente', 'S e I >0 S > I', 'Apoya; armoniza; proyecta empatía; está orientado al servicio.', 1),
+(12, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '-', NULL, 'Desconcertante', '- Centro', NULL, 1),
+(13, NULL, NULL, 'Profundo afán por el desarrollo personal.', 'Su autodisciplina; sus posiciones y ascensos.', 'Quiere mantenerse a la altura de los demás en cuanto a esfuerzo y desempeño técnico.', 'Colaborara en forma genuina para beneficio general; delegara tareas importantes a las personas apropiadas.', 'Se cohíbe; sensible a la crítica.', 'La confianza en su habilidad para perfeccionar nuevos conocimientos; al desarrollar y seguir procedimientos y acciones “correctos”.', 'Ser demasiado predecible; que no se le reconozca como “experto”.', 'ISC', 'Una atención excesiva a objetivos personales; expectativas poco realistas sobre los demás.', 'Profesional', 'I, S, C >0 En cualquier orden', 'Hábil para resolver problemas técnicos y humanos; profesionalismo en su especialidad.', 1),
+(14, NULL, NULL, 'Aprobación, popularidad.', 'Su forma de expresarse.', 'Dispuesto a aceptar a los demás.', 'Tuviera más control del tiempo; fuera más objetivo; fuera más sensible a lo que significa “urgente”, controlara sus emociones; cumpliera hasta el final sus promesas, tareas.', 'Descuidado y sentimental; actúa en forma desorganizada; no sabe cómo llevar a cabo las cosas.', 'Alabanzas, oportunidades, haciendo favores.', 'Perder aceptación social y su autoestima.', 'I', 'Los elogios, optimismo.', 'Promotor', 'I >0', 'Alivia tensiones; promueve proyectos y personas, incluso a sí mismo.', 1),
+(15, NULL, NULL, 'Logros estables, predecible.', 'Normas precisas.', 'Competente para hacer bien las cosas, reservado, cauteloso.', 'Fuera más flexible en su papel, fuera más independiente e interdependiente, tuviera más fe en sí mismo y si se viera a sí mismo como una persona valiosa.', 'Es discreto, diplomático.', 'La atención al detalle y precisión.', 'El antagonismo.', 'SC', 'Los procedimientos y controles excesivos para evitar las fallas, depende demasiado de la gente, productos y procesos que le funcionaron en el pasado.', 'Perfeccionista', 'S y C >0 En cualquier orden', 'Concienzudo, conserva las normas, control de calidad.', 1),
+(16, NULL, NULL, 'Conservar el “status quo”, controlar el ambiente.', 'Las normas de amistad, después por su capacidad.', 'Moderación calculada; afán de servir, de adaptarse a los demás.', 'Compartiera más sus ideas; aumentara su confianza en sí mismo basándose en la retroalimentación que recibe; utilizara métodos más sencillos y directos.', 'Se adapta a quienes tienen autoridad y a lo que opina el grupo.', 'Su constancia en el desempeño; por su afán de servir, de adaptarse a las necesidades de los demás.', 'Los cambios; la desorganización.', 'S', 'La modestia; su miedo a correr riesgos; su resistencia pasiva hacia las innovaciones.', 'Especialista', 'S >0', 'Planifica a corto plazo; es predecible, es congruente; mantiene un ritmo uniforme y seguro.', 1),
+(17, NULL, NULL, 'La exactitud.', 'Su capacidad de pensamiento analítico.', 'Puede rechazar la agresión interpersonal.', 'Fuera más abierto, compartiera en público su perspicacia y opiniones.', 'Se vuelve aprensivo.', 'La información objetiva, los argumentos lógicos.', 'Actos irracionales, el ridículo.', 'C', 'El análisis.', 'Objetivo', 'C >0', 'Define, esclarece, obtiene información, evalúa, comprueba.', 1),
+(18, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '-', NULL, 'Subactivo', '- Límite superior', NULL, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -816,6 +840,124 @@ CREATE TABLE `disc_codigo` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `estado_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `disc_codigo`
+--
+
+INSERT INTO `disc_codigo` (`id`, `letra`, `segmento`, `intensidad`, `rango_min`, `rango_max`, `created_at`, `updated_at`, `estado_id`) VALUES
+(1, 'D', '7', 28, 28, 28, NULL, NULL, 1),
+(2, 'D', '7', 27, 12, 27, NULL, NULL, 1),
+(3, 'D', '7', 26, 12, 27, NULL, NULL, 1),
+(4, 'D', '7', 25, 9, 11, NULL, NULL, 1),
+(5, 'D', '6', 24, 8, 8, NULL, NULL, 1),
+(6, 'D', '6', 23, 7, 7, NULL, NULL, 1),
+(7, 'D', '6', 22, 6, 6, NULL, NULL, 1),
+(8, 'D', '6', 21, 5, 5, NULL, NULL, 1),
+(9, 'D', '5', 20, 4, 4, NULL, NULL, 1),
+(10, 'D', '5', 19, 3, 3, NULL, NULL, 1),
+(11, 'D', '5', 18, 3, 3, NULL, NULL, 1),
+(12, 'D', '5', 17, 2, 2, NULL, NULL, 1),
+(13, 'D', '4', 16, 1, 1, NULL, NULL, 1),
+(14, 'D', '4', 15, 1, 1, NULL, NULL, 1),
+(15, 'D', '4', 14, 0, 0, NULL, NULL, 1),
+(16, 'D', '4', 13, 0, 0, NULL, NULL, 1),
+(17, 'D', '3', 12, -1, -1, NULL, NULL, 1),
+(18, 'D', '3', 11, -2, -2, NULL, NULL, 1),
+(19, 'D', '3', 10, -2, -2, NULL, NULL, 1),
+(20, 'D', '3', 9, -3, -3, NULL, NULL, 1),
+(21, 'D', '2', 8, -4, -4, NULL, NULL, 1),
+(22, 'D', '2', 7, -5, -5, NULL, NULL, 1),
+(23, 'D', '2', 6, -6, -6, NULL, NULL, 1),
+(24, 'D', '2', 5, -7, -7, NULL, NULL, 1),
+(25, 'D', '1', 4, -8, -8, NULL, NULL, 1),
+(26, 'D', '1', 3, -8, -8, NULL, NULL, 1),
+(27, 'D', '1', 2, -11, -9, NULL, NULL, 1),
+(28, 'D', '1', 1, -28, -12, NULL, NULL, 1),
+(29, 'I', '7', 28, 28, 28, NULL, NULL, 1),
+(30, 'I', '7', 27, 10, 27, NULL, NULL, 1),
+(31, 'I', '7', 26, 10, 27, NULL, NULL, 1),
+(32, 'I', '7', 25, 7, 9, NULL, NULL, 1),
+(33, 'I', '6', 24, 6, 6, NULL, NULL, 1),
+(34, 'I', '6', 23, 5, 5, NULL, NULL, 1),
+(35, 'I', '6', 22, 4, 4, NULL, NULL, 1),
+(36, 'I', '6', 21, 4, 4, NULL, NULL, 1),
+(37, 'I', '5', 20, 3, 3, NULL, NULL, 1),
+(38, 'I', '5', 19, 3, 3, NULL, NULL, 1),
+(39, 'I', '5', 18, 2, 2, NULL, NULL, 1),
+(40, 'I', '5', 17, 2, 2, NULL, NULL, 1),
+(41, 'I', '4', 16, 1, 1, NULL, NULL, 1),
+(42, 'I', '4', 15, 0, 0, NULL, NULL, 1),
+(43, 'I', '4', 14, 0, 0, NULL, NULL, 1),
+(44, 'I', '4', 13, -1, -1, NULL, NULL, 1),
+(45, 'I', '3', 12, -2, -2, NULL, NULL, 1),
+(46, 'I', '3', 11, -2, -2, NULL, NULL, 1),
+(47, 'I', '3', 10, -3, -3, NULL, NULL, 1),
+(48, 'I', '3', 9, -3, -3, NULL, NULL, 1),
+(49, 'I', '2', 8, -4, -4, NULL, NULL, 1),
+(50, 'I', '2', 7, -5, -5, NULL, NULL, 1),
+(51, 'I', '2', 6, -6, -6, NULL, NULL, 1),
+(52, 'I', '2', 5, -7, -7, NULL, NULL, 1),
+(53, 'I', '1', 4, -12, -8, NULL, NULL, 1),
+(54, 'I', '1', 3, -12, -8, NULL, NULL, 1),
+(55, 'I', '1', 2, -27, -11, NULL, NULL, 1),
+(56, 'I', '1', 1, -28, 28, NULL, NULL, 1),
+(57, 'S', '7', 28, 28, 28, NULL, NULL, 1),
+(58, 'S', '7', 27, 10, 27, NULL, NULL, 1),
+(59, 'S', '7', 26, 10, 27, NULL, NULL, 1),
+(60, 'S', '7', 25, 8, 9, NULL, NULL, 1),
+(61, 'S', '6', 24, 7, 7, NULL, NULL, 1),
+(62, 'S', '6', 23, 5, 6, NULL, NULL, 1),
+(63, 'S', '6', 22, 4, 4, NULL, NULL, 1),
+(64, 'S', '6', 21, 3, 3, NULL, NULL, 1),
+(65, 'S', '5', 20, 2, 2, NULL, NULL, 1),
+(66, 'S', '5', 19, 1, 1, NULL, NULL, 1),
+(67, 'S', '5', 18, 1, 1, NULL, NULL, 1),
+(68, 'S', '5', 17, 0, 0, NULL, NULL, 1),
+(69, 'S', '4', 16, -1, -1, NULL, NULL, 1),
+(70, 'S', '4', 15, -2, -2, NULL, NULL, 1),
+(71, 'S', '4', 14, -2, -2, NULL, NULL, 1),
+(72, 'S', '4', 13, -3, -3, NULL, NULL, 1),
+(73, 'S', '3', 12, -4, -4, NULL, NULL, 1),
+(74, 'S', '3', 11, -5, -5, NULL, NULL, 1),
+(75, 'S', '3', 10, -5, -5, NULL, NULL, 1),
+(76, 'S', '3', 9, -6, -6, NULL, NULL, 1),
+(77, 'S', '2', 8, -7, -7, NULL, NULL, 1),
+(78, 'S', '2', 7, -8, -8, NULL, NULL, 1),
+(79, 'S', '2', 6, -9, -9, NULL, NULL, 1),
+(80, 'S', '2', 5, -10, -10, NULL, NULL, 1),
+(81, 'S', '1', 4, -12, -11, NULL, NULL, 1),
+(82, 'S', '1', 3, -12, -11, NULL, NULL, 1),
+(83, 'S', '1', 2, -27, -13, NULL, NULL, 1),
+(84, 'S', '1', 1, -28, -28, NULL, NULL, 1),
+(85, 'C', '7', 28, 28, 28, NULL, NULL, 1),
+(86, 'C', '7', 27, 11, 27, NULL, NULL, 1),
+(87, 'C', '7', 26, 11, 27, NULL, NULL, 1),
+(88, 'C', '7', 25, 9, 10, NULL, NULL, 1),
+(89, 'C', '6', 24, 8, 8, NULL, NULL, 1),
+(90, 'C', '6', 23, 7, 7, NULL, NULL, 1),
+(91, 'C', '6', 22, 6, 6, NULL, NULL, 1),
+(92, 'C', '6', 21, 5, 5, NULL, NULL, 1),
+(93, 'C', '5', 20, 4, 4, NULL, NULL, 1),
+(94, 'C', '5', 19, 4, 4, NULL, NULL, 1),
+(95, 'C', '5', 18, 3, 3, NULL, NULL, 1),
+(96, 'C', '5', 17, 3, 3, NULL, NULL, 1),
+(97, 'C', '4', 16, 2, 2, NULL, NULL, 1),
+(98, 'C', '4', 15, 1, 1, NULL, NULL, 1),
+(99, 'C', '4', 14, 1, 1, NULL, NULL, 1),
+(100, 'C', '4', 13, 0, 0, NULL, NULL, 1),
+(101, 'C', '3', 12, -1, -1, NULL, NULL, 1),
+(102, 'C', '3', 11, -1, -1, NULL, NULL, 1),
+(103, 'C', '3', 10, -2, -2, NULL, NULL, 1),
+(104, 'C', '3', 9, -2, -2, NULL, NULL, 1),
+(105, 'C', '2', 8, -3, -3, NULL, NULL, 1),
+(106, 'C', '2', 7, -4, -4, NULL, NULL, 1),
+(107, 'C', '2', 6, -4, -4, NULL, NULL, 1),
+(108, 'C', '2', 5, -5, -5, NULL, NULL, 1),
+(109, 'C', '1', 4, -10, -6, NULL, NULL, 1),
+(110, 'C', '1', 3, -10, -6, NULL, NULL, 1),
+(111, 'C', '1', 2, -27, -11, NULL, NULL, 1),
+(112, 'C', '1', 1, -28, -28, NULL, NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -2194,13 +2336,13 @@ ALTER TABLE `dimension`
 -- AUTO_INCREMENT de la tabla `disc_analisis`
 --
 ALTER TABLE `disc_analisis`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT de la tabla `disc_codigo`
 --
 ALTER TABLE `disc_codigo`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=113;
 
 --
 -- AUTO_INCREMENT de la tabla `disc_instancia`

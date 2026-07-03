@@ -23,6 +23,7 @@ export class EvaluacionResultadosComponent implements OnInit {
   esGlobal        = computed(() => [2, 5].includes(this.data()?.evaluacion_id));
   esDimensiones   = computed(() => [3, 4, 6, 7, 9].includes(this.data()?.evaluacion_id));
   esGestionTiempo = computed(() => this.data()?.evaluacion_id === 8);
+  esDisc          = computed(() => this.data()?.evaluacion_id === 10);
 
   analisis = computed(() => this.getAnalisis());
 
@@ -54,6 +55,25 @@ export class EvaluacionResultadosComponent implements OnInit {
   colorPorIndice(i: number): string {
     const colores = ['primary', 'success', 'warning', 'danger', 'info'];
     return colores[i % colores.length];
+  }
+
+  // ── DISC (ID 10) ──────────────────────────────────────────────────────────
+  getPerfilDisc() {
+    return this.resultados().filter(r => ['D', 'I', 'S', 'C'].includes(r.dimension));
+  }
+
+  getPerfilDominanteDisc() {
+    return this.resultados().find(r => r.dimension === 'Perfil Dominante');
+  }
+
+  colorLetraDisc(letra: string): string {
+    const mapa: Record<string, string> = { D: 'danger', I: 'warning', S: 'success', C: 'primary' };
+    return mapa[letra] || 'secondary';
+  }
+
+  // La intensidad normalizada de disc_codigo va de 1 a 28 (escala real del sistema original)
+  porcentajeIntensidadDisc(intensidad: number): number {
+    return Math.max(0, Math.min(100, Math.round((intensidad / 28) * 100)));
   }
 
   volver() { this.router.navigate(['/mis-evaluaciones']); }
@@ -353,11 +373,49 @@ export class EvaluacionResultadosComponent implements OnInit {
           'Establece rutinas fijas de inicio y cierre del día para crear estructura y hábito.'
         ]}
       ];
-      const nivel = mapas.find(n => positivo >= n.min) || mapas[1];
+        const nivel = mapas.find(n => positivo >= n.min) || mapas[1];
       return {
         titulo: `Análisis: Gestión del Tiempo — ${positivo}% de hábitos efectivos`,
         parrafos: nivel.parrafos,
         recomendaciones: nivel.recs
+      };
+    }
+
+    // TEST DISC (ID 10)
+    if (ev === 10) {
+      const dominante: any = this.getPerfilDominanteDisc();
+      if (!dominante) return null;
+
+      const nombresEstilo: Record<string, string> = {
+        D: 'Dominancia', I: 'Influencia', S: 'Estabilidad', C: 'Cumplimiento'
+      };
+      const letra = (dominante.Resultado || '').split('—')[0].trim();
+      const nombreEstilo = nombresEstilo[letra] || letra;
+
+      const parrafos: string[] = [];
+      if (dominante.ResultadoDescripcion) {
+        parrafos.push(`Tu perfil predominante es ${letra} (${nombreEstilo}). Tu principal motivación es: ${dominante.ResultadoDescripcion}`);
+      }
+      if (dominante.Influye) {
+        parrafos.push(`Sueles influir en otros a través de: ${dominante.Influye}`);
+      }
+      if (dominante.Teme) {
+        parrafos.push(`Tiendes a evitar o temer: ${dominante.Teme}`);
+      }
+
+      const recomendaciones: string[] = [];
+      if (dominante.Juzga) {
+        recomendaciones.push(`Sueles juzgar a otros y a ti mismo/a según: ${dominante.Juzga}. Ten esto presente al evaluar a tu equipo.`);
+      }
+      if (dominante.BajoPresion) {
+        recomendaciones.push(`Bajo presión, cuida esta tendencia: ${dominante.BajoPresion}`);
+      }
+      recomendaciones.push('Recuerda que no existen estilos DISC "buenos" o "malos" — cada uno representa una forma válida de actuar, y conocerlo es la base para relacionarte mejor con estilos distintos al tuyo.');
+
+      return {
+        titulo: `Análisis: Perfil predominante — ${letra} (${nombreEstilo})`,
+        parrafos: parrafos.length ? parrafos : ['No se encontró una descripción detallada para este perfil.'],
+        recomendaciones
       };
     }
 
