@@ -4,13 +4,17 @@ import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
-export class FaqService {
+export class PerfilService {
 
   private http        = inject(HttpClient);
   private authService = inject(AuthService);
-  private url          = `${environment.apiUrl}/faq`;
+  private apiUrl       = `${environment.apiUrl}/perfil`;
 
-  getFaqs() {
-    return this.http.get<any>(this.url, { headers: this.authService.getAuthHeaders() });
+  getPerfil() {
+    return this.http.get<any>(this.apiUrl, { headers: this.authService.getAuthHeaders() });
+  }
+
+  actualizar(data: any) {
+    return this.http.put<any>(this.apiUrl, data, { headers: this.authService.getAuthHeaders() });
   }
 }

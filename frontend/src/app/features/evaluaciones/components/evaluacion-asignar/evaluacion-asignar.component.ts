@@ -1,8 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
+import { EvaluacionService } from '../../../../core/services/evaluacion.service';
 
 interface IEvaluacion {
   id: number;
@@ -24,10 +23,8 @@ interface IUsuario {
 })
 export class EvaluacionAsignarComponent implements OnInit {
 
-  private http   = inject(HttpClient);
   private router = inject(Router);
-
-  private apiUrl = `${environment.apiUrl}/evaluaciones`;
+  private evaluacionService = inject(EvaluacionService);
 
   usuarios           = signal<IUsuario[]>([]);
   disponibles        = signal<IEvaluacion[]>([]);
@@ -40,13 +37,8 @@ export class EvaluacionAsignarComponent implements OnInit {
   mostrarListas       = signal<boolean>(false);
   toast               = signal<{ mensaje: string; tipo: string } | null>(null);
 
-  private headers() {
-    const token = localStorage.getItem('token');
-    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
-  }
-
   ngOnInit() {
-    this.http.get<any>(`${this.apiUrl}/form-data`, this.headers()).subscribe({
+    this.evaluacionService.getFormData().subscribe({
       next: (resp) => {
         this.usuarios.set(resp.usuarios);
         this.todasEvaluaciones.set(resp.evaluaciones);
@@ -67,7 +59,7 @@ export class EvaluacionAsignarComponent implements OnInit {
     this.loadingUsuario.set(true);
     this.mostrarListas.set(false);
 
-    this.http.get<any>(`${this.apiUrl}/asignadas/${id}`, this.headers()).subscribe({
+    this.evaluacionService.getAsignadasPorUsuario(id).subscribe({
       next: (resp) => {
         const asignadasIds: number[] = resp.data;
         const todas = this.todasEvaluaciones();
@@ -112,7 +104,7 @@ export class EvaluacionAsignarComponent implements OnInit {
       ver_resultados: 0
     };
 
-    this.http.post<any>(`${this.apiUrl}/asignar-lote`, body, this.headers()).subscribe({
+    this.evaluacionService.asignarLote(body).subscribe({
       next: () => {
         this.guardando.set(false);
         this.mostrarToast('Asignaciones guardadas correctamente.', 'success');

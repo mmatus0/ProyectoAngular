@@ -1,42 +1,39 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class InstitucionService {
 
-  private http   = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/instituciones`;
-
-  private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-  }
+  private http        = inject(HttpClient);
+  private authService = inject(AuthService);
+  private apiUrl       = `${environment.apiUrl}/instituciones`;
 
   getAll(estadoId: number) {
-    return this.http.get<any>(`${this.apiUrl}?estado=${estadoId}`, { headers: this.getAuthHeaders() });
+    return this.http.get<any>(`${this.apiUrl}?estado=${estadoId}`, { headers: this.authService.getAuthHeaders() });
   }
 
   create(data: any) {
-    return this.http.post<any>(this.apiUrl, data, { headers: this.getAuthHeaders() });
+    return this.http.post<any>(this.apiUrl, data, { headers: this.authService.getAuthHeaders() });
   }
 
   update(id: number, data: any) {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, data, { headers: this.getAuthHeaders() });
+    return this.http.put<any>(`${this.apiUrl}/${id}`, data, { headers: this.authService.getAuthHeaders() });
   }
 
   desactivar(id: number) {
-    return this.http.post<any>(`${this.apiUrl}/${id}/desactivar`, {}, { headers: this.getAuthHeaders() });
+    return this.http.post<any>(`${this.apiUrl}/${id}/desactivar`, {}, { headers: this.authService.getAuthHeaders() });
   }
 
   activar(id: number) {
-    return this.http.post<any>(`${this.apiUrl}/${id}/activar`, {}, { headers: this.getAuthHeaders() });
+    return this.http.post<any>(`${this.apiUrl}/${id}/activar`, {}, { headers: this.authService.getAuthHeaders() });
   }
 
   cargaMasiva(archivo: File) {
     const formData = new FormData();
     formData.append('archivo', archivo);
-    return this.http.post<any>(`${this.apiUrl}/carga-masiva`, formData, { headers: this.getAuthHeaders() });
+    return this.http.post<any>(`${this.apiUrl}/carga-masiva`, formData, { headers: this.authService.getAuthHeaders() });
   }
 
   descargarPlantilla() {

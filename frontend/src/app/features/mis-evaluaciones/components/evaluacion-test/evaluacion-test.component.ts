@@ -1,8 +1,7 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
+import { EvaluacionService } from '../../../../core/services/evaluacion.service';
 
 interface IPregunta {
   id: number;
@@ -31,9 +30,8 @@ export class EvaluacionTestComponent implements OnInit {
 
   private route  = inject(ActivatedRoute);
   private router = inject(Router);
-  private http   = inject(HttpClient);
+  private evaluacionService = inject(EvaluacionService);
 
-  private apiUrl = `${environment.apiUrl}/mis-evaluaciones`;
   private asignacionId!: number;
 
   evaluacion   = signal<any>(null);
@@ -68,14 +66,9 @@ export class EvaluacionTestComponent implements OnInit {
       : 0
   );
 
-  private headers() {
-    const token = localStorage.getItem('token');
-    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
-  }
-
   ngOnInit() {
     this.asignacionId = Number(this.route.snapshot.paramMap.get('id'));
-    this.http.get<any>(`${this.apiUrl}/${this.asignacionId}/test`, this.headers()).subscribe({
+    this.evaluacionService.getTest(this.asignacionId).subscribe({
       next: (resp) => {
         this.evaluacion.set(resp.evaluacion);
         this.preguntas.set(resp.preguntas);
@@ -105,7 +98,6 @@ export class EvaluacionTestComponent implements OnInit {
   seleccionarMas(preguntaId: number, altId: number) {
     this.respuestasDisc.update(r => {
       const actual = r[preguntaId] || { mas: null, menos: null };
-      // Si el mismo alt estaba en Menos, lo limpiamos
       const menos = actual.menos === altId ? null : actual.menos;
       return { ...r, [preguntaId]: { mas: altId, menos } };
     });
@@ -114,7 +106,6 @@ export class EvaluacionTestComponent implements OnInit {
   seleccionarMenos(preguntaId: number, altId: number) {
     this.respuestasDisc.update(r => {
       const actual = r[preguntaId] || { mas: null, menos: null };
-      // Si el mismo alt estaba en Más, lo limpiamos
       const mas = actual.mas === altId ? null : actual.mas;
       return { ...r, [preguntaId]: { mas, menos: altId } };
     });
@@ -140,7 +131,7 @@ export class EvaluacionTestComponent implements OnInit {
       ? { respuestas: this.respuestasDisc(), finalizar: false }
       : { respuestas: this.respuestas(), finalizar: false };
 
-    this.http.post<any>(`${this.apiUrl}/${this.asignacionId}/guardar`, body, this.headers()).subscribe({
+    this.evaluacionService.guardarTest(this.asignacionId, body).subscribe({
       next: () => {
         this.guardando.set(false);
         this.mostrarToast('Avance guardado correctamente.', 'success');
@@ -158,7 +149,7 @@ export class EvaluacionTestComponent implements OnInit {
       ? { respuestas: this.respuestasDisc(), finalizar: true }
       : { respuestas: this.respuestas(), finalizar: true };
 
-    this.http.post<any>(`${this.apiUrl}/${this.asignacionId}/guardar`, body, this.headers()).subscribe({
+    this.evaluacionService.guardarTest(this.asignacionId, body).subscribe({
       next: () => {
         this.guardando.set(false);
         this.cerrarModalFinalizar();

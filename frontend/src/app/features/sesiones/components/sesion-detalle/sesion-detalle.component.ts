@@ -2,8 +2,7 @@ import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
+import { SesionService } from '../../../../core/services/sesion.service';
 
 @Component({
   selector: 'app-sesion-detalle',
@@ -15,10 +14,9 @@ export class SesionDetalleComponent implements OnInit, OnDestroy {
 
   private route  = inject(ActivatedRoute);
   private router = inject(Router);
-  private http   = inject(HttpClient);
   private fb     = inject(FormBuilder);
+  private sesionService = inject(SesionService);
 
-  private apiUrl = `${environment.apiUrl}/sesiones`;
   private intervalId: any = null;
 
   sesion        = signal<any>(null);
@@ -35,14 +33,9 @@ export class SesionDetalleComponent implements OnInit, OnDestroy {
   corriendo     = signal<boolean>(false);
   bloqueado     = signal<boolean>(false);
 
-  private headers() {
-    const token = localStorage.getItem('token');
-    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
-  }
-
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
-    this.http.get<any>(`${this.apiUrl}/${id}/detalle`, this.headers()).subscribe({
+    this.sesionService.getDetalle(Number(id)).subscribe({
       next: (resp) => {
         this.sesion.set(resp.sesion);
         this.tipos.set(resp.tipos);
@@ -126,7 +119,7 @@ export class SesionDetalleComponent implements OnInit, OnDestroy {
     };
 
     const id = this.sesion().id;
-    this.http.put<any>(`${this.apiUrl}/${id}/detalle`, body, this.headers()).subscribe({
+    this.sesionService.actualizarDetalle(id, body).subscribe({
       next: () => {
         this.guardando.set(false);
         this.mostrarToast('Cambios guardados correctamente.', 'success');
@@ -155,7 +148,7 @@ export class SesionDetalleComponent implements OnInit, OnDestroy {
     };
 
     const id = this.sesion().id;
-    this.http.put<any>(`${this.apiUrl}/${id}/finalizar-detalle`, body, this.headers()).subscribe({
+    this.sesionService.finalizarDetalle(id, body).subscribe({
       next: () => {
         this.cerrarModalFinalizar();
         this.mostrarToast('Sesión finalizada correctamente.', 'success');

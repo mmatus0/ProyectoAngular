@@ -1,8 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { environment } from '../../../../../environments/environment';
+import { HerramientaService } from '../../../../core/services/herramienta.service';
 
 interface IMiHerramienta {
   id: number;
@@ -21,21 +20,14 @@ interface IMiHerramienta {
 })
 export class MisHerramientasComponent implements OnInit {
 
-  private http = inject(HttpClient);
-  private url  = `${environment.apiUrl}/mis-herramientas`;
+  private herramientaService = inject(HerramientaService);
   private router = inject(Router);
-
 
   herramientas = signal<IMiHerramienta[]>([]);
   loading      = signal<boolean>(true);
 
-  private headers() {
-    const token = localStorage.getItem('token');
-    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
-  }
-
   ngOnInit() {
-    this.http.get<any>(this.url, this.headers()).subscribe({
+    this.herramientaService.getMisHerramientas().subscribe({
       next: (resp) => {
         this.herramientas.set(resp.data);
         this.loading.set(false);

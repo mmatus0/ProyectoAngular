@@ -1,8 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
+import { PerfilService } from '../../../../core/services/perfil.service';
 
 @Component({
   selector: 'app-perfil',
@@ -12,10 +11,8 @@ import { environment } from '../../../../../environments/environment';
 })
 export class PerfilComponent implements OnInit {
 
-  private http = inject(HttpClient);
   private fb   = inject(FormBuilder);
-
-  private apiUrl = `${environment.apiUrl}/perfil`;
+  private perfilService = inject(PerfilService);
 
   perfil   = signal<any>(null);
   loading  = signal<boolean>(true);
@@ -39,13 +36,8 @@ export class PerfilComponent implements OnInit {
     observacion:     ['']
   });
 
-  private headers() {
-    const token = localStorage.getItem('token');
-    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
-  }
-
   ngOnInit() {
-    this.http.get<any>(this.apiUrl, this.headers()).subscribe({
+    this.perfilService.getPerfil().subscribe({
       next: (resp) => {
         this.perfil.set(resp.data);
         this.form.patchValue(resp.data);
@@ -66,7 +58,7 @@ export class PerfilComponent implements OnInit {
 
   guardar() {
     this.guardando.set(true);
-    this.http.put<any>(this.apiUrl, this.form.value, this.headers()).subscribe({
+    this.perfilService.actualizar(this.form.value).subscribe({
       next: () => {
         this.perfil.set({ ...this.perfil(), ...this.form.value });
         this.modoEdicion.set(false);

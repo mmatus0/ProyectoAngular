@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 12-06-2026 a las 00:05:38
+-- Tiempo de generación: 03-07-2026 a las 02:18:58
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -409,6 +409,14 @@ CREATE TABLE `biblioteca` (
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Volcado de datos para la tabla `biblioteca`
+--
+
+INSERT INTO `biblioteca` (`id`, `titulo`, `descripcion`, `tipo`, `ruta_archivo`, `url`, `categoria_id`, `estado_id`, `usuario_id`, `created_at`, `updated_at`) VALUES
+(1, 'Documento de Prueba', 'lalala', 'digital', 'biblioteca/doc_1782957514995.pdf', NULL, 2, 1, 4, '2026-07-02 01:58:00', '2026-07-02 01:58:35'),
+(2, 'klljb', 'lk', 'digital', 'biblioteca/doc_1782968225992.pdf', NULL, 2, 1, 3, '2026-07-02 04:57:05', '2026-07-02 04:57:05');
+
 -- --------------------------------------------------------
 
 --
@@ -700,7 +708,23 @@ INSERT INTO `detalle_respuesta` (`id`, `resultado`, `created_at`, `updated_at`, 
 (239, '1', NULL, NULL, 13, 1, 188, 159),
 (240, '1', NULL, NULL, 13, 1, 188, 160),
 (241, '0', NULL, NULL, 13, 1, 189, 161),
-(242, '1', NULL, NULL, 13, 1, 188, 162);
+(242, '1', NULL, NULL, 13, 1, 188, 162),
+(243, '1', NULL, NULL, 14, 1, 197, 201),
+(244, '-1', NULL, NULL, 14, 1, 198, 201),
+(245, '2', NULL, NULL, 15, 1, 191, 163),
+(246, '1', NULL, NULL, 15, 1, 190, 164),
+(247, '1', NULL, NULL, 16, 1, 3, 1),
+(248, '2', NULL, NULL, 16, 1, 5, 2),
+(249, '-1', NULL, NULL, 16, 1, 10, 3),
+(250, '1', NULL, NULL, 16, 1, 13, 4),
+(251, '1', NULL, NULL, 16, 1, 18, 5),
+(252, '2', NULL, NULL, 16, 1, 24, 6),
+(253, '-2', NULL, NULL, 16, 1, 25, 7),
+(254, '-1', NULL, NULL, 16, 1, 30, 8),
+(255, '-1', NULL, NULL, 16, 1, 36, 9),
+(256, '2', NULL, NULL, 16, 1, 40, 10),
+(257, '-1', NULL, NULL, 16, 1, 43, 11),
+(258, '-1', NULL, NULL, 16, 1, 45, 12);
 
 -- --------------------------------------------------------
 
@@ -833,7 +857,8 @@ CREATE TABLE `empresa` (
 
 INSERT INTO `empresa` (`id`, `empresa`, `razonsocial`, `numero_identificacion_fiscal`, `direccion`, `telefonos`, `pagina_web`, `created_at`, `updated_at`, `estado_id`) VALUES
 (1, 'Empresa Demo', 'Demo S.A.', '12345678-9', NULL, NULL, NULL, '2026-04-06 22:46:34', '2026-04-06 22:46:34', 1),
-(2, 'ISIAC', 'ISIAC LTDA', '775463218', 'Constitución 879', '+56999999999', NULL, '2026-06-11 20:56:39', '2026-06-11 20:56:39', 1);
+(2, 'ISIAC', 'ISIAC LTDA', '775463218', 'Constitución 879', '+56999999999', NULL, '2026-06-11 20:56:39', '2026-06-11 20:56:39', 1),
+(3, 'Empresa Ejemplo', 'Ejemplo S.A.', '12345678-9', 'Av. Principal 123', '+56912345678', 'https://ejemplo.com', '2026-07-02 03:01:13', '2026-07-02 03:01:13', 1);
 
 -- --------------------------------------------------------
 
@@ -966,16 +991,16 @@ INSERT INTO `evaluacion_usuario` (`id`, `intentos`, `ver_resultados`, `fecha`, `
 (8, 1, 0, '2026-06-07 18:19:36', '2026-06-07 18:29:01', '2026-06-07 18:29:01', '{\"Resultados\":[]}', NULL, NULL, NULL, NULL, 2, NULL, 4, 6),
 (9, 1, 0, '2026-06-07 18:19:36', '2026-06-07 18:30:00', '2026-06-07 18:30:00', '{\"Resultados\":[{\"Puntaje\":2,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Escuchar sin interrumpir.\",\"dimension_descripcion\":null},{\"Puntaje\":4,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Escuchar prestando 100% de atención.\",\"dimension_descripcion\":null},{\"Puntaje\":1,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Escuchar más allá de las palabras.\",\"dimension_descripcion\":null},{\"Puntaje\":2,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Escuchar incentivando al otro a profundizar.\",\"dimension_descripcion\":null}]}', NULL, NULL, NULL, NULL, 2, NULL, 4, 4),
 (10, 1, 0, '2026-06-07 18:19:36', '2026-06-07 18:31:11', '2026-06-07 18:31:11', '{\"Resultados\":[{\"Puntaje\":0.72,\"Resultado\":\"Sin diagnóstico\",\"ResultadoDescripcion\":\"\",\"dimension\":null}]}', NULL, NULL, NULL, NULL, 2, NULL, 4, 5),
-(11, 1, 0, '2026-06-11 17:06:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, NULL, 1, 9),
+(11, 1, 0, '2026-06-11 17:06:04', '2026-07-01 22:26:14', NULL, NULL, NULL, NULL, NULL, NULL, 3, NULL, 3, 9),
 (12, 1, 0, '2026-06-11 16:58:32', '2026-06-11 16:59:05', '2026-06-11 16:59:18', '{\"Resultados\":[{\"Puntaje\":0,\"Resultado\":\"Experiencia Concreta (EC)\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Experiencia Concreta (EC)\",\"dimension_descripcion\":\"Refleja una tendencia a aprender basado en la experiencia y en juicios intuitivos.\\nLos individuos con un fuerte desarrollo en EC suelen establecer buenos contactos con otros y son más bien “orientados a las personas”.\\n A menudo encuentran que la teoría no ayuda mucho y prefieren tratar cada caso como caso único.\\nAprenden más de ejemplos específicos que los enfrentan a situaciones prácticas.\\nLas personas que enfatizan EC aprenden más de sus iguales que de sus superiores y se benefician más de la retroalimentación y discusión con los otros que enfatizan EC.\"},{\"Puntaje\":0,\"Resultado\":\"Observación Reflexiva (OR)\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Observación Reflexiva (OR)\",\"dimension_descripcion\":\"Refleja una tendencia a aprender en forma imparcial y reflexiva.\\nLas personas con un desarrollo de OR aprenden basándose en juicios sobre observaciones precisas y prefieren\\n situaciones de aprendizaje tal como las clases expositivas que les permiten tomar el rol de observadores imparciales.\\nEstas personas suelen ser Introvertidas.\"},{\"Puntaje\":0,\"Resultado\":\"Conceptualización Abstracta (CA)\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Conceptualización Abstracta (CA)\",\"dimension_descripcion\":\"Refleja una tendencia al análisis y a la conceptualización y una forma de aprender basada en el pensamiento lógico y la evaluación racional.\\nLas personas con un fuerte desarrollo de CA tienden a orientarse más hacia las cosas y los símbolos que hacia otras personas.\\nAprende más en situaciones impersonales con una clara autoridad en las que enfatiza el análisis sistemático y la teoría.\\nSe frustran y obtienen poco beneficio de la experiencia poco estructurada tales como el ejercicio y la simulación.\"},{\"Puntaje\":0,\"Resultado\":\"Experimentación Activa (EA)\",\"ResultadoDescripcion\":\"\",\"dimension\":\"Experimentación Activa (EA)\",\"dimension_descripcion\":\"Refleja una tendencia a aprender haciendo cosas y experimentando alternativas.\\nLas personas con un grado de desarrollo de EA aprenden más cuando participan en proyectos, trabajos o discusión de grupo.\\nNo se sienten atraídos por clases expositivas y situaciones de aprendizaje pasivo. Estas personas suelen ser extravertidas.\"},{\"Puntaje\":0,\"Resultado\":\"Activo\",\"ResultadoDescripcion\":\"EA-OR eje abscisas\",\"dimension\":\"EJE HORIZONTAL\",\"dimension_descripcion\":\"Tendencia Reflexiva vs Activa\"},{\"Puntaje\":0,\"Resultado\":\"Abstracto\",\"ResultadoDescripcion\":\"CA-EC eje ordenadas\",\"dimension\":\"EJE VERTICAL\",\"dimension_descripcion\":\"Tendencia Concreta vs Abstracta\"},{\"Puntaje\":0,\"Resultado\":\"Cuadrante \",\"ResultadoDescripcion\":\"\",\"dimension\":\"ESTILO DE APRENDIZAJE\",\"dimension_descripcion\":\"Perfil dominante según matriz de Kolb\"}]}', NULL, NULL, NULL, NULL, 3, NULL, 4, 7),
 (13, 1, 0, '2026-06-11 17:06:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, NULL, 1, 3),
 (14, 1, 0, '2026-06-11 16:58:32', '2026-06-11 17:00:39', '2026-06-11 17:00:39', '{\"Resultados\":[{\"Puntaje\":8.33,\"Resultado\":\"8.33%\",\"ResultadoDescripcion\":\"Buena gestión del tiempo\",\"dimension\":null},{\"Puntaje\":91.67,\"Resultado\":\"91.67%\",\"ResultadoDescripcion\":\"Mala gestión del tiempo\",\"dimension\":null}]}', NULL, NULL, NULL, NULL, 3, NULL, 4, 8),
-(15, 1, 0, '2026-06-11 17:06:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, NULL, 1, 1),
+(15, 1, 0, '2026-06-11 17:06:04', '2026-07-02 00:43:03', '2026-07-02 00:43:22', '{\"Resultados\":[{\"dimension\":\"ATBR\",\"Puntaje\":1,\"Porcentaje\":8.33,\"Resultado\":\"E1: Dirigir\",\"ResultadoDescripcion\":\"Alto Comportamiento Directivo / Bajo Comportamiento de Apoyo\"},{\"dimension\":\"ATAR\",\"Puntaje\":8,\"Porcentaje\":66.67,\"Resultado\":\"E2: Persuadir\",\"ResultadoDescripcion\":\"Alto Comportamiento Directivo / Alto Comportamiento de Apoyo\"},{\"dimension\":\"BTAR\",\"Puntaje\":2,\"Porcentaje\":16.67,\"Resultado\":\"E3: Apoyar\",\"ResultadoDescripcion\":\"Alto Comportamiento de Apoyo / Bajo Comportamiento Directivo\"},{\"dimension\":\"BTBR\",\"Puntaje\":1,\"Porcentaje\":8.33,\"Resultado\":\"E4: Delegar\",\"ResultadoDescripcion\":\"Bajo Comportamiento de Apoyo / Bajo Comportamiento Directivo\"},{\"dimension\":\"Nivel de Efectividad\",\"Puntaje\":2,\"Porcentaje\":0,\"Resultado\":\"Nivel 2\",\"ResultadoDescripcion\":\"\"}]}', NULL, NULL, NULL, NULL, 3, NULL, 4, 1),
 (16, 1, 0, '2026-06-11 17:06:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, NULL, 1, 6),
 (17, 1, 0, '2026-06-11 17:06:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, NULL, 1, 2),
 (18, 1, 0, '2026-06-11 17:06:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, NULL, 1, 4),
 (19, 1, 0, '2026-06-11 17:06:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, NULL, 1, 5),
-(20, 1, 0, '2026-06-11 17:06:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, NULL, 1, 10);
+(20, 1, 0, '2026-06-11 17:06:04', '2026-07-01 22:25:58', NULL, NULL, NULL, NULL, NULL, NULL, 3, NULL, 3, 10);
 
 -- --------------------------------------------------------
 
@@ -1311,7 +1336,8 @@ INSERT INTO `persona` (`id`, `fecha_nacimiento`, `telefono`, `direccion`, `grupo
 (1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-04-06 22:47:03', '2026-04-06 22:47:03', 1, 1, 1),
 (2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-06-06 23:41:52', '2026-06-06 23:41:52', 1, 2, 1),
 (3, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 3, 1),
-(4, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 4, 2);
+(4, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 4, 2),
+(5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 5, 1);
 
 -- --------------------------------------------------------
 
@@ -1591,7 +1617,10 @@ INSERT INTO `respuestas` (`id`, `fecha`, `nro_intentos`, `created_at`, `updated_
 (10, '2026-06-07 18:30:00', 1, NULL, NULL, 1, 9),
 (11, '2026-06-07 18:31:11', 1, NULL, NULL, 1, 10),
 (12, '2026-06-11 16:59:05', 1, NULL, NULL, 1, 12),
-(13, '2026-06-11 17:00:39', 1, NULL, NULL, 1, 14);
+(13, '2026-06-11 17:00:39', 1, NULL, NULL, 1, 14),
+(14, '2026-07-01 22:25:58', 1, NULL, NULL, 1, 20),
+(15, '2026-07-01 22:26:14', 1, NULL, NULL, 1, 11),
+(16, '2026-07-02 00:43:03', 1, NULL, NULL, 1, 15);
 
 -- --------------------------------------------------------
 
@@ -1800,8 +1829,9 @@ CREATE TABLE `user` (
 INSERT INTO `user` (`id`, `nombre`, `usuario`, `email`, `password`, `status`, `disc_asignados`, `acreditado`, `eval_asignadas`, `avatar_nombre_archivo`, `avatar_es_fisico`, `ruta_avatar`, `remember_token`, `created_at`, `updated_at`, `rolusuario_id`, `estado_id`, `empresa_id`) VALUES
 (1, 'Gonzalo Matus', 'mmatus0', 'matusgonzalo1544@gmail.com', '$2y$12$MW.OVVYX4mPYFF2jYw8UbeMKE9Ifs5S8HA5bR30EBqY80hjvtrzJ2', 1, 0, 0, 0, 'default_avatar.png', '1', 'images/users/default_avatar.png', 'J7UvIkaq46UUu532yz2VERMsteqnkEsFgOEIinjzeIGy2mfpPQD3p4Xi6RNS', '2026-04-06 22:47:03', '2026-06-07 06:01:06', 1, 1, 1),
 (2, 'Constanza Venegas', 'conyvenegas', 'gmatusz85@gmail.com', '$2y$12$uN8j1pFdPhCmvX2zTpBYM.rc3wc1qf0qQmW0wCvqtlnmVhC7OW16C', 1, 0, 0, 0, 'default_avatar.png', '1', 'images/users/default_avatar.png', '6OrN520h8ME9AoURUPs7CWjdUxjY6SpRV1NQi5soZft37YGMIXNAiuupUrFZ', '2026-06-06 23:41:52', '2026-06-06 23:41:52', 3, 1, 1),
-(3, 'Andrea Aravena', 'aaravena12', 'aaravena@gmail.com', '$2b$10$vkLvd56WXvPZ6CK3OG19eexoqS1Lq58z1eMHFVbfH3skOj4dTY70K', NULL, 0, 0, 0, NULL, NULL, 'images/users/default_avatar.png', NULL, NULL, NULL, 3, 1, 1),
-(4, 'admin', 'adminc', 'admin@evalcoach.cl', '$2b$10$FTB1MfC2guCn/mCkCk44WeMzEwyiX3h6UIHjYnVcwMm6scpSCytEu', NULL, 0, 0, 0, NULL, NULL, 'images/users/default_avatar.png', NULL, NULL, NULL, 1, 1, 2);
+(3, 'Andrea Aravena', 'aaravena12', 'aaravena@gmail.com', '$2b$10$FLDj/SfY7YdKX1C6h40oYeeYYdejaWsw.95JcVa0Ah7vYNKv2C.Ia', NULL, 0, 0, 0, NULL, NULL, 'images/users/default_avatar.png', NULL, NULL, NULL, 3, 1, 1),
+(4, 'admin', 'adminc', 'admin@evalcoach.cl', '$2b$10$FTB1MfC2guCn/mCkCk44WeMzEwyiX3h6UIHjYnVcwMm6scpSCytEu', NULL, 0, 0, 0, NULL, NULL, 'images/users/default_avatar.png', NULL, NULL, NULL, 1, 1, 2),
+(5, 'Juan Pérez', 'jperez', 'jperez@gmail.com', '$2b$10$/.3bZZNEceM1NE7bi7o9leraH3m05uT8eh6.2Dllf9oEw/PnCFkgG', NULL, 0, 0, 0, NULL, NULL, 'images/users/default_avatar.png', NULL, NULL, NULL, 3, 1, 1);
 
 --
 -- Índices para tablas volcadas
@@ -2134,7 +2164,7 @@ ALTER TABLE `atributo`
 -- AUTO_INCREMENT de la tabla `biblioteca`
 --
 ALTER TABLE `biblioteca`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `calculo_tabla_resultados`
@@ -2152,7 +2182,7 @@ ALTER TABLE `categorias`
 -- AUTO_INCREMENT de la tabla `detalle_respuesta`
 --
 ALTER TABLE `detalle_respuesta`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=243;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=259;
 
 --
 -- AUTO_INCREMENT de la tabla `dimension`
@@ -2182,7 +2212,7 @@ ALTER TABLE `disc_instancia`
 -- AUTO_INCREMENT de la tabla `empresa`
 --
 ALTER TABLE `empresa`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `entidad`
@@ -2272,7 +2302,7 @@ ALTER TABLE `permiso_usuario`
 -- AUTO_INCREMENT de la tabla `persona`
 --
 ALTER TABLE `persona`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `preguntas`
@@ -2284,7 +2314,7 @@ ALTER TABLE `preguntas`
 -- AUTO_INCREMENT de la tabla `respuestas`
 --
 ALTER TABLE `respuestas`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de la tabla `resultados`
@@ -2332,7 +2362,7 @@ ALTER TABLE `tmp_usuarios`
 -- AUTO_INCREMENT de la tabla `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Restricciones para tablas volcadas

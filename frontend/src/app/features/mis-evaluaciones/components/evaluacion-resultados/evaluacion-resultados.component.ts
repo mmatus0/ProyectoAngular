@@ -1,8 +1,7 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
+import { EvaluacionService } from '../../../../core/services/evaluacion.service';
 
 @Component({
   selector: 'app-evaluacion-resultados',
@@ -14,9 +13,7 @@ export class EvaluacionResultadosComponent implements OnInit {
 
   private route  = inject(ActivatedRoute);
   private router = inject(Router);
-  private http   = inject(HttpClient);
-
-  private apiUrl = `${environment.apiUrl}/mis-evaluaciones`;
+  private evaluacionService = inject(EvaluacionService);
 
   data        = signal<any>(null);
   resultados  = signal<any[]>([]);
@@ -29,14 +26,9 @@ export class EvaluacionResultadosComponent implements OnInit {
 
   analisis = computed(() => this.getAnalisis());
 
-  private headers() {
-    const token = localStorage.getItem('token');
-    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
-  }
-
   ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    this.http.get<any>(`${this.apiUrl}/${id}/resultados`, this.headers()).subscribe({
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.evaluacionService.getResultados(id).subscribe({
       next: (resp) => {
         this.data.set(resp.data);
         this.resultados.set(resp.data.resultadosJson?.Resultados || []);

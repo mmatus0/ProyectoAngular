@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 const SECRET_KEY = process.env.JWT_SECRET || 'clave_secreta_evalcoach';
 const path = require('path');
 
-const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:4200').split(',');
+const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:4200,http://pacheco.chillan.ubiobio.cl:8073').split(',').map(o => o.trim());
 
 app.use((req, res, next) => {
     const origin = req.headers.origin;
@@ -72,6 +72,13 @@ function verificarToken(req, res, next) {
         if (err) return res.status(401).json({ ok: false, mensaje: 'Token inválido o expirado' });
         req.usuario = decoded;
         next();
+    });
+}
+
+function esClienteValido(usuarioId, callback) {
+    conn.query('SELECT rolusuario_id FROM user WHERE id = ? AND estado_id = 1', [usuarioId], (err, rows) => {
+        if (err) return callback(err, false);
+        callback(null, rows.length > 0 && rows[0].rolusuario_id === 3);
     });
 }
 
@@ -424,7 +431,8 @@ app.get('/api/sesiones', verificarToken, (req, res) => {
 
 // ── GET /api/sesiones/form-data ───────────────────────────────────────────────
 app.get('/api/sesiones/form-data', verificarToken, (req, res) => {
-    conn.query('SELECT id, nombre FROM user WHERE estado_id = 1 ORDER BY nombre', (err, usuarios) => {
+    // Solo se pueden agendar sesiones para usuarios con rol Cliente (rolusuario_id = 3),
+    conn.query('SELECT id, nombre FROM user WHERE estado_id = 1 AND rolusuario_id = 3 ORDER BY nombre', (err, usuarios) => {
         if (err) return res.status(500).json({ ok: false, mensaje: err.message });
         res.json({ ok: true, usuarios });
     });
@@ -434,10 +442,16 @@ app.get('/api/sesiones/form-data', verificarToken, (req, res) => {
 app.post('/api/sesiones', verificarToken, (req, res) => {
     const { nombre_sesion, fecha_sesion, lugar, usuario_id } = req.body;
     if (!nombre_sesion || !usuario_id) return res.status(400).json({ ok: false, mensaje: 'Nombre y cliente son requeridos.' });
-    const sql = `INSERT INTO sesion (nombre_sesion, fecha_sesion, lugar, usuario_id, estado_id, duracion, segundos) VALUES (?, ?, ?, ?, 1, 0, 0)`;
-    conn.query(sql, [nombre_sesion, fecha_sesion, lugar, usuario_id], (err, result) => {
-        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
-        res.status(201).json({ ok: true, mensaje: 'Sesión creada correctamente.', id: result.insertId });
+
+    esClienteValido(usuario_id, (errRol, esValido) => {
+        if (errRol) return res.status(500).json({ ok: false, mensaje: errRol.message });
+        if (!esValido) return res.status(400).json({ ok: false, mensaje: 'Solo se pueden agendar sesiones para usuarios con rol Cliente.' });
+
+        const sql = `INSERT INTO sesion (nombre_sesion, fecha_sesion, lugar, usuario_id, estado_id, duracion, segundos) VALUES (?, ?, ?, ?, 1, 0, 0)`;
+        conn.query(sql, [nombre_sesion, fecha_sesion, lugar, usuario_id], (err, result) => {
+            if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+            res.status(201).json({ ok: true, mensaje: 'Sesión creada correctamente.', id: result.insertId });
+        });
     });
 });
 
@@ -599,7 +613,8 @@ app.get('/api/herramientas/catalogo', verificarToken, (req, res) => {
 
 // ── GET /api/herramientas/form-data ───────────────────────────────────────────
 app.get('/api/herramientas/form-data', verificarToken, (req, res) => {
-    conn.query('SELECT id, nombre, email FROM user WHERE estado_id = 1 ORDER BY nombre', (err, usuarios) => {
+    // Solo Clientes pueden recibir herramientas asignadas.
+    conn.query('SELECT id, nombre, email FROM user WHERE estado_id = 1 AND rolusuario_id = 3 ORDER BY nombre', (err, usuarios) => {
         if (err) return res.status(500).json({ ok: false, mensaje: err.message });
         conn.query('SELECT id, nombre, foto FROM herramienta WHERE estado_id = 1 ORDER BY nombre', (err2, herramientas) => {
             if (err2) return res.status(500).json({ ok: false, mensaje: err2.message });
@@ -622,22 +637,27 @@ app.post('/api/herramientas/asignar', verificarToken, (req, res) => {
     const { usuario_id, herramientas } = req.body;
     if (!usuario_id) return res.status(400).json({ ok: false, mensaje: 'usuario_id es requerido.' });
 
-    conn.query('UPDATE herramienta_usuario SET estado_id = 2 WHERE usuario_id = ?', [usuario_id], (err) => {
-        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
-        if (!herramientas || herramientas.length === 0) return res.json({ ok: true, mensaje: 'Asignaciones actualizadas.' });
+    esClienteValido(usuario_id, (errRol, esValido) => {
+        if (errRol) return res.status(500).json({ ok: false, mensaje: errRol.message });
+        if (!esValido) return res.status(400).json({ ok: false, mensaje: 'Solo se pueden asignar herramientas a usuarios con rol Cliente.' });
 
-        let procesados = 0;
-        herramientas.forEach(herrId => {
-            conn.query('SELECT id FROM herramienta_usuario WHERE usuario_id = ? AND herramienta_id = ?', [usuario_id, herrId], (err2, existe) => {
-                if (existe && existe.length > 0) {
-                    conn.query('UPDATE herramienta_usuario SET estado_id = 1, fecha = NOW() WHERE usuario_id = ? AND herramienta_id = ?', [usuario_id, herrId], () => {
-                        procesados++; if (procesados === herramientas.length) res.json({ ok: true, mensaje: 'Asignaciones guardadas correctamente.' });
-                    });
-                } else {
-                    conn.query('INSERT INTO herramienta_usuario (usuario_id, herramienta_id, estado_id, fecha) VALUES (?,?,1,NOW())', [usuario_id, herrId], () => {
-                        procesados++; if (procesados === herramientas.length) res.json({ ok: true, mensaje: 'Asignaciones guardadas correctamente.' });
-                    });
-                }
+        conn.query('UPDATE herramienta_usuario SET estado_id = 2 WHERE usuario_id = ?', [usuario_id], (err) => {
+            if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+            if (!herramientas || herramientas.length === 0) return res.json({ ok: true, mensaje: 'Asignaciones actualizadas.' });
+
+            let procesados = 0;
+            herramientas.forEach(herrId => {
+                conn.query('SELECT id FROM herramienta_usuario WHERE usuario_id = ? AND herramienta_id = ?', [usuario_id, herrId], (err2, existe) => {
+                    if (existe && existe.length > 0) {
+                        conn.query('UPDATE herramienta_usuario SET estado_id = 1, fecha = NOW() WHERE usuario_id = ? AND herramienta_id = ?', [usuario_id, herrId], () => {
+                            procesados++; if (procesados === herramientas.length) res.json({ ok: true, mensaje: 'Asignaciones guardadas correctamente.' });
+                        });
+                    } else {
+                        conn.query('INSERT INTO herramienta_usuario (usuario_id, herramienta_id, estado_id, fecha) VALUES (?,?,1,NOW())', [usuario_id, herrId], () => {
+                            procesados++; if (procesados === herramientas.length) res.json({ ok: true, mensaje: 'Asignaciones guardadas correctamente.' });
+                        });
+                    }
+                });
             });
         });
     });
@@ -752,7 +772,8 @@ app.get('/api/evaluaciones', verificarToken, (req, res) => {
 
 // ── GET /api/evaluaciones/form-data ───────────────────────────────────────────
 app.get('/api/evaluaciones/form-data', verificarToken, (req, res) => {
-    conn.query('SELECT id, nombre FROM user WHERE estado_id = 1 ORDER BY nombre', (err, usuarios) => {
+    // Solo Clientes pueden recibir evaluaciones asignadas.
+    conn.query('SELECT id, nombre FROM user WHERE estado_id = 1 AND rolusuario_id = 3 ORDER BY nombre', (err, usuarios) => {
         if (err) return res.status(500).json({ ok: false, mensaje: err.message });
         conn.query('SELECT id, nombre FROM evaluacion WHERE estado_id = 1 ORDER BY nombre', (err2, evaluaciones) => {
             if (err2) return res.status(500).json({ ok: false, mensaje: err2.message });
@@ -774,14 +795,19 @@ app.post('/api/evaluaciones/asignar', verificarToken, (req, res) => {
     const { usuario_id, evaluacion_id, intentos, ver_resultados } = req.body;
     if (!usuario_id || !evaluacion_id) return res.status(400).json({ ok: false, mensaje: 'usuario_id y evaluacion_id son requeridos.' });
 
-    conn.query('SELECT evaluacion_id FROM evaluacion_usuario WHERE usuario_id = ? AND estado_id IN (1, 3, 4)', [usuario_id, evaluacion_id], (err, existe) => {
-        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
-        if (existe.length > 0) return res.status(400).json({ ok: false, mensaje: 'Esta evaluación ya está asignada a este usuario.' });
+    esClienteValido(usuario_id, (errRol, esValido) => {
+        if (errRol) return res.status(500).json({ ok: false, mensaje: errRol.message });
+        if (!esValido) return res.status(400).json({ ok: false, mensaje: 'Solo se pueden asignar evaluaciones a usuarios con rol Cliente.' });
 
-        conn.query('INSERT INTO evaluacion_usuario (usuario_id, evaluacion_id, intentos, ver_resultados, estado_id, fecha) VALUES (?, ?, ?, ?, 1, NOW())',
-            [usuario_id, evaluacion_id, intentos || 1, ver_resultados || 0], (err2, result) => {
-            if (err2) return res.status(500).json({ ok: false, mensaje: err2.message });
-            res.status(201).json({ ok: true, mensaje: 'Evaluación asignada correctamente.', id: result.insertId });
+        conn.query('SELECT evaluacion_id FROM evaluacion_usuario WHERE usuario_id = ? AND estado_id IN (1, 3, 4)', [usuario_id, evaluacion_id], (err, existe) => {
+            if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+            if (existe.length > 0) return res.status(400).json({ ok: false, mensaje: 'Esta evaluación ya está asignada a este usuario.' });
+
+            conn.query('INSERT INTO evaluacion_usuario (usuario_id, evaluacion_id, intentos, ver_resultados, estado_id, fecha) VALUES (?, ?, ?, ?, 1, NOW())',
+                [usuario_id, evaluacion_id, intentos || 1, ver_resultados || 0], (err2, result) => {
+                if (err2) return res.status(500).json({ ok: false, mensaje: err2.message });
+                res.status(201).json({ ok: true, mensaje: 'Evaluación asignada correctamente.', id: result.insertId });
+            });
         });
     });
 });
@@ -791,23 +817,28 @@ app.post('/api/evaluaciones/asignar-lote', verificarToken, (req, res) => {
     const { usuario_id, evaluaciones, intentos, ver_resultados } = req.body;
     if (!usuario_id) return res.status(400).json({ ok: false, mensaje: 'usuario_id requerido.' });
 
-    conn.query('UPDATE evaluacion_usuario SET estado_id = 2 WHERE usuario_id = ? AND estado_id = 1', [usuario_id], (err) => {
-        if (err) return res.status(500).json({ ok: false, mensaje: err.message });
-        if (!evaluaciones || evaluaciones.length === 0) return res.json({ ok: true, mensaje: 'Asignaciones actualizadas.' });
+    esClienteValido(usuario_id, (errRol, esValido) => {
+        if (errRol) return res.status(500).json({ ok: false, mensaje: errRol.message });
+        if (!esValido) return res.status(400).json({ ok: false, mensaje: 'Solo se pueden asignar evaluaciones a usuarios con rol Cliente.' });
 
-        let procesados = 0;
-        evaluaciones.forEach(evalId => {
-            conn.query('SELECT id FROM evaluacion_usuario WHERE usuario_id = ? AND evaluacion_id = ?', [usuario_id, evalId], (err2, existe) => {
-                if (existe && existe.length > 0) {
-                    conn.query('UPDATE evaluacion_usuario SET estado_id=1, fecha=NOW() WHERE usuario_id=? AND evaluacion_id=?', [usuario_id, evalId], () => {
-                        procesados++; if (procesados === evaluaciones.length) res.json({ ok: true, mensaje: 'Asignaciones guardadas.' });
-                    });
-                } else {
-                    conn.query('INSERT INTO evaluacion_usuario (usuario_id, evaluacion_id, intentos, ver_resultados, estado_id, fecha) VALUES (?,?,?,?,1,NOW())',
-                        [usuario_id, evalId, intentos || 1, ver_resultados || 0], () => {
-                        procesados++; if (procesados === evaluaciones.length) res.json({ ok: true, mensaje: 'Asignaciones guardadas.' });
-                    });
-                }
+        conn.query('UPDATE evaluacion_usuario SET estado_id = 2 WHERE usuario_id = ? AND estado_id = 1', [usuario_id], (err) => {
+            if (err) return res.status(500).json({ ok: false, mensaje: err.message });
+            if (!evaluaciones || evaluaciones.length === 0) return res.json({ ok: true, mensaje: 'Asignaciones actualizadas.' });
+
+            let procesados = 0;
+            evaluaciones.forEach(evalId => {
+                conn.query('SELECT id FROM evaluacion_usuario WHERE usuario_id = ? AND evaluacion_id = ?', [usuario_id, evalId], (err2, existe) => {
+                    if (existe && existe.length > 0) {
+                        conn.query('UPDATE evaluacion_usuario SET estado_id=1, fecha=NOW() WHERE usuario_id=? AND evaluacion_id=?', [usuario_id, evalId], () => {
+                            procesados++; if (procesados === evaluaciones.length) res.json({ ok: true, mensaje: 'Asignaciones guardadas.' });
+                        });
+                    } else {
+                        conn.query('INSERT INTO evaluacion_usuario (usuario_id, evaluacion_id, intentos, ver_resultados, estado_id, fecha) VALUES (?,?,?,?,1,NOW())',
+                            [usuario_id, evalId, intentos || 1, ver_resultados || 0], () => {
+                            procesados++; if (procesados === evaluaciones.length) res.json({ ok: true, mensaje: 'Asignaciones guardadas.' });
+                        });
+                    }
+                });
             });
         });
     });

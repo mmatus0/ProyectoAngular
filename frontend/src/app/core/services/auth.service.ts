@@ -1,5 +1,5 @@
 import { Injectable, signal, inject, effect} from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -9,6 +9,7 @@ export class AuthService {
 
   public isAuthenticated = signal<boolean>(false);
   public usuario = signal<any>(null);
+  public token = signal<string | null>(null);
 
   private http   = inject(HttpClient);
   private router = inject(Router);
@@ -16,7 +17,8 @@ export class AuthService {
   private urlLogin = `${environment.apiUrl}/login`;
 
   constructor() {
-  this.isAuthenticated.set(!!localStorage.getItem('token'));
+  this.token.set(localStorage.getItem('token'));
+  this.isAuthenticated.set(!!this.token());
 
   const storedUser = localStorage.getItem('usuario');
   if (storedUser) {
@@ -39,6 +41,7 @@ export class AuthService {
       map((resp: any) => {
         localStorage.setItem('token', resp.token);
         localStorage.setItem('usuario', JSON.stringify(resp.usuario));
+        this.token.set(resp.token);
         this.isAuthenticated.set(true);
         this.usuario.set(resp.usuario);
         this.router.navigate(['/dashboard']);
@@ -49,13 +52,20 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');
+    this.token.set(null);
     this.isAuthenticated.set(false);
     this.usuario.set(null);
     this.router.navigate(['/login']);
   }
-  
+
   getToken(): string | null {
-    return localStorage.getItem('token');
+    return this.token();
+  }
+
+  // Punto único y centralizado para construir las cabeceras HTTP autenticadas.
+  // Reemplaza los getAuthHeaders() privados que existían duplicados en cada servicio.
+  getAuthHeaders(): HttpHeaders {
+    return new HttpHeaders({ 'Authorization': `Bearer ${this.token()}` });
   }
 
   getRol(): string {

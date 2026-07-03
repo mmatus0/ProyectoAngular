@@ -1,8 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
+import { SesionService } from '../../../../core/services/sesion.service';
 
 interface IMiSesion {
   id: number;
@@ -23,19 +22,14 @@ interface IMiSesion {
 })
 export class MisSesionesComponent implements OnInit {
 
-  private http   = inject(HttpClient);
   private router = inject(Router);
+  private sesionService = inject(SesionService);
 
   sesiones = signal<IMiSesion[]>([]);
   loading  = signal<boolean>(true);
 
-  private headers() {
-    const token = localStorage.getItem('token');
-    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
-  }
-
   ngOnInit() {
-    this.http.get<any>(`${environment.apiUrl}/mis-sesiones`, this.headers()).subscribe({
+    this.sesionService.getMisSesiones().subscribe({
       next: (resp) => {
         this.sesiones.set(resp.data);
         this.loading.set(false);

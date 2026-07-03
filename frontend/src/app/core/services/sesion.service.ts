@@ -1,16 +1,17 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class SesionService {
 
-  private http = inject(HttpClient);
-  private url  = `${environment.apiUrl}/sesiones`;
+  private http        = inject(HttpClient);
+  private authService = inject(AuthService);
+  private url          = `${environment.apiUrl}/sesiones`;
 
   private headers() {
-    const token = localStorage.getItem('token');
-    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
+    return { headers: this.authService.getAuthHeaders() };
   }
 
   getSesiones(estado: number) {
@@ -39,5 +40,21 @@ export class SesionService {
 
   finalizar(id: number) {
     return this.http.post<any>(`${this.url}/${id}/finalizar`, {}, this.headers());
+  }
+
+  getDetalle(id: number) {
+    return this.http.get<any>(`${this.url}/${id}/detalle`, this.headers());
+  }
+
+  actualizarDetalle(id: number, data: any) {
+    return this.http.put<any>(`${this.url}/${id}/detalle`, data, this.headers());
+  }
+
+  finalizarDetalle(id: number, data: any) {
+    return this.http.put<any>(`${this.url}/${id}/finalizar-detalle`, data, this.headers());
+  }
+
+  getMisSesiones() {
+    return this.http.get<any>(`${environment.apiUrl}/mis-sesiones`, this.headers());
   }
 }

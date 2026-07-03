@@ -1,79 +1,80 @@
 # EvalCoach — Plataforma de Gestión de Evaluaciones
 
 ---
-## Avances
 
-Todas las modificaciones y avances de la entrega del 12/06 se encuentran en la rama "avance2"
+## Despliegue en producción (Pacheco)
 
----
-## Base de Datos
+El proyecto está desplegado y operativo en:
+**http://pacheco.chillan.ubiobio.cl:8073/login**
 
-El proyecto usa la base de datos **`coachingnew`** (`.sql`) el cual se encuentra dentro de la carpeta `database`.
-
-Para levantar con XAMPP debe crear una base de datos llamada `coachingnew` y luego importar el `.sql` en ella.
-Luego, debe dejar runneada la base de datos y seguir los pasos:
+> Use cualquiera de las credenciales de la sección "Credenciales de Prueba" más abajo (ambas cuentas son Administrador).
 
 ---
 
-## Levantar Backend
+## Cómo levantar el proyecto — SOLO con Docker
+
+Esta entrega exige que el proyecto se levante completo (frontend + backend + base de datos) únicamente con Docker Compose, sin necesidad de `npm install`, `ng serve` ni XAMPP.
+
+### Requisitos
+
+- Tener **Docker Desktop** instalado y en ejecución.
+
+### Pasos
+
+1. Clonar el repositorio y ubicarse en la carpeta raíz del proyecto (`ProyectoAngular/`).
+
+2. Crear el archivo `.env` en la raíz, usando `.env.example` como plantilla:
 
 ```bash
-cd backend
-npm install
+   cp .env.example .env
 ```
 
-Editar el archivo `.env` con los datos de conexión:
+   Completar `DB_ROOT_PASSWORD`, `DB_USER` y `DB_PASSWORD` con los valores que se quieran usar localmente.
 
+3. Crear el archivo `backend/.env`, usando `backend/.env.example` como plantilla:
+
+```bash
+   cp backend/.env.example backend/.env
+```
+
+   Para desarrollo local, dejar `DB_HOST=db` (nombre del servicio de MariaDB dentro de la red de Docker — **no** `localhost`, ya que el backend corre dentro de un contenedor). Completar `DB_PASSWORD` con el mismo valor usado en el `.env` de la raíz, y definir `JWT_SECRET`.
+
+   El valor de `CORS_ORIGIN` ya viene con ambos orígenes necesarios (local y Pacheco):
 ```env
-PORT=3000
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=coachingnew
-DB_USER=root
-DB_PASSWORD=
-JWT_SECRET=evalcoach_secret_2026
-JWT_EXPIRES_IN=8h
+   CORS_ORIGIN=http://localhost:4200,http://pacheco.chillan.ubiobio.cl:8073
 ```
 
-Luego levanta el servidor:
+4. Levantar todo el stack:
 
 ```bash
-npm run dev
+   docker-compose up --build -d
 ```
 
-> Debe aparecer: `Servidor backend EvalCoach escuchando en puerto 3000 Conectado a MySQL correctamente.`
+   Esto construye y levanta 3 contenedores:
 
----
+   | Contenedor | Descripción | Puerto expuesto |
+   |---|---|---|
+   | `evalcoach_db` | MariaDB 10.11, con la base `coachingnew` importada automáticamente desde `database/coachingnew.sql` | interno |
+   | `evalcoach_backend` | API Node.js/Express | **8074** |
+   | `evalcoach_frontend` | Angular compilado + Nginx | **8073** |
 
-## Levantar Frontend
+5. Abrir en el navegador: **http://localhost:8073**
+
+   > La app en Docker corre en el puerto **8073**, no en 4200. El backend responde en el puerto **8074**, no en 3000 — esto aplica tanto en local como en Pacheco, ya que ambos entornos usan exactamente el mismo `docker-compose.yml`.
+
+### Apagar / reiniciar
 
 ```bash
-cd frontend
-npm install
-ng serve -o
+docker-compose down                 # detener y eliminar contenedores
+docker-compose up --build -d        # reconstruir y levantar de nuevo
 ```
 
-Abre automáticamente `http://localhost:4200`
-
-> **Nota:** El backend debe estar corriendo antes de levantar el frontend.
-
----
-
-## Docker
-
-Para acceder a proyecto desplegado en server pacheco, debe ingresar a: http://pacheco.chillan.ubiobio.cl:8073/login
-> **Nota:** Debe utilizar las credenciales que se encuentran más abajo para login. Cualquiera de las dos cuentas sirve como admin del sistema
-
-Para levantar con Docker, solo basta con tener ejecutado la app **Docker Desktop** y ejecutar el siguiente comando en la carpeta raíz del proyecto:
+### Verificar que todo esté arriba
 
 ```bash
-docker-compose up --build
+docker ps                           # deben verse los 3 contenedores "Up"
+docker logs evalcoach_backend       # debe mostrar "Conectado a MySQL correctamente."
 ```
-
-| Servicio | URL |
-|---|---|
-| Frontend | http://localhost:4200 |
-| Backend API | http://localhost:3000/api |
 
 ---
 
@@ -92,7 +93,7 @@ docker-compose up --build
 ## Funcionalidades Implementadas
 
 ### Autenticación y Seguridad
-- Login con JWT almacenado en localStorage
+- Login con JWT, token y sesión centralizados en `AuthService` (signal `token`, método `getAuthHeaders()` consumido por todos los servicios)
 - AuthGuard en todas las rutas privadas
 - Persistencia de sesión al recargar
 - Control de acceso por rol (Admin / Coach / Cliente)
@@ -117,11 +118,13 @@ docker-compose up --build
 - Cronómetro por sesión (start/stop)
 - Catastro de actividades por sesión
 - Finalización de sesión con persistencia
+- Solo pueden asignarse a usuarios con rol **Cliente**
 
 ### Herramientas
 - Asignación de herramientas a clientes (dual-list)
 - Vista cliente: cuadrante interactivo por herramienta
 - Activar / desactivar asignaciones
+- Solo pueden asignarse a usuarios con rol **Cliente**
 
 ### Evaluaciones (Tests)
 - Asignación de tests a clientes
@@ -129,6 +132,14 @@ docker-compose up --build
 - Finalización con modal de confirmación
 - Resultados con 4 tipos de visualización
 - Análisis textual personalizado por tipo de test
+- Solo pueden asignarse a usuarios con rol **Cliente**
+
+### Biblioteca
+- Documentos digitales (PDF) y contenido audiovisual (URL), asignados a un cliente específico
+- Vista "Mi Biblioteca" para clientes, con visor de PDF integrado
+
+### Dashboard
+- Métricas en tiempo real diferenciadas por rol (Admin/Coach vs. Cliente)
 
 ### Perfil
 - Ver y editar datos personales y redes sociales

@@ -1,10 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
-
-
+import { HerramientaService } from '../../../../core/services/herramienta.service';
 
 interface IAtributo {
   id: number;
@@ -32,9 +29,7 @@ export class HerramientaDetalleComponent implements OnInit {
 
   private route  = inject(ActivatedRoute);
   private router = inject(Router);
-  private http   = inject(HttpClient);
-
-  private apiUrl = `${environment.apiUrl}/mis-herramientas`;
+  private herramientaService = inject(HerramientaService);
 
   herramienta  = signal<any>(null);
   entidades    = signal<IEntidad[]>([]);
@@ -47,18 +42,13 @@ export class HerramientaDetalleComponent implements OnInit {
 
   private asignacionId!: number;
 
-  private headers() {
-    const token = localStorage.getItem('token');
-    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
-  }
-
   ngOnInit() {
     this.asignacionId = Number(this.route.snapshot.paramMap.get('id'));
     this.cargarDatos();
   }
 
   cargarDatos() {
-    this.http.get<any>(`${this.apiUrl}/${this.asignacionId}/cuadrantes`, this.headers()).subscribe({
+    this.herramientaService.getCuadrantes(this.asignacionId).subscribe({
       next: (resp) => {
         this.herramienta.set(resp.herramienta);
         this.entidades.set(resp.entidades);
@@ -95,7 +85,7 @@ export class HerramientaDetalleComponent implements OnInit {
     }
 
     const body = { entidad_id: entidadId, atributo: texto };
-    this.http.post<any>(`${this.apiUrl}/${this.asignacionId}/atributo`, body, this.headers()).subscribe({
+    this.herramientaService.crearAtributo(this.asignacionId, body).subscribe({
       next: (resp) => {
         const nuevo: IAtributo = { id: resp.id, atributo: texto, entidad_id: entidadId };
         this.atributos.update(acts => ({
@@ -141,7 +131,7 @@ export class HerramientaDetalleComponent implements OnInit {
     const texto = atributo.textoEdicion?.trim();
     if (!texto) return;
 
-    this.http.put<any>(`${this.apiUrl}/atributo/${atributo.id}`, { atributo: texto }, this.headers()).subscribe({
+    this.herramientaService.actualizarAtributo(atributo.id, { atributo: texto }).subscribe({
       next: () => {
         this.atributos.update(acts => ({
           ...acts,
@@ -157,7 +147,7 @@ export class HerramientaDetalleComponent implements OnInit {
   eliminarAtributo(entidadId: number, atributoId: number) {
     if (!confirm('¿Quitar este elemento?')) return;
 
-    this.http.delete<any>(`${this.apiUrl}/atributo/${atributoId}`, this.headers()).subscribe({
+    this.herramientaService.eliminarAtributo(atributoId).subscribe({
       next: () => {
         this.atributos.update(acts => ({
           ...acts,

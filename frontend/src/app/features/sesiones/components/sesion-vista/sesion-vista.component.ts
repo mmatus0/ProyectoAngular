@@ -1,8 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
+import { SesionService } from '../../../../core/services/sesion.service';
 
 @Component({
   selector: 'app-sesion-vista',
@@ -14,7 +13,7 @@ export class SesionVistaComponent implements OnInit {
 
   private route  = inject(ActivatedRoute);
   private router = inject(Router);
-  private http   = inject(HttpClient);
+  private sesionService = inject(SesionService);
 
   sesion   = signal<any>(null);
   tipos    = signal<any[]>([]);
@@ -22,14 +21,9 @@ export class SesionVistaComponent implements OnInit {
   loading  = signal<boolean>(true);
   tabActiva = signal<number>(0);
 
-  private headers() {
-    const token = localStorage.getItem('token');
-    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
-  }
-
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
-    this.http.get<any>(`${environment.apiUrl}/sesiones/${id}/detalle`, this.headers()).subscribe({
+    this.sesionService.getDetalle(Number(id)).subscribe({
       next: (resp) => {
         this.sesion.set(resp.sesion);
         this.tipos.set(resp.tipos);

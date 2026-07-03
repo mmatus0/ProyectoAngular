@@ -1,7 +1,6 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../../core/services/auth.service';
-import { environment } from '../../../../../environments/environment';
+import { DashboardService } from '../../../../core/services/dashboard.service';
 
 interface MetricasAdmin {
   clientes_total:           number;
@@ -28,7 +27,7 @@ interface MetricasCliente {
 export class DashboardComponent implements OnInit {
 
   authService = inject(AuthService);
-  private http = inject(HttpClient);
+  private dashboardService = inject(DashboardService);
 
   user     = this.authService.usuario;
   loading  = signal<boolean>(true);
@@ -38,19 +37,14 @@ export class DashboardComponent implements OnInit {
   metricasAdmin   = signal<MetricasAdmin | null>(null);
   metricasCliente = signal<MetricasCliente | null>(null);
 
-  private getAuthHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-  }
-
   ngOnInit() {
     if (this.esCliente()) {
-      this.http.get<any>(`${environment.apiUrl}/dashboard/cliente`, { headers: this.getAuthHeaders() }).subscribe({
+      this.dashboardService.getMetricasCliente().subscribe({
         next: r  => { this.metricasCliente.set(r.data); this.loading.set(false); },
         error: () => this.loading.set(false)
       });
     } else {
-      this.http.get<any>(`${environment.apiUrl}/dashboard`, { headers: this.getAuthHeaders() }).subscribe({
+      this.dashboardService.getMetricasAdmin().subscribe({
         next: r  => { this.metricasAdmin.set(r.data); this.loading.set(false); },
         error: () => this.loading.set(false)
       });
